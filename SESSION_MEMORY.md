@@ -1,7 +1,7 @@
 # TONESCOPE — Session Memory
 
 ## Project Overview
-Professional music tuner webapp mockup — single-file HTML app at `index.html` (~95KB, ~1853 lines).
+Professional music tuner webapp mockup — single-file HTML app at `index.html` (~2170 lines).
 
 ## What Was Built
 A phone-dimension webapp with **4 main sections** + bottom management bar:
@@ -16,14 +16,14 @@ A phone-dimension webapp with **4 main sections** + bottom management bar:
 - 6px top padding to avoid phone frame clipping
 
 ### 2. Tuner (arc meter) — 32.5% height
-- **~153° arc** (`arcSpan = Math.PI * 0.85`) with ±50 cents range
-- Color zones: green (±5¢ with glow), amber (±20¢), red (±50¢)
+- **~153° arc** (`arcSpan = Math.PI * 0.85`) with **±100 cents range** (updated from ±50)
+- Color zones: green (±10¢ with glow), amber (±40¢), red (±100¢)
 - 10px thick arc with base track, rounded caps
 - Smooth needle with configurable inertia (`S.tunerLerp`, default 0.08)
 - **50% needle root masked** with background circle + 10px extra — labels drawn inside mask
 - **Note name, Hz (15px), and cents (14px)** drawn high inside the mask area
-- Tick marks every 5¢, labels at ±25/±50/0
-- Hz labels on outer arc for current note
+- Tick marks every 10¢, labels at ±50/±100/0
+- Hz labels on outer arc for current note at ±100, ±50, 0
 - **dB indicator** — vertical bar at top-right corner, RMS-based, gradient green→amber→red, 10px labels
 - Padding: 28px sides, 18px top, 30px bottom
 - Background darkens in live mode (`rgba(4,5,12)`)
@@ -31,6 +31,8 @@ A phone-dimension webapp with **4 main sections** + bottom management bar:
 - **Reference pitch control** `[− A440 +]` — centered at bottom, adjustable A392–A494 Hz, hold to repeat
 - **Pitch player** `[♭ 🔈 C4 ♯]` — next to A440 control, plays sine tone at selected note through analyser so tuner follows it; semitone up/down buttons; tap to play/stop
 - **Sensitivity setting** — Low/Medium/High in settings, controls lerp (0.04–0.18), confidence threshold (0.75–0.88), RMS minimum (0.005–0.015)
+- **Pitch stabilization system** — median filter (5 readings), octave-jump suppression (2x/0.5x), hysteresis (3 frames to switch note), frequency smoothing (0.3 lerp)
+- **Holds last detected note** — does not reset to blank when signal drops
 
 ### 3. Metronome — 22% height
 - **Beat triangles** (pointing right →) at top, tappable to start/stop
@@ -56,7 +58,7 @@ A phone-dimension webapp with **4 main sections** + bottom management bar:
 
 ### 4. Waveform + Recording — flex:1, min 100px
 - **iOS Voice Memo style** scrubbing: center indicator fixed (1px thin), waveform slides on drag
-- Peaks at 100/sec density, 2.5px per peak
+- Peaks at 100/sec density, configurable pxPerPeak (1.5–6)
 - **X-axis time labels** — auto-scaling intervals (0.5s–60s), tick marks + `m:ss` labels
 - During recording: waveform grows from left
 - After recording: center-indicator mode with played/upcoming color distinction
@@ -73,7 +75,7 @@ A phone-dimension webapp with **4 main sections** + bottom management bar:
 - **+ button** (right, 40px) — adds new empty recording slot
 - **Swipe up** on bar → reveals **action bar**: `[ Share | Rename | Delete ]`
   - 34px thin bar, animates height 0→34px
-  - Share exports as WAV, Rename prompts, Delete removes slot
+  - Share exports as WAV (supports 16-bit and 24-bit), Rename prompts, Delete removes slot
 - 6px bottom margin to avoid phone frame clipping
 
 ### 6. Settings Panel (push-up design)
@@ -87,6 +89,20 @@ A phone-dimension webapp with **4 main sections** + bottom management bar:
   - Audio: Metronome Volume
   - About: TONESCOPE v1.0
 
+### 7. Section Swipe Config Panels (NEW)
+- **Each section** (Spectrum, Tuner, Metronome, Waveform) has a swipe-left config panel
+- **Swipe left** on any section slides it left and reveals config options
+- **Swipe right** slides back to the component view
+- Uses `.section-slider` with CSS `translateX(-100%)` transition
+- Config panel is absolutely positioned at `left:100%` (off-screen right)
+- Touch and mouse swipe support, 40px threshold, ignores vertical swipes
+- **Section labels are hidden** (`display:none` on `.section-label`)
+- Spectrum, Tuner, Metronome have **dummy config options** for now
+- **Waveform config is functional**:
+  - Sample Rate: 22.05 / 44.1 / 48 kHz (reinitializes AudioContext)
+  - Bit Depth: 16-bit / 24-bit (controls WAV export)
+  - Waveform Zoom: Compact(1.5) / Normal(2.5) / Wide(4) / Extra Wide(6)
+
 ## Key Behaviors
 - **Tap startup overlay** → initializes AudioContext + mic
 - **Live mode**: spectrum + tuner update from mic via AnalyserNode (darker backgrounds, LIVE badge)
@@ -96,6 +112,8 @@ A phone-dimension webapp with **4 main sections** + bottom management bar:
 - **Live override**: tap spectrum/tuner while paused → switches to live mic (tap again or scrub to go back)
 - **Recording management**: multiple recording slots, swipe dial to switch, + to add, swipe up for actions
 - **Pitch player**: sine oscillator routed through analyser + output gain, tuner tracks the played note
+- **Screen Wake Lock**: keeps device awake during practice sessions, re-acquires on tab visibility change
+- **Pitch stabilization**: median filter + octave-jump suppression + hysteresis prevents flickering
 
 ## Technical Architecture
 
@@ -112,6 +130,7 @@ Pitch Player:    Oscillator → GainNode(0.15) → AnalyserNode + OutputGain →
 - Lag range: sampleRate/4200 to sampleRate/45 (~45–4200 Hz)
 - Configurable via sensitivity: confidence threshold (`S.tunerConfidence`), RMS minimum (`S.tunerRmsMin`)
 - `let A4 = 440` — mutable reference pitch, adjustable 392–494 Hz
+- **Stabilization pipeline**: raw freq → octave-jump suppression → median filter (5 samples) → freq smoothing (0.3 lerp) → hysteresis (3 frames) → display
 
 ### Offline Analysis (paused/scrubbing)
 - `simpleFFT()`: Radix-2 Cooley-Tukey FFT with Hanning window
@@ -135,10 +154,10 @@ Grave(35) → Largo(50) → Larghetto(63) → Adagio(72) → Andante(84) → Mod
   .app-inner (170% tall, slides up for settings)
     .app-content (100dvh — all sections)
       .startup (overlay)
-      .sec-spectrum (canvas, 20%, 6px top padding)
-      .sec-tuner (canvas, 32.5%, ref-pitch-ctrl + pitch-player-ctrl)
-      .sec-metro (metronome controls, 22%)
-      .sec-wave (waveform + controls, flex:1 min 100px)
+      .sec-spectrum > .section-slider > .section-main + .section-config
+      .sec-tuner > .section-slider > .section-main + .section-config
+      .sec-metro > .section-slider > .section-main + .section-config
+      .sec-wave > .section-slider > .section-main + .section-config
       .rec-actions (share/rename/delete bar, height-animated)
       .rec-bar (gear | dial wheel | +, 38px, 6px bottom margin)
     .settings-panel (70% — settings body)
@@ -161,7 +180,6 @@ Grave(35) → Largo(50) → Larghetto(63) → Adagio(72) → Andante(84) → Mod
 
 ## File Structure
 ```
-demo/
-  index.html          — Complete single-file app (~95KB, ~1853 lines)
-  SESSION_MEMORY.md   — This file
+index.html          — Complete single-file app (~2170 lines)
+SESSION_MEMORY.md   — This file
 ```
