@@ -1,0 +1,23 @@
+{
+  "name": "tunescope",
+  "version": "1.0.0",
+  "description": "Professional music tuner, metronome & recorder",
+  "scripts": {
+    "build": "mkdir -p www && cp index.html www/ && cp manifest.json www/ && cp icon-*.png www/",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:ios": "npx cap open ios"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/ios": "^6.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
