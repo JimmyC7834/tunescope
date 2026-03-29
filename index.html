@@ -402,6 +402,16 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             <option value="6">Extra Wide</option>
           </select>
         </div>
+        <div class="config-item">
+          <span>Mic Gain</span>
+          <select id="cfgMicGain" class="config-select">
+            <option value="1">1x</option>
+            <option value="2">2x</option>
+            <option value="3" selected>3x</option>
+            <option value="5">5x</option>
+            <option value="8">8x</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -2245,6 +2255,10 @@ function setupEvents() {
 
   $('cfgBitDepth').addEventListener('change', function() {
     wavBitDepth = parseInt(this.value);
+  });
+
+  $('cfgMicGain').addEventListener('change', function() {
+    if (S.micGain) S.micGain.gain.value = parseFloat(this.value);
   });
 
   $('cfgWaveZoom').addEventListener('change', function() {
