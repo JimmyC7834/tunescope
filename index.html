@@ -152,14 +152,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .wave-indicator::after{bottom:0;border-bottom:4px solid var(--warning)}
 .wave-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--text-dim);letter-spacing:.1em;pointer-events:none}
 .wave-controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:2px 0 3px}
-.ctrl-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border-light);background:transparent;color:var(--text-mid);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.ctrl-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border-light);background:transparent;color:var(--text-mid);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
 .ctrl-btn:active{transform:scale(.9)}
 .ctrl-btn.rec{border-color:var(--danger);color:var(--danger)}
 .ctrl-btn.rec.active{background:var(--danger);color:#fff;animation:rec-pulse 1s ease-in-out infinite}
 @keyframes rec-pulse{0%,100%{box-shadow:0 0 0 0 var(--danger-glow)}50%{box-shadow:0 0 0 8px transparent}}
 .ctrl-btn.play{border-color:var(--accent);color:var(--accent)}
 .ctrl-btn:disabled{opacity:.25;pointer-events:none}
-.ctrl-btn svg{width:12px;height:12px;fill:currentColor}
+.ctrl-btn svg{width:14px;height:14px;fill:currentColor}
 
 /* Recording manager — bottom bar */
 .rec-bar{position:relative;height:38px;background:rgba(8,10,18,.95);border-top:1px solid var(--border);flex-shrink:0;user-select:none;display:flex;align-items:stretch;margin-bottom:6px}
@@ -580,7 +580,14 @@ async function initAudio() {
   try {
     S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
-    S.micSrc.connect(S.analyser);
+    // Mic input gain to compensate for iOS low volume
+    S.micGain = S.ctx.createGain();
+    S.micGain.gain.value = 3.0;
+    S.micSrc.connect(S.micGain);
+    S.micGain.connect(S.analyser);
+    // Create a destination stream for recording the amplified signal
+    S.recDest = S.ctx.createMediaStreamDestination();
+    S.micGain.connect(S.recDest);
     S.mode = 'live';
   } catch (e) {
     console.warn('Mic denied', e);
@@ -603,11 +610,12 @@ async function requestWakeLock() {
 function startRecording() {
   if (!S.micStream) return;
   S.liveOverride = false;
-  if (S.micSrc) { try { S.micSrc.connect(S.analyser); } catch(_){} }
+  if (S.micGain) { try { S.micGain.connect(S.analyser); } catch(_){} }
   S.outputGain.gain.value = 0;
   S.chunks = []; S.livePeaks = [];
   S.audioBuffer = null; S.peaks = [];
-  S.recorder = new MediaRecorder(S.micStream);
+  // Record from amplified stream, not raw mic
+  S.recorder = new MediaRecorder(S.recDest ? S.recDest.stream : S.micStream);
   S.recorder.ondataavailable = e => { if (e.data.size) S.chunks.push(e.data); };
   S.recorder.onstop = async () => {
     const blob = new Blob(S.chunks, { type: S.recorder.mimeType });
@@ -652,7 +660,7 @@ function startPlayback() {
       S.playOffset = S.audioBuffer.duration;
       S.mode = 'paused';
       S.outputGain.gain.value = 0;
-      try { S.micSrc && S.micSrc.connect(S.analyser); } catch(_){}
+      try { S.micGain ? S.micGain.connect(S.analyser) : S.micSrc && S.micSrc.connect(S.analyser); } catch(_){}
       updateControlState();
     }
   };
@@ -665,7 +673,7 @@ function pausePlayback() {
   S.playOffset = curPlayTime();
   S.playOffset = Math.min(S.playOffset, S.audioBuffer ? S.audioBuffer.duration : 0);
   S.mode = 'paused';
-  try { S.micSrc && S.micSrc.connect(S.analyser); } catch(_){}
+  try { S.micGain ? S.micGain.connect(S.analyser) : S.micSrc && S.micSrc.connect(S.analyser); } catch(_){}
   updateControlState();
 }
 
@@ -1585,7 +1593,7 @@ function resetToEmpty() {
   S.playOffset = 0; S.lastAnalyzedPos = -1;
   S.liveOverride = false;
   S.mode = S.micStream ? 'live' : 'idle';
-  try { S.micSrc && S.micSrc.connect(S.analyser); } catch(_){}
+  try { S.micGain ? S.micGain.connect(S.analyser) : S.micSrc && S.micSrc.connect(S.analyser); } catch(_){}
   S.outputGain.gain.value = 0;
   elWaveEmpty.style.display = '';
   elWaveInd.style.display = 'none';
@@ -1624,7 +1632,7 @@ function setupEvents() {
     if (S.mode === 'paused' && S.audioBuffer && S.micSrc) {
       S.liveOverride = !S.liveOverride;
       if (S.liveOverride) {
-        try { S.micSrc.connect(S.analyser); } catch(_){}
+        try { S.micGain ? S.micGain.connect(S.analyser) : S.micSrc.connect(S.analyser); } catch(_){}
         S.lastAnalyzedPos = -1; // force re-analyze when switching back
       }
     }
@@ -2225,7 +2233,12 @@ function setupEvents() {
     try {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
-      S.micSrc.connect(S.analyser);
+      S.micGain = S.ctx.createGain();
+      S.micGain.gain.value = 3.0;
+      S.micSrc.connect(S.micGain);
+      S.micGain.connect(S.analyser);
+      S.recDest = S.ctx.createMediaStreamDestination();
+      S.micGain.connect(S.recDest);
       S.mode = 'live';
     } catch(e) { S.mode = 'idle'; }
   });
