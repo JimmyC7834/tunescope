@@ -51,6 +51,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .section-config .config-item span:last-child{color:var(--text-main);font-family:'Share Tech Mono',monospace}
 .config-select{background:var(--bg-body);color:var(--text-main);border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:.7rem;font-family:'Share Tech Mono',monospace;outline:none;cursor:pointer}
 .config-select:focus{border-color:var(--accent)}
+.config-slider-group{display:flex;align-items:center;gap:6px}
+.config-range{width:80px;height:4px;accent-color:var(--accent);cursor:pointer}
+.config-range-val{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-main);min-width:2.2em;text-align:right}
 .section-label{position:absolute;top:8px;left:12px;font-size:.55rem;font-weight:600;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;z-index:2;display:none}
 
 /* Spectrum */
@@ -64,33 +67,27 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
-.tuner-info{display:none}
-.note-row{display:flex;align-items:baseline;justify-content:center;gap:4px}
-.note-name{font-size:2.6rem;font-weight:700;line-height:1;color:var(--text-bright);transition:color .2s}
-.note-octave{font-family:'Share Tech Mono',monospace;font-size:1.1rem;color:var(--text-mid);margin-bottom:2px}
-.freq-line{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-mid);margin-top:2px}
-.cents-line{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text-dim);margin-top:1px}
-.ref-pitch-ctrl{position:absolute;bottom:6px;left:50%;transform:translateX(calc(-50% - 70px));display:flex;align-items:center;z-index:4;border:1px solid rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;background:rgba(12,14,24,0.6);backdrop-filter:blur(4px)}
+.ref-pitch-cfg{display:flex;align-items:center;border:1px solid rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;background:rgba(12,14,24,0.4)}
 .ref-pitch-btn{width:26px;height:22px;border:none;background:transparent;color:var(--text-mid);font-size:.85rem;font-family:'Share Tech Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:color .12s,background .12s;-webkit-tap-highlight-color:transparent}
 .ref-pitch-btn:active{color:var(--accent);background:rgba(0,232,154,0.1)}
 .ref-pitch-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-bright);padding:0 6px;white-space:nowrap;letter-spacing:.04em;border-left:1px solid rgba(255,255,255,0.08);border-right:1px solid rgba(255,255,255,0.08)}
-.app.light .ref-pitch-ctrl{border-color:rgba(0,0,0,0.1);background:rgba(240,241,245,0.6)}
+.app.light .ref-pitch-cfg{border-color:rgba(0,0,0,0.1);background:rgba(240,241,245,0.4)}
 .app.light .ref-pitch-label{border-color:rgba(0,0,0,0.08)}
-.pitch-player-ctrl{position:absolute;bottom:6px;left:50%;transform:translateX(calc(-50% + 70px));display:flex;align-items:center;z-index:4;border:1px solid rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;background:rgba(12,14,24,0.6);backdrop-filter:blur(4px)}
-.pitch-play-btn{border:none;background:transparent;color:var(--text-bright);font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:0 6px;height:22px;cursor:pointer;white-space:nowrap;letter-spacing:.04em;border-left:1px solid rgba(255,255,255,0.08);border-right:1px solid rgba(255,255,255,0.08);transition:color .12s,background .12s;-webkit-tap-highlight-color:transparent}
-.pitch-play-btn:active{background:rgba(0,232,154,0.1)}
-.pitch-play-btn.playing{color:var(--accent)}
-.app.light .pitch-player-ctrl{border-color:rgba(0,0,0,0.1);background:rgba(240,241,245,0.6)}
-.app.light .pitch-play-btn{border-color:rgba(0,0,0,0.08)}
+.note-arrow{position:absolute;bottom:24%;z-index:5;border:none;background:transparent;color:var(--text-dim);font-size:2.8rem;padding:12px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent;font-family:'Share Tech Mono',monospace;line-height:1}
+.note-arrow-left{left:22%}
+.note-arrow-right{right:22%}
+.note-arrow.visible{opacity:1;pointer-events:auto}
+.note-arrow:active{color:var(--accent)}
 
 /* Metronome */
 .sec-metro{flex:0 0 22%;min-height:140px;background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
-.sec-metro .section-main{padding:10px 16px 10px}
-.beat-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:4px 0;flex-shrink:0}
-.beat-tri{width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:18px solid var(--border);transition:border-left-color .06s,filter .06s;filter:drop-shadow(0 0 0 transparent);pointer-events:none}
-.beat-tri.accent{border-top-width:13px;border-bottom-width:13px;border-left-width:22px}
-.beat-tri.on{border-left-color:var(--accent);filter:drop-shadow(0 0 8px var(--accent-glow))}
-.beat-tri.accent.on{border-left-color:var(--warning);filter:drop-shadow(0 0 10px var(--warning-glow))}
+.sec-metro .section-main{padding:10px 16px}
+.metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
+.beat-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:10px 0;flex-shrink:0}
+.beat-tri{width:20px;height:20px;border-radius:50%;background:var(--border);transition:background .06s,box-shadow .06s;box-shadow:none;pointer-events:none}
+.beat-tri.accent{width:28px;height:28px}
+.beat-tri.on{background:var(--accent);box-shadow:0 0 8px var(--accent-glow)}
+.beat-tri.accent.on{background:var(--warning);box-shadow:0 0 10px var(--warning-glow)}
 .metro-row{display:flex;align-items:flex-start;justify-content:center;flex:1;position:relative;z-index:2;padding:0 4px}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
@@ -152,14 +149,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .wave-indicator::after{bottom:0;border-bottom:4px solid var(--warning)}
 .wave-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--text-dim);letter-spacing:.1em;pointer-events:none}
 .wave-controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:2px 0 3px}
-.ctrl-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border-light);background:transparent;color:var(--text-mid);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.ctrl-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border-light);background:transparent;color:var(--text-mid);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
 .ctrl-btn:active{transform:scale(.9)}
 .ctrl-btn.rec{border-color:var(--danger);color:var(--danger)}
 .ctrl-btn.rec.active{background:var(--danger);color:#fff;animation:rec-pulse 1s ease-in-out infinite}
 @keyframes rec-pulse{0%,100%{box-shadow:0 0 0 0 var(--danger-glow)}50%{box-shadow:0 0 0 8px transparent}}
 .ctrl-btn.play{border-color:var(--accent);color:var(--accent)}
 .ctrl-btn:disabled{opacity:.25;pointer-events:none}
-.ctrl-btn svg{width:14px;height:14px;fill:currentColor}
+.ctrl-btn svg{width:16px;height:16px;fill:currentColor}
 
 /* Recording manager — bottom bar */
 .rec-bar{position:relative;height:38px;background:rgba(8,10,18,.95);border-top:1px solid var(--border);flex-shrink:0;user-select:none;display:flex;align-items:stretch;margin-bottom:6px}
@@ -260,10 +257,10 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       </div>
       <div class="section-config">
 
-        <div class="config-item"><span>FFT Size</span><span>2048</span></div>
-        <div class="config-item"><span>Max Frequency</span><span>5 kHz</span></div>
-        <div class="config-item"><span>Smoothing</span><span>0.8</span></div>
-        <div class="config-item"><span>Color Theme</span><span>Gradient</span></div>
+        <div class="config-item"><span>FFT Size</span><select class="config-select" id="cfgFFTSize"><option value="1024">1024</option><option value="2048" selected>2048</option><option value="4096">4096</option><option value="8192">8192</option></select></div>
+        <div class="config-item"><span>Max Freq</span><select class="config-select" id="cfgMaxFreq"><option value="2000">2 kHz</option><option value="5000" selected>5 kHz</option><option value="8000">8 kHz</option><option value="12000">12 kHz</option><option value="20000">20 kHz</option></select></div>
+        <div class="config-item"><span>Smoothing</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgSmoothing" min="0" max="0.95" step="0.05" value="0.5"><span class="config-range-val" id="cfgSmoothingVal">0.5</span></span></div>
+        <div class="config-item"><span>Color</span><select class="config-select" id="cfgSpecColor"><option value="green" selected>Green</option><option value="cyan">Cyan</option><option value="magenta">Magenta</option><option value="orange">Orange</option><option value="white">White</option></select></div>
       </div>
     </div>
   </div>
@@ -274,29 +271,15 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       <div class="section-main">
         <div class="section-label">Tuner</div>
         <canvas id="cvTuner"></canvas>
-        <div class="tuner-info">
-          <div class="note-row"><span class="note-name" id="noteName">--</span><span class="note-octave" id="noteOct"></span></div>
-          <div class="freq-line" id="freqLine">--- Hz</div>
-          <div class="cents-line" id="centsLine">-- &cent;</div>
-        </div>
-        <div class="ref-pitch-ctrl" id="refPitchCtrl">
-          <button class="ref-pitch-btn" id="refPitchDown">−</button>
-          <div class="ref-pitch-label" id="refPitchLabel">A440</div>
-          <button class="ref-pitch-btn" id="refPitchUp">+</button>
-        </div>
-        <div class="pitch-player-ctrl" id="pitchPlayerCtrl">
-          <button class="ref-pitch-btn" id="pitchDown">♭</button>
-          <button class="pitch-play-btn" id="pitchPlayBtn">🔈 C4</button>
-          <button class="ref-pitch-btn" id="pitchUp">♯</button>
-        </div>
+        <button class="note-arrow note-arrow-left" id="pitchDown">‹</button>
+        <button class="note-arrow note-arrow-right" id="pitchUp">›</button>
       </div>
       <div class="section-config">
 
-        <div class="config-item"><span>Reference Pitch</span><span>A440</span></div>
-        <div class="config-item"><span>Sensitivity</span><span>Medium</span></div>
-        <div class="config-item"><span>Temperament</span><span>Equal</span></div>
-        <div class="config-item"><span>Transpose</span><span>None</span></div>
-        <div class="config-item"><span>Notation</span><span>Sharp</span></div>
+        <div class="config-item"><span>Reference Pitch</span><span class="ref-pitch-cfg"><button class="ref-pitch-btn" id="refPitchDown">−</button><span class="ref-pitch-label" id="refPitchLabel">A440</span><button class="ref-pitch-btn" id="refPitchUp">+</button></span></div>
+        <div class="config-item"><span>Sensitivity</span><select class="config-select" id="cfgTunerSens"><option value="low">Low</option><option value="medium">Medium</option><option value="high" selected>High</option></select></div>
+        <div class="config-item"><span>Notation</span><select class="config-select" id="cfgNotation"><option value="sharp" selected>Sharp (C#)</option><option value="flat">Flat (D♭)</option></select></div>
+        <div class="config-item"><span>Transpose</span><select class="config-select" id="cfgTranspose"><option value="0" selected>None</option><option value="1">+1</option><option value="2">+2</option><option value="3">+3</option><option value="4">+4</option><option value="5">+5</option><option value="6">+6</option><option value="-5">−5</option><option value="-4">−4</option><option value="-3">−3</option><option value="-2">−2</option><option value="-1">−1</option></select></div>
       </div>
     </div>
   </div>
@@ -306,6 +289,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     <div class="section-slider" data-swipe-section>
       <div class="section-main">
         <div class="section-label">Metronome</div>
+        <div class="metro-core">
         <div class="beat-row" id="beatRow"></div>
         <div class="metro-row">
           <div class="bpm-wheel">
@@ -325,6 +309,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             <div class="bpm-tap-hint">TAP TEMPO</div>
           </div>
         </div>
+        </div>
         <div class="timesig-group">
           <div class="scroll-picker">
             <div class="scroll-picker-track" id="tsCombo">
@@ -343,11 +328,12 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       </div>
       <div class="section-config">
 
-        <div class="config-item"><span>Click Sound</span><span>Classic</span></div>
-        <div class="config-item"><span>Accent Volume</span><span>100%</span></div>
-        <div class="config-item"><span>Subdivision</span><span>Quarter</span></div>
-        <div class="config-item"><span>Count-in</span><span>Off</span></div>
-        <div class="config-item"><span>Flash Beat</span><span>On</span></div>
+        <div class="config-item"><span>Click Sound</span><select class="config-select" id="cfgClickSound"><option value="sine" selected>Classic</option><option value="triangle">Wood</option><option value="square">Digital</option><option value="noise">Noise</option></select></div>
+        <div class="config-item"><span>Volume</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgMetroVol" min="0" max="1" step="0.05" value="0.25"><span class="config-range-val" id="cfgMetroVolVal">0.25</span></span></div>
+        <div class="config-item"><span>Accent</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgAccentVol" min="0.5" max="2.5" step="0.1" value="1.0"><span class="config-range-val" id="cfgAccentVolVal">1.0x</span></span></div>
+        <div class="config-item"><span>Subdivision</span><select class="config-select" id="cfgSubdiv"><option value="1" selected>None</option><option value="2">8th</option><option value="3">Triplet</option><option value="4">16th</option></select></div>
+        <div class="config-item"><span>Count-in</span><select class="config-select" id="cfgCountIn"><option value="0" selected>Off</option><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option></select></div>
+        <div class="config-item"><span>Flash Beat</span><select class="config-select" id="cfgFlashBeat"><option value="on" selected>On</option><option value="off">Off</option></select></div>
       </div>
     </div>
   </div>
@@ -366,14 +352,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           <div class="wave-empty" id="waveEmpty">RECORD TO ANALYZE</div>
         </div>
         <div class="wave-controls">
-          <button class="ctrl-btn rec" id="btnRec" title="Record">
+          <button class="ctrl-btn rec" id="btnMain" title="Record">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>
-          </button>
-          <button class="ctrl-btn" id="btnStop" disabled title="Stop">
-            <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
-          </button>
-          <button class="ctrl-btn play" id="btnPlay" disabled title="Play">
-            <svg viewBox="0 0 24 24"><polygon points="8,5 20,12 8,19"/></svg>
           </button>
         </div>
       </div>
@@ -511,12 +491,24 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 //  TONESCOPE — Professional Music Tuner
 // ================================================================
 
-const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTES_FLAT  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+let NOTES = NOTES_SHARP;
 let A4 = 440; const A4_MIDI = 69;
+let tunerTranspose = 0;
 const FFT_SIZE = 2048;
 const PEAK_RATE = 100; // peaks per second for waveform
 let pxPerPeak = 2.5;   // waveform zoom
 let wavBitDepth = 16;   // WAV export bit depth
+let specMaxFreq = 5000; // spectrum max frequency
+const SPEC_COLORS = {
+  green:   { stroke: '#00e89a', glow: 'rgba(0,232,154,0.45)', fill: [['0','rgba(0,232,154,0.02)'],['0.4','rgba(0,200,120,0.12)'],['1','rgba(0,255,170,0.18)']] },
+  cyan:    { stroke: '#00d4ff', glow: 'rgba(0,212,255,0.45)', fill: [['0','rgba(0,212,255,0.02)'],['0.4','rgba(0,180,230,0.12)'],['1','rgba(0,220,255,0.18)']] },
+  magenta: { stroke: '#ff3dff', glow: 'rgba(255,61,255,0.45)', fill: [['0','rgba(255,61,255,0.02)'],['0.4','rgba(220,40,220,0.12)'],['1','rgba(255,80,255,0.18)']] },
+  orange:  { stroke: '#ffb020', glow: 'rgba(255,176,32,0.45)', fill: [['0','rgba(255,176,32,0.02)'],['0.4','rgba(230,150,20,0.12)'],['1','rgba(255,190,50,0.18)']] },
+  white:   { stroke: '#e0e0e0', glow: 'rgba(224,224,224,0.35)', fill: [['0','rgba(224,224,224,0.02)'],['0.4','rgba(200,200,200,0.10)'],['1','rgba(224,224,224,0.15)']] }
+};
+let specColorKey = 'green';
 
 // -------- Theme helper --------
 function isLight() { return document.getElementById('app').classList.contains('light'); }
@@ -543,11 +535,14 @@ const S = {
   // Recording slots
   recordings: [], // [{audioBuffer, peaks, name}]
   recIdx: 0, // current recording index
+  // Pitch player
+  pitchPlaying: false, pitchMidi: 60,
   // Playback
   playSrc: null, playStart: 0, playOffset: 0,
   // Metronome
   metroOn: false, bpm: 120, beats: 4, tsDenom: 4, curBeat: -1,
   nextBeatTime: 0, metroTimer: null, beatPattern: 'standard',
+  metroSound: 'sine', metroSubdiv: 1, metroCountIn: 0, metroFlash: true, metroAccentMul: 1.0,
   // Waveform drag
   dragging: false, dragX: 0, dragOffset: 0, lastAnalyzedPos: -1,
   // Live analysis override (when paused with recording, tap to use mic)
@@ -562,14 +557,12 @@ const $ = id => document.getElementById(id);
 const elStartup = $('startup');
 const cvSpectrum = $('cvSpectrum'), cvTuner = $('cvTuner'), cvWave = $('cvWave');
 const elSecSpectrum = document.querySelector('.sec-spectrum'), elSecTuner = document.querySelector('.sec-tuner');
-const elNoteName = $('noteName'), elNoteOct = $('noteOct');
-const elFreq = $('freqLine'), elCents = $('centsLine');
 const elBpmDisplay = $('bpmDisplay'), elBpmTrack = $('bpmTrack'), elBpmInner = $('bpmInner'), elBpmFlash = $('bpmFlash');
 const elTsCombo = $('tsCombo'), elTsComboItems = $('tsComboItems');
 const elBeatRow = $('beatRow'), elMetroToggle = $('metroToggle');
 const elWaveTime = $('waveTime'), elWaveWrap = $('waveWrap');
 const elWaveInd = $('waveInd'), elWaveEmpty = $('waveEmpty');
-const btnRec = $('btnRec'), btnStop = $('btnStop'), btnPlay = $('btnPlay');
+const btnMain = $('btnMain');
 const elRecSlot = $('recSlot'), elRecSlotInner = $('recSlotInner'), elRecAdd = $('recAdd');
 const elRecActions = $('recActions');
 
@@ -580,7 +573,7 @@ async function initAudio() {
   S.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
   S.analyser = S.ctx.createAnalyser();
   S.analyser.fftSize = FFT_SIZE;
-  S.analyser.smoothingTimeConstant = 0.82;
+  S.analyser.smoothingTimeConstant = 0.5;
   S.outputGain = S.ctx.createGain();
   S.outputGain.gain.value = 0;
   S.analyser.connect(S.outputGain).connect(S.ctx.destination);
@@ -656,7 +649,7 @@ function stopRecording() {
 function startPlayback() {
   if (!S.audioBuffer) return;
   S.liveOverride = false;
-  try { S.micSrc && S.micSrc.disconnect(); } catch(_){}
+  try { S.micGain ? S.micGain.disconnect(S.analyser) : S.micSrc && S.micSrc.disconnect(S.analyser); } catch(_){}
   S.outputGain.gain.value = 1;
   S.playSrc = S.ctx.createBufferSource();
   S.playSrc.buffer = S.audioBuffer;
@@ -794,10 +787,11 @@ function stabilizePitch(rawFreq) {
 
 function noteFromFreq(f) {
   const midi = Math.round(12 * Math.log2(f / A4) + A4_MIDI);
-  const name = NOTES[((midi % 12) + 12) % 12];
-  const oct = Math.floor(midi / 12) - 1;
   const nf = A4 * Math.pow(2, (midi - A4_MIDI) / 12);
   const cents = 1200 * Math.log2(f / nf);
+  const dispMidi = midi + tunerTranspose;
+  const name = NOTES[((dispMidi % 12) + 12) % 12];
+  const oct = Math.floor(dispMidi / 12) - 1;
   return { name, oct, freq: nf, cents, midi };
 }
 
@@ -899,7 +893,7 @@ function drawSpectrum() {
   if (!S.ctx) return;
 
   const sr = S.ctx.sampleRate || 44100;
-  const maxFreq = 5000;
+  const maxFreq = specMaxFreq;
   const maxBin = Math.min(data.length, Math.floor(maxFreq / sr * data.length * 2));
   const points = Math.min(180, maxBin);
   const binsPerPt = Math.max(1, Math.floor(maxBin / points));
@@ -910,17 +904,17 @@ function drawSpectrum() {
   for (let i = 0; i < points; i++) {
     let sum = 0, cnt = 0;
     for (let j = 0; j < binsPerPt; j++) { sum += data[i * binsPerPt + j]; cnt++; }
-    const v = (sum / cnt / 255);
+    let v = sum / cnt / 255;
+    v = Math.pow(v, 2.2); // power curve: suppress low volume, emphasize peaks
     const x = pad + (i / (points - 1)) * (w - pad * 2);
     const y = plotH - v * plotH * 0.88 - 2;
     pts.push({ x, y });
   }
 
   // Filled area under line
+  const sc = SPEC_COLORS[specColorKey];
   const fillGrd = c.createLinearGradient(0, plotH, 0, 0);
-  fillGrd.addColorStop(0, 'rgba(0,232,154,0.02)');
-  fillGrd.addColorStop(0.4, 'rgba(0,200,120,0.12)');
-  fillGrd.addColorStop(1, 'rgba(0,255,170,0.18)');
+  for (const [stop, color] of sc.fill) fillGrd.addColorStop(parseFloat(stop), color);
   c.beginPath();
   c.moveTo(pts[0].x, plotH);
   for (let i = 0; i < pts.length; i++) {
@@ -937,7 +931,7 @@ function drawSpectrum() {
 
   // Line stroke with glow
   c.save();
-  c.shadowColor = 'rgba(0,232,154,0.45)';
+  c.shadowColor = sc.glow;
   c.shadowBlur = 8;
   c.beginPath();
   for (let i = 0; i < pts.length; i++) {
@@ -947,7 +941,7 @@ function drawSpectrum() {
     c.quadraticCurveTo(prev.x, prev.y, cpx, (prev.y + pts[i].y) / 2);
     if (i === pts.length - 1) c.quadraticCurveTo(pts[i].x, pts[i].y, pts[i].x, pts[i].y);
   }
-  c.strokeStyle = '#00e89a';
+  c.strokeStyle = sc.stroke;
   c.lineWidth = 1.5;
   c.stroke();
   c.restore();
@@ -959,18 +953,20 @@ function drawSpectrum() {
     c.beginPath(); c.moveTo(0, plotH * i / 5); c.lineTo(w, plotH * i / 5); c.stroke();
   }
 
-  // X-axis labels: 0–5k every 1k
+  // X-axis labels
   c.font = '9px "Share Tech Mono"';
   c.fillStyle = lt ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)';
   c.textBaseline = 'top';
-  for (let khz = 0; khz <= 5; khz++) {
-    const x = pad + (khz / 5) * (w - pad * 2);
-    // Tick line
+  const maxKhz = maxFreq / 1000;
+  const step = maxKhz <= 3 ? 0.5 : maxKhz <= 6 ? 1 : maxKhz <= 14 ? 2 : 5;
+  const ticks = Math.floor(maxKhz / step);
+  for (let i = 0; i <= ticks; i++) {
+    const khz = i * step;
+    const x = pad + (khz / maxKhz) * (w - pad * 2);
     c.beginPath(); c.moveTo(x, plotH); c.lineTo(x, plotH + 3);
     c.strokeStyle = lt ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)'; c.lineWidth = 0.8; c.stroke();
-    // Label
-    c.textAlign = khz === 0 ? 'left' : (khz === 5 ? 'right' : 'center');
-    c.fillText(khz === 0 ? '0' : khz + 'k', x, plotH + 3);
+    c.textAlign = i === 0 ? 'left' : (i === ticks ? 'right' : 'center');
+    c.fillText(khz === 0 ? '0' : (khz % 1 === 0 ? khz + 'k' : khz.toFixed(1) + 'k'), x, plotH + 3);
   }
 
   // Live mode badge
@@ -1072,13 +1068,13 @@ function drawTuner() {
 
   // Needle
   c.lineCap = 'round';
-  const hasNote = S.note || S.mode === 'live' || S.mode === 'recording';
+  const hasNote = S.pitchPlaying || S.note || S.mode === 'live' || S.mode === 'recording';
   if (hasNote) {
-    const nAngle = centsToAngle(S.displayCents);
+    const nAngle = centsToAngle(S.pitchPlaying ? 0 : S.displayCents);
     const needleLen = r - 20;
     const nx = cx + needleLen * Math.cos(nAngle);
     const ny = cy + needleLen * Math.sin(nAngle);
-    const absCents = Math.abs(S.displayCents);
+    const absCents = S.pitchPlaying ? 0 : Math.abs(S.displayCents);
     const nColor = absCents < 10 ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
     // Glow
     c.save(); c.shadowColor = nColor; c.shadowBlur = 12;
@@ -1106,7 +1102,30 @@ function drawTuner() {
   c.fill();
 
   c.textAlign = 'center';
-  if (S.freq > 0 && S.note) {
+  if (S.pitchPlaying) {
+    // Show played note
+    const dispMidi = S.pitchMidi + tunerTranspose;
+    const pName = NOTES[((dispMidi % 12) + 12) % 12];
+    const pOct = Math.floor(dispMidi / 12) - 1;
+    const pFreq = A4 * Math.pow(2, (S.pitchMidi - A4_MIDI) / 12);
+    c.font = '700 30px "Chakra Petch"';
+    c.fillStyle = '#00e89a';
+    c.textBaseline = 'middle';
+    const noteW = c.measureText(pName).width;
+    c.fillText(pName, cx - 6, cy - maskR * 0.78);
+    c.font = '500 14px "Share Tech Mono"';
+    c.fillStyle = lt ? '#5a5d72' : '#8a8da8';
+    c.textBaseline = 'middle';
+    c.fillText(pOct, cx + noteW / 2 + 2, cy - maskR * 0.84);
+    c.font = '600 15px "Share Tech Mono"';
+    c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
+    c.textBaseline = 'top';
+    c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 39);
+    // "♪ PLAYING" indicator
+    c.font = '600 10px "Chakra Petch"';
+    c.fillStyle = '#00e89a';
+    c.fillText('♪ TAP TO STOP', cx, cy - 20);
+  } else if (S.freq > 0 && S.note) {
     const absCents = Math.abs(S.cents);
     const col = absCents < 10 ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
     // Note name + octave — centered in mask
@@ -1191,19 +1210,34 @@ function buildBeats() {
 }
 
 function metroClick(time, type) {
-  // type: 'accent', 'normal', 'ghost', 'swing'
+  // type: 'accent', 'normal', 'ghost', 'swing', 'subdiv'
   if (!S.ctx) return;
-  const osc = S.ctx.createOscillator();
   const g = S.ctx.createGain();
-  osc.type = 'sine';
-  const freq = type === 'accent' ? 1200 : (type === 'ghost' || type === 'swing' ? 660 : 880);
-  const vol = type === 'accent' ? 0.35 : (type === 'ghost' ? 0.10 : (type === 'swing' ? 0.12 : 0.18));
-  const dur = (type === 'ghost' || type === 'swing') ? 0.04 : 0.06;
-  osc.frequency.value = freq;
-  g.gain.setValueAtTime(vol, time);
-  g.gain.exponentialRampToValueAtTime(0.001, time + dur);
-  osc.connect(g).connect(S.metroGain);
-  osc.start(time); osc.stop(time + 0.06);
+  const freq = type === 'accent' ? 1200 : type === 'subdiv' ? 600 : (type === 'ghost' || type === 'swing' ? 660 : 880);
+  let vol = type === 'accent' ? 0.35 * S.metroAccentMul : type === 'subdiv' ? 0.08 : (type === 'ghost' ? 0.10 : (type === 'swing' ? 0.12 : 0.18));
+  const dur = (type === 'ghost' || type === 'swing' || type === 'subdiv') ? 0.04 : 0.06;
+
+  if (S.metroSound === 'noise') {
+    // White noise burst
+    const bufLen = Math.ceil(S.ctx.sampleRate * 0.06);
+    const buf = S.ctx.createBuffer(1, bufLen, S.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+    const src = S.ctx.createBufferSource();
+    src.buffer = buf;
+    g.gain.setValueAtTime(vol, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+    src.connect(g).connect(S.metroGain);
+    src.start(time); src.stop(time + 0.06);
+  } else {
+    const osc = S.ctx.createOscillator();
+    osc.type = S.metroSound;
+    osc.frequency.value = freq;
+    g.gain.setValueAtTime(vol, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+    osc.connect(g).connect(S.metroGain);
+    osc.start(time); osc.stop(time + 0.06);
+  }
 }
 
 function scheduleBeats() {
@@ -1214,36 +1248,50 @@ function scheduleBeats() {
   while (S.nextBeatTime < S.ctx.currentTime + ahead) {
     const beat = S.curBeat;
 
+    // Count-in phase: only click, no recording logic
+    const isCountIn = S.metroCountInLeft > 0;
+
     if (pattern === 'standard') {
       metroClick(S.nextBeatTime, beat === 0 ? 'accent' : 'normal');
     } else if (pattern === 'swing') {
-      // Main beat
       metroClick(S.nextBeatTime, beat === 0 ? 'accent' : 'normal');
-      // Swing ghost note at 2/3 of the beat (triplet feel)
       const swingTime = S.nextBeatTime + beatInterval * (2 / 3);
       metroClick(swingTime, 'swing');
     } else if (pattern === 'march') {
-      // Accent on beats 1 and 3 (or every odd beat for non-4/4)
       const isAccent = beat === 0 || (S.beats >= 4 && beat === Math.floor(S.beats / 2));
       metroClick(S.nextBeatTime, isAccent ? 'accent' : 'normal');
     }
 
+    // Subdivisions
+    if (S.metroSubdiv > 1) {
+      const subInterval = beatInterval / S.metroSubdiv;
+      for (let s = 1; s < S.metroSubdiv; s++) {
+        metroClick(S.nextBeatTime + subInterval * s, 'subdiv');
+      }
+    }
+
     // Visual update
-    const delay = Math.max(0, (S.nextBeatTime - S.ctx.currentTime) * 1000);
-    const b = beat;
-    setTimeout(() => {
-      const tris = elBeatRow.children;
-      for (let i = 0; i < tris.length; i++) tris[i].classList.toggle('on', i === b);
-    }, delay);
+    if (S.metroFlash) {
+      const delay = Math.max(0, (S.nextBeatTime - S.ctx.currentTime) * 1000);
+      const b = beat;
+      setTimeout(() => {
+        const tris = elBeatRow.children;
+        for (let i = 0; i < tris.length; i++) tris[i].classList.toggle('on', i === b);
+      }, delay);
+    }
 
     S.curBeat = (S.curBeat + 1) % S.beats;
     if (S.curBeat === 0) {
-      const barDelay = Math.max(0, (S.nextBeatTime - S.ctx.currentTime) * 1000);
-      setTimeout(() => {
-        S.barCount = (S.barCount || 0) + 1;
-        const bc = $('barCounter');
-        if (bc) bc.textContent = S.barCount;
-      }, barDelay);
+      if (isCountIn) {
+        S.metroCountInLeft--;
+      } else {
+        const barDelay = Math.max(0, (S.nextBeatTime - S.ctx.currentTime) * 1000);
+        setTimeout(() => {
+          S.barCount = (S.barCount || 0) + 1;
+          const bc = $('barCounter');
+          if (bc) bc.textContent = S.barCount;
+        }, barDelay);
+      }
     }
     S.nextBeatTime += beatInterval;
   }
@@ -1255,6 +1303,7 @@ function startMetronome() {
   S.metroOn = true;
   S.curBeat = 0;
   S.barCount = 0;
+  S.metroCountInLeft = S.metroCountIn;
   const bc = $('barCounter');
   if (bc) bc.textContent = '0';
   S.nextBeatTime = S.ctx.currentTime + 0.05;
@@ -1440,14 +1489,24 @@ function setupCanvases() {
 // ================================================================
 function updateControlState() {
   const m = S.mode;
-  btnRec.disabled = m === 'playback';
-  btnRec.classList.toggle('active', m === 'recording');
-  btnStop.disabled = m !== 'recording' && m !== 'playback';
-  btnPlay.disabled = !S.audioBuffer || m === 'recording';
-  if (m === 'playback') {
-    btnPlay.innerHTML = '<svg viewBox="0 0 24 24"><rect x="5" y="5" width="5" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="5" height="14" rx="1" fill="currentColor"/></svg>';
+  const svgRec = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>';
+  const svgStop = '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
+  const svgPlay = '<svg viewBox="0 0 24 24"><polygon points="8,5 20,12 8,19"/></svg>';
+  const svgPause = '<svg viewBox="0 0 24 24"><rect x="5" y="5" width="5" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="5" height="14" rx="1" fill="currentColor"/></svg>';
+
+  btnMain.classList.remove('rec', 'play', 'active');
+  if (m === 'recording') {
+    btnMain.innerHTML = svgStop;
+    btnMain.classList.add('rec', 'active');
+  } else if (m === 'playback') {
+    btnMain.innerHTML = svgPause;
+    btnMain.classList.add('play');
+  } else if (S.audioBuffer) {
+    btnMain.innerHTML = svgPlay;
+    btnMain.classList.add('play');
   } else {
-    btnPlay.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="8,5 20,12 8,19" fill="currentColor"/></svg>';
+    btnMain.innerHTML = svgRec;
+    btnMain.classList.add('rec');
   }
 }
 
@@ -1623,18 +1682,12 @@ function setupEvents() {
     animate();
   });
 
-  // Recording controls
-  btnRec.addEventListener('click', () => {
-    if (S.mode === 'recording') stopRecording();
-    else startRecording();
-  });
-  btnStop.addEventListener('click', () => {
+  // Unified recording/playback button
+  btnMain.addEventListener('click', () => {
     if (S.mode === 'recording') stopRecording();
     else if (S.mode === 'playback') pausePlayback();
-  });
-  btnPlay.addEventListener('click', () => {
-    if (S.mode === 'playback') pausePlayback();
     else if (S.audioBuffer) startPlayback();
+    else startRecording();
   });
 
   // ---- Live override: tap spectrum or tuner to toggle live mic detection ----
@@ -1643,6 +1696,8 @@ function setupEvents() {
       S.liveOverride = !S.liveOverride;
       if (S.liveOverride) {
         try { S.micGain ? S.micGain.connect(S.analyser) : S.micSrc.connect(S.analyser); } catch(_){}
+      } else {
+        try { S.micGain ? S.micGain.disconnect(S.analyser) : S.micSrc.disconnect(S.analyser); } catch(_){}
         S.lastAnalyzedPos = -1; // force re-analyze when switching back
       }
     }
@@ -1897,6 +1952,33 @@ function setupEvents() {
     $('barCounter').textContent = '0';
   });
 
+  // ---- Metronome config options ----
+  $('cfgClickSound').addEventListener('change', function() {
+    S.metroSound = this.value;
+  });
+  $('cfgMetroVol').addEventListener('input', function() {
+    const v = parseFloat(this.value);
+    if (S.metroGain) S.metroGain.gain.value = v;
+    $('cfgMetroVolVal').textContent = v.toFixed(2);
+  });
+  $('cfgAccentVol').addEventListener('input', function() {
+    S.metroAccentMul = parseFloat(this.value);
+    $('cfgAccentVolVal').textContent = S.metroAccentMul.toFixed(1) + 'x';
+  });
+  $('cfgSubdiv').addEventListener('change', function() {
+    S.metroSubdiv = parseInt(this.value);
+  });
+  $('cfgCountIn').addEventListener('change', function() {
+    S.metroCountIn = parseInt(this.value);
+  });
+  $('cfgFlashBeat').addEventListener('change', function() {
+    S.metroFlash = this.value === 'on';
+    if (!S.metroFlash) {
+      const tris = elBeatRow.children;
+      for (let i = 0; i < tris.length; i++) tris[i].classList.remove('on');
+    }
+  });
+
   // Waveform scrubbing
   elWaveWrap.addEventListener('mousedown', wavePointerDown);
   elWaveWrap.addEventListener('touchstart', e => {
@@ -2143,6 +2225,18 @@ function setupEvents() {
     applySensitivity(this.value);
   });
 
+  // ---- Tuner config panel options ----
+  $('cfgTunerSens').addEventListener('change', function() {
+    applySensitivity(this.value);
+    $('sensitivitySelect').value = this.value;
+  });
+  $('cfgNotation').addEventListener('change', function() {
+    NOTES = this.value === 'flat' ? NOTES_FLAT : NOTES_SHARP;
+  });
+  $('cfgTranspose').addEventListener('change', function() {
+    tunerTranspose = parseInt(this.value);
+  });
+
   // ---- Reference Pitch (A4) control ----
   function updateRefPitch() {
     $('refPitchLabel').textContent = 'A' + A4;
@@ -2164,56 +2258,67 @@ function setupEvents() {
   });
   document.addEventListener('pointerup', () => { if (refRepeatTimer) { clearInterval(refRepeatTimer); refRepeatTimer = null; } });
 
-  // ---- Pitch Player ----
-  let pitchMidi = 60; // C4
-  let pitchOsc = null, pitchGain = null, pitchPlaying = false;
-  const elPitchBtn = $('pitchPlayBtn');
+  // ---- Pitch Player (tap note on canvas) ----
+  let pitchOsc = null, pitchGainNode = null;
+  const elArrowL = $('pitchDown'), elArrowR = $('pitchUp');
 
   function pitchMidiToFreq(midi) {
     return A4 * Math.pow(2, (midi - A4_MIDI) / 12);
   }
-  function pitchLabel(midi) {
-    const name = NOTES[((midi % 12) + 12) % 12];
-    const oct = Math.floor(midi / 12) - 1;
-    return name + oct;
-  }
-  function updatePitchBtn() {
-    elPitchBtn.textContent = (pitchPlaying ? '🔊 ' : '🔈 ') + pitchLabel(pitchMidi);
-    elPitchBtn.classList.toggle('playing', pitchPlaying);
-    if (pitchPlaying && pitchOsc) {
-      pitchOsc.frequency.setValueAtTime(pitchMidiToFreq(pitchMidi), S.ctx.currentTime);
+  function updatePitchUI() {
+    elArrowL.classList.toggle('visible', S.pitchPlaying);
+    elArrowR.classList.toggle('visible', S.pitchPlaying);
+    if (S.pitchPlaying && pitchOsc) {
+      pitchOsc.frequency.setValueAtTime(pitchMidiToFreq(S.pitchMidi), S.ctx.currentTime);
     }
   }
   function startPitch() {
     if (!S.ctx) return;
+    // Snap to last detected note, fallback to C4
+    if (S.stableNote && S.stableFreq > 0) {
+      S.pitchMidi = Math.round(12 * Math.log2(S.stableFreq / A4) + A4_MIDI);
+      S.pitchMidi = Math.max(24, Math.min(96, S.pitchMidi));
+    }
     pitchOsc = S.ctx.createOscillator();
-    pitchGain = S.ctx.createGain();
+    pitchGainNode = S.ctx.createGain();
     pitchOsc.type = 'sine';
-    pitchOsc.frequency.value = pitchMidiToFreq(pitchMidi);
-    pitchGain.gain.value = 0.15;
-    pitchOsc.connect(pitchGain);
-    pitchGain.connect(S.analyser);
-    pitchGain.connect(S.outputGain);
+    pitchOsc.frequency.value = pitchMidiToFreq(S.pitchMidi);
+    pitchGainNode.gain.value = 0.15;
+    pitchOsc.connect(pitchGainNode);
+    pitchGainNode.connect(S.analyser);
+    pitchGainNode.connect(S.ctx.destination);
     pitchOsc.start();
-    pitchPlaying = true;
-    updatePitchBtn();
+    S.pitchPlaying = true;
+    updatePitchUI();
   }
   function stopPitch() {
     if (pitchOsc) { try { pitchOsc.stop(); } catch(e){} pitchOsc = null; }
-    if (pitchGain) { pitchGain.disconnect(); pitchGain = null; }
-    pitchPlaying = false;
-    updatePitchBtn();
+    if (pitchGainNode) { pitchGainNode.disconnect(); pitchGainNode = null; }
+    S.pitchPlaying = false;
+    updatePitchUI();
   }
-  elPitchBtn.addEventListener('click', () => {
-    pitchPlaying ? stopPitch() : startPitch();
+  // Tap canvas note area to toggle pitch
+  cvTuner.addEventListener('click', e => {
+    const rect = cvTuner.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const scaleX = cvTuner.width / rect.width, scaleY = cvTuner.height / rect.height;
+    const canvasX = x * scaleX, canvasY = y * scaleY;
+    const cxC = cvTuner.width / 2, cyC = cvTuner.height - 30 * scaleY;
+    const dist = Math.sqrt((canvasX - cxC) ** 2 + (canvasY - cyC) ** 2);
+    const r = Math.min(cvTuner.width / 2 - 28, cvTuner.height - 48);
+    const maskR = r * 0.5 + 10;
+    if (dist < maskR) {
+      e.stopImmediatePropagation();
+      S.pitchPlaying ? stopPitch() : startPitch();
+    }
   });
-  $('pitchDown').addEventListener('click', () => {
-    pitchMidi = Math.max(24, pitchMidi - 1);
-    updatePitchBtn();
+  elArrowL.addEventListener('click', () => {
+    S.pitchMidi = Math.max(24, S.pitchMidi - 1);
+    updatePitchUI();
   });
-  $('pitchUp').addEventListener('click', () => {
-    pitchMidi = Math.min(96, pitchMidi + 1);
-    updatePitchBtn();
+  elArrowR.addEventListener('click', () => {
+    S.pitchMidi = Math.min(96, S.pitchMidi + 1);
+    updatePitchUI();
   });
 
   // Resize
@@ -2231,7 +2336,7 @@ function setupEvents() {
     S.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: sr });
     S.analyser = S.ctx.createAnalyser();
     S.analyser.fftSize = FFT_SIZE;
-    S.analyser.smoothingTimeConstant = 0.82;
+    S.analyser.smoothingTimeConstant = 0.5;
     S.outputGain = S.ctx.createGain();
     S.outputGain.gain.value = 0;
     S.outputGain.connect(S.ctx.destination);
@@ -2251,6 +2356,26 @@ function setupEvents() {
       S.micGain.connect(S.recDest);
       S.mode = 'live';
     } catch(e) { S.mode = 'idle'; }
+  });
+
+  // ---- Spectrum config options ----
+  $('cfgFFTSize').addEventListener('change', function() {
+    const size = parseInt(this.value);
+    if (S.analyser) {
+      S.analyser.fftSize = size;
+      S.spectrumData = new Uint8Array(size / 2);
+      S.timeBuf = new Float32Array(size);
+    }
+  });
+  $('cfgMaxFreq').addEventListener('change', function() {
+    specMaxFreq = parseInt(this.value);
+  });
+  $('cfgSmoothing').addEventListener('input', function() {
+    if (S.analyser) S.analyser.smoothingTimeConstant = parseFloat(this.value);
+    $('cfgSmoothingVal').textContent = parseFloat(this.value).toFixed(2);
+  });
+  $('cfgSpecColor').addEventListener('change', function() {
+    specColorKey = this.value;
   });
 
   $('cfgBitDepth').addEventListener('change', function() {
