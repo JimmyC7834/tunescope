@@ -127,14 +127,13 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .metro-toggle{display:none}
 
 /* Beat pattern button — bottom right */
-.subdiv-btn{position:absolute;bottom:6px;right:10px;font-family:'Chakra Petch',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--text-mid);background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:4px 10px;cursor:pointer;user-select:none;z-index:3;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
+.subdiv-btn{position:absolute;bottom:6px;right:10px;font-family:'Chakra Petch',sans-serif;font-size:1rem;letter-spacing:0;color:var(--text-mid);background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;z-index:3;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
 .subdiv-btn:active{color:var(--accent);border-color:var(--accent)}
 .app.light .subdiv-btn{border-color:rgba(0,0,0,0.1)}
-.bar-counter-group{position:absolute;bottom:6px;left:10px;display:flex;align-items:center;gap:4px;z-index:3}
-.bar-counter-label{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text-bright);min-width:20px;text-align:center}
-.bar-counter-reset{width:22px;height:22px;border:1px solid rgba(255,255,255,0.08);border-radius:6px;background:transparent;color:var(--text-mid);font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent;transition:color .12s,border-color .12s}
-.bar-counter-reset:active{color:var(--accent);border-color:var(--accent)}
-.app.light .bar-counter-reset{border-color:rgba(0,0,0,0.1)}
+.bar-counter-group{position:absolute;bottom:6px;left:10px;display:flex;align-items:center;z-index:3}
+.bar-counter-label{position:relative;font-family:'Share Tech Mono',monospace;font-size:1.1rem;color:var(--text-bright);min-width:32px;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .15s}
+.bar-counter-label:active{color:var(--accent)}
+.bar-counter-label.counting::after{content:'↺';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--text-mid);opacity:0.25;pointer-events:none}
 
 /* Waveform */
 .sec-wave{flex:1;min-height:100px;background:var(--bg-panel);display:flex}
@@ -280,6 +279,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         <div class="config-item"><span>Sensitivity</span><select class="config-select" id="cfgTunerSens"><option value="low">Low</option><option value="medium">Medium</option><option value="high" selected>High</option></select></div>
         <div class="config-item"><span>Notation</span><select class="config-select" id="cfgNotation"><option value="sharp" selected>Sharp (C#)</option><option value="flat">Flat (D♭)</option></select></div>
         <div class="config-item"><span>Transpose</span><select class="config-select" id="cfgTranspose"><option value="0" selected>None</option><option value="1">+1</option><option value="2">+2</option><option value="3">+3</option><option value="4">+4</option><option value="5">+5</option><option value="6">+6</option><option value="-5">−5</option><option value="-4">−4</option><option value="-3">−3</option><option value="-2">−2</option><option value="-1">−1</option></select></div>
+        <div class="config-item"><span>Pitch Player Vol</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgPitchVol" min="0" max="0.5" step="0.01" value="0.15"><span class="config-range-val" id="cfgPitchVolVal">0.15</span></span></div>
       </div>
     </div>
   </div>
@@ -322,7 +322,6 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         <div class="subdiv-btn" id="subdivBtn">♩</div>
         <div class="bar-counter-group">
           <div class="bar-counter-label" id="barCounter">0</div>
-          <button class="bar-counter-reset" id="barCounterReset">↺</button>
         </div>
         <button class="metro-toggle" id="metroToggle">START</button>
       </div>
@@ -387,9 +386,11 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           <select id="cfgMicGain" class="config-select">
             <option value="1">1x</option>
             <option value="2">2x</option>
-            <option value="3" selected>3x</option>
-            <option value="5">5x</option>
+            <option value="3">3x</option>
+            <option value="5" selected>5x</option>
             <option value="8">8x</option>
+            <option value="10">10x</option>
+            <option value="15">15x</option>
           </select>
         </div>
       </div>
@@ -586,7 +587,7 @@ async function initAudio() {
     S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
     // Mic input gain to compensate for iOS low volume
     S.micGain = S.ctx.createGain();
-    S.micGain.gain.value = 3.0;
+    S.micGain.gain.value = 5.0;
     S.micSrc.connect(S.micGain);
     S.micGain.connect(S.analyser);
     // Create a destination stream for recording the amplified signal
@@ -887,7 +888,7 @@ function drawSpectrum() {
   const plotH = h - labelH;
   // Fade previous frame for trail / decay effect
   const lt = isLight();
-  c.fillStyle = lt ? 'rgba(240,241,245,0.35)' : 'rgba(6,8,16,0.35)';
+  c.fillStyle = lt ? 'rgba(240,241,245,0.45)' : 'rgba(6,8,16,0.45)';
   c.fillRect(0, 0, w, h);
 
   const data = S.spectrumData;
@@ -896,17 +897,17 @@ function drawSpectrum() {
   const sr = S.ctx.sampleRate || 44100;
   const maxFreq = specMaxFreq;
   const maxBin = Math.min(data.length, Math.floor(maxFreq / sr * data.length * 2));
-  const points = Math.min(180, maxBin);
+  const points = Math.min(320, maxBin);
   const binsPerPt = Math.max(1, Math.floor(maxBin / points));
   const pad = 4;
 
-  // Build sample points (average neighboring bins for smoother line)
+  // Build sample points (peak-hold neighboring bins for spiky response)
   const pts = [];
   for (let i = 0; i < points; i++) {
-    let sum = 0, cnt = 0;
-    for (let j = 0; j < binsPerPt; j++) { sum += data[i * binsPerPt + j]; cnt++; }
-    let v = sum / cnt / 255;
-    v = Math.pow(v, 2.2); // power curve: suppress low volume, emphasize peaks
+    let peak = 0;
+    for (let j = 0; j < binsPerPt; j++) { peak = Math.max(peak, data[i * binsPerPt + j]); }
+    let v = peak / 255;
+    v = Math.pow(v, 1.6); // power curve: moderate suppression, sharper peaks
     const x = pad + (i / (points - 1)) * (w - pad * 2);
     const y = plotH - v * plotH * 0.88 - 2;
     pts.push({ x, y });
@@ -918,13 +919,7 @@ function drawSpectrum() {
   for (const [stop, color] of sc.fill) fillGrd.addColorStop(parseFloat(stop), color);
   c.beginPath();
   c.moveTo(pts[0].x, plotH);
-  for (let i = 0; i < pts.length; i++) {
-    if (i === 0) { c.lineTo(pts[i].x, pts[i].y); continue; }
-    const prev = pts[i - 1];
-    const cpx = (prev.x + pts[i].x) / 2;
-    c.quadraticCurveTo(prev.x, prev.y, cpx, (prev.y + pts[i].y) / 2);
-    if (i === pts.length - 1) c.quadraticCurveTo(pts[i].x, pts[i].y, pts[i].x, pts[i].y);
-  }
+  for (let i = 0; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y);
   c.lineTo(pts[pts.length - 1].x, plotH);
   c.closePath();
   c.fillStyle = fillGrd;
@@ -933,17 +928,14 @@ function drawSpectrum() {
   // Line stroke with glow
   c.save();
   c.shadowColor = sc.glow;
-  c.shadowBlur = 8;
+  c.shadowBlur = 6;
   c.beginPath();
   for (let i = 0; i < pts.length; i++) {
-    if (i === 0) { c.moveTo(pts[i].x, pts[i].y); continue; }
-    const prev = pts[i - 1];
-    const cpx = (prev.x + pts[i].x) / 2;
-    c.quadraticCurveTo(prev.x, prev.y, cpx, (prev.y + pts[i].y) / 2);
-    if (i === pts.length - 1) c.quadraticCurveTo(pts[i].x, pts[i].y, pts[i].x, pts[i].y);
+    if (i === 0) c.moveTo(pts[i].x, pts[i].y);
+    else c.lineTo(pts[i].x, pts[i].y);
   }
   c.strokeStyle = sc.stroke;
-  c.lineWidth = 1.5;
+  c.lineWidth = 1;
   c.stroke();
   c.restore();
 
@@ -1290,7 +1282,7 @@ function scheduleBeats() {
         setTimeout(() => {
           S.barCount = (S.barCount || 0) + 1;
           const bc = $('barCounter');
-          if (bc) bc.textContent = S.barCount;
+          if (bc) { bc.textContent = S.barCount; bc.classList.add('counting'); }
         }, barDelay);
       }
     }
@@ -1306,7 +1298,7 @@ function startMetronome() {
   S.barCount = 0;
   S.metroCountInLeft = S.metroCountIn;
   const bc = $('barCounter');
-  if (bc) bc.textContent = '0';
+  if (bc) { bc.textContent = '0'; bc.classList.remove('counting'); }
   S.nextBeatTime = S.ctx.currentTime + 0.05;
   scheduleBeats();
 }
@@ -1963,11 +1955,28 @@ function setupEvents() {
     elSubdiv.textContent = currentPatterns[0].label;
   }
 
-  let subdivTouchX = 0, subdivTouchY = 0;
-  elSubdiv.addEventListener('pointerdown', e => { subdivTouchX = e.clientX; subdivTouchY = e.clientY; });
-  elSubdiv.addEventListener('pointerup', e => {
-    if (Math.abs(e.clientX - subdivTouchX) > 10 || Math.abs(e.clientY - subdivTouchY) > 10) return;
+  let subdivStartX = 0, subdivStartY = 0;
+  elSubdiv.addEventListener('touchstart', e => {
+    subdivStartX = e.touches[0].clientX;
+    subdivStartY = e.touches[0].clientY;
     e.stopPropagation();
+  }, { passive: true });
+  elSubdiv.addEventListener('touchend', e => {
+    e.stopPropagation();
+    e.preventDefault(); // prevent ghost click
+    const t = e.changedTouches[0];
+    if (Math.abs(t.clientX - subdivStartX) > 15 || Math.abs(t.clientY - subdivStartY) > 15) return;
+    patternIdx = (patternIdx + 1) % currentPatterns.length;
+    const opt = currentPatterns[patternIdx];
+    S.beatPattern = opt.id;
+    elSubdiv.textContent = opt.label;
+    if (S.metroOn) { stopMetronome(); startMetronome(); }
+  });
+  // Desktop fallback
+  elSubdiv.addEventListener('click', e => {
+    e.stopPropagation();
+    // Skip if already handled by touch
+    if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
     patternIdx = (patternIdx + 1) % currentPatterns.length;
     const opt = currentPatterns[patternIdx];
     S.beatPattern = opt.id;
@@ -1996,9 +2005,11 @@ function setupEvents() {
   document.querySelector('.metro-core').addEventListener('click', toggleMetronome);
 
   // Bar counter reset
-  $('barCounterReset').addEventListener('click', () => {
+  $('barCounter').addEventListener('click', e => {
+    e.stopPropagation();
     S.barCount = 0;
     $('barCounter').textContent = '0';
+    $('barCounter').classList.remove('counting');
   });
 
   // ---- Metronome config options ----
@@ -2295,6 +2306,11 @@ function setupEvents() {
   $('cfgTranspose').addEventListener('change', function() {
     tunerTranspose = parseInt(this.value);
   });
+  $('cfgPitchVol').addEventListener('input', function() {
+    const v = parseFloat(this.value);
+    if (pitchGainNode) pitchGainNode.gain.value = v;
+    $('cfgPitchVolVal').textContent = v.toFixed(2);
+  });
 
   // ---- Reference Pitch (A4) control ----
   function updateRefPitch() {
@@ -2343,7 +2359,7 @@ function setupEvents() {
     pitchGainNode = S.ctx.createGain();
     pitchOsc.type = 'sine';
     pitchOsc.frequency.value = pitchMidiToFreq(S.pitchMidi);
-    pitchGainNode.gain.value = 0.15;
+    pitchGainNode.gain.value = parseFloat(($('cfgPitchVol') || {}).value || 0.15);
     pitchOsc.connect(pitchGainNode);
     pitchGainNode.connect(S.analyser);
     pitchGainNode.connect(S.ctx.destination);
@@ -2409,7 +2425,7 @@ function setupEvents() {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
-      S.micGain.gain.value = 3.0;
+      S.micGain.gain.value = 5.0;
       S.micSrc.connect(S.micGain);
       S.micGain.connect(S.analyser);
       S.recDest = S.ctx.createMediaStreamDestination();
