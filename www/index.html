@@ -571,6 +571,7 @@ const elRecActions = $('recActions');
 // ================================================================
 async function initAudio() {
   S.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+  if (S.ctx.state === 'suspended') await S.ctx.resume();
   S.analyser = S.ctx.createAnalyser();
   S.analyser.fftSize = FFT_SIZE;
   S.analyser.smoothingTimeConstant = 0.5;
@@ -2066,14 +2067,24 @@ function setupEvents() {
   document.addEventListener('mouseup', () => { recDragActive = false; });
   document.addEventListener('touchend', () => { recDragActive = false; });
 
-  // Tap on rec-slot (no drag) toggles share/rename/delete action bar
-  function recTapHandler() {
-    if (!recDragMoved && !recSwipedUp) {
+  // Tap on rec-slot: left = prev, right = next, center = action menu
+  function recTapHandler(clientX) {
+    if (recDragMoved || recSwipedUp) return;
+    const rect = elRecSlot.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const third = rect.width / 3;
+    if (x < third) {
+      if (S.recIdx > 0) switchToRecording(S.recIdx - 1);
+    } else if (x > third * 2) {
+      if (S.recIdx < S.recordings.length - 1) switchToRecording(S.recIdx + 1);
+    } else {
       toggleRecActions();
     }
   }
-  elRecSlot.addEventListener('mouseup', recTapHandler);
-  elRecSlot.addEventListener('touchend', recTapHandler);
+  elRecSlot.addEventListener('mouseup', e => recTapHandler(e.clientX));
+  elRecSlot.addEventListener('touchend', e => {
+    if (e.changedTouches && e.changedTouches.length) recTapHandler(e.changedTouches[0].clientX);
+  });
 
   // ---- Recording action bar ----
   function toggleRecActions() {
@@ -2274,6 +2285,7 @@ function setupEvents() {
   }
   function startPitch() {
     if (!S.ctx) return;
+    if (S.ctx.state === 'suspended') S.ctx.resume();
     // Snap to last detected note, fallback to C4
     if (S.stableNote && S.stableFreq > 0) {
       S.pitchMidi = Math.round(12 * Math.log2(S.stableFreq / A4) + A4_MIDI);
