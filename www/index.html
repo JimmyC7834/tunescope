@@ -160,7 +160,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
 /* Recording manager — bottom bar */
 .rec-bar{position:relative;height:38px;background:rgba(8,10,18,.95);border-top:1px solid var(--border);flex-shrink:0;user-select:none;display:flex;align-items:stretch;margin-bottom:6px}
-.rec-settings-btn{width:40px;flex-shrink:0;border:none;border-right:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color .12s}
+.rec-settings-btn{width:52px;flex-shrink:0;border:none;border-right:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color .12s}
 .rec-settings-btn:hover{color:var(--text-bright)}
 .rec-settings-btn:active{background:rgba(255,255,255,.04)}
 .rec-settings-btn svg{width:17px;height:17px;fill:currentColor}
@@ -173,7 +173,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .rec-slot-fade-l,.rec-slot-fade-r{position:absolute;top:0;bottom:0;width:40px;pointer-events:none;z-index:1}
 .rec-slot-fade-l{left:0;background:linear-gradient(90deg,rgba(8,10,18,.95) 0%,transparent 100%)}
 .rec-slot-fade-r{right:0;background:linear-gradient(270deg,rgba(8,10,18,.95) 0%,transparent 100%)}
-.rec-add{width:40px;flex-shrink:0;border:none;border-left:1px solid var(--border);background:transparent;color:var(--text-mid);font-size:1.2rem;font-family:'Chakra Petch',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color .12s,background .12s}
+.rec-add{width:52px;flex-shrink:0;border:none;border-left:1px solid var(--border);background:transparent;color:var(--text-mid);font-size:1.2rem;font-family:'Chakra Petch',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color .12s,background .12s}
 .rec-add:hover{color:var(--text-bright)}
 .rec-add:active{background:rgba(255,255,255,.04)}
 
@@ -319,7 +319,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             </div>
           </div>
         </div>
-        <div class="subdiv-btn" id="subdivBtn">STD</div>
+        <div class="subdiv-btn" id="subdivBtn">♩</div>
         <div class="bar-counter-group">
           <div class="bar-counter-label" id="barCounter">0</div>
           <button class="bar-counter-reset" id="barCounterReset">↺</button>
@@ -1314,6 +1314,13 @@ function startMetronome() {
 function stopMetronome() {
   S.metroOn = false;
   clearTimeout(S.metroTimer);
+  // Kill already-scheduled clicks by disconnecting and recreating metroGain
+  if (S.metroGain) {
+    S.metroGain.disconnect();
+    S.metroGain = S.ctx.createGain();
+    S.metroGain.gain.value = parseFloat(($('cfgMetroVol') || {}).value || 0.25);
+    S.metroGain.connect(S.ctx.destination);
+  }
   const tris = elBeatRow.children;
   for (let i = 0; i < tris.length; i++) tris[i].classList.remove('on');
 }
@@ -1918,34 +1925,75 @@ function setupEvents() {
     return state;
   }
 
+  // Beat pattern button — options vary by time signature
+  function getPatternsForTS(beats, den) {
+    // ♩=standard ♪=swing ⚐=march
+    if (den === 8 && beats % 3 === 0) return [
+      { id:'standard', label:'♩' },
+      { id:'swing', label:'♪' }
+    ];
+    if (beats === 2) return [
+      { id:'standard', label:'♩' },
+      { id:'march', label:'⚐' }
+    ];
+    if (beats === 3) return [
+      { id:'standard', label:'♩' },
+      { id:'swing', label:'♪' }
+    ];
+    if (beats === 4) return [
+      { id:'standard', label:'♩' },
+      { id:'swing', label:'♪' },
+      { id:'march', label:'⚐' }
+    ];
+    if (beats >= 5) return [
+      { id:'standard', label:'♩' },
+      { id:'march', label:'⚐' }
+    ];
+    return [{ id:'standard', label:'♩' }];
+  }
+  let patternIdx = 0;
+  let currentPatterns = getPatternsForTS(S.beats, S.tsDenom);
+  const elSubdiv = $('subdivBtn');
+  elSubdiv.textContent = currentPatterns[0].label;
+
+  function updatePatternOptions() {
+    currentPatterns = getPatternsForTS(S.beats, S.tsDenom);
+    patternIdx = 0;
+    S.beatPattern = currentPatterns[0].id;
+    elSubdiv.textContent = currentPatterns[0].label;
+  }
+
+  let subdivTouchX = 0, subdivTouchY = 0;
+  elSubdiv.addEventListener('pointerdown', e => { subdivTouchX = e.clientX; subdivTouchY = e.clientY; });
+  elSubdiv.addEventListener('pointerup', e => {
+    if (Math.abs(e.clientX - subdivTouchX) > 10 || Math.abs(e.clientY - subdivTouchY) > 10) return;
+    e.stopPropagation();
+    patternIdx = (patternIdx + 1) % currentPatterns.length;
+    const opt = currentPatterns[patternIdx];
+    S.beatPattern = opt.id;
+    elSubdiv.textContent = opt.label;
+    if (S.metroOn) { stopMetronome(); startMetronome(); }
+  });
+
   buildPicker(elTsCombo, elTsComboItems, TS_LABELS, '4/4', label => {
     const combo = TS_COMBOS.find(c => c.label === label);
     if (combo) {
       S.beats = combo.beats;
       S.tsDenom = combo.den;
       buildBeats();
+      updatePatternOptions();
       if (S.metroOn) { stopMetronome(); startMetronome(); }
     }
   });
 
-  // Tap beat-row to start/stop metronome
-  elBeatRow.addEventListener('click', () => { S.metroOn ? stopMetronome() : startMetronome(); });
-
-  // Beat pattern button
-  const PATTERN_OPTIONS = [
-    { id:'standard', label:'STD' },
-    { id:'swing', label:'SWG' },
-    { id:'march', label:'MCH' }
-  ];
-  let patternIdx = 0;
-  const elSubdiv = $('subdivBtn');
-  elSubdiv.addEventListener('click', () => {
-    patternIdx = (patternIdx + 1) % PATTERN_OPTIONS.length;
-    const opt = PATTERN_OPTIONS[patternIdx];
-    S.beatPattern = opt.id;
-    elSubdiv.textContent = opt.label;
-    if (S.metroOn) { stopMetronome(); startMetronome(); }
-  });
+  // Tap beat-row or metronome background to start/stop metronome
+  function toggleMetronome(e) {
+    const tag = e.target.tagName;
+    if (tag === 'BUTTON' || tag === 'SELECT' || tag === 'INPUT' || e.target.classList.contains('subdiv-btn')
+        || e.target.closest('.bpm-wheel') || e.target.closest('.timesig-group') || e.target.closest('.bar-counter-group')) return;
+    S.metroOn ? stopMetronome() : startMetronome();
+  }
+  document.querySelector('.metro-core').addEventListener('click', toggleMetronome);
 
   // Bar counter reset
   $('barCounterReset').addEventListener('click', () => {
@@ -2419,6 +2467,9 @@ function setupEvents() {
     slider.addEventListener('touchstart', e => {
       const t = e.touches[0];
       startX = t.clientX; startY = t.clientY;
+      // Don't track swipe if touching an interactive element
+      const el = e.target;
+      if (el.closest('button, select, input, .subdiv-btn, .timesig-group, .bar-counter-group, .scroll-picker')) { tracking = false; return; }
       const isOpen = slider.classList.contains('open');
       // To open: must start from right edge. To close: anywhere on config panel is fine.
       tracking = isOpen || isEdgeSwipe(t.clientX);
