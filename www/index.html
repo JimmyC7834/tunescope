@@ -133,7 +133,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .bar-counter-group{position:absolute;bottom:6px;left:10px;display:flex;align-items:center;z-index:3}
 .bar-counter-label{position:relative;font-family:'Share Tech Mono',monospace;font-size:1.1rem;color:var(--text-bright);min-width:32px;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .15s}
 .bar-counter-label:active{color:var(--accent)}
-.bar-counter-label.counting::after{content:'↺';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--text-mid);opacity:0.25;pointer-events:none}
+.bar-counter-label.counting::after{content:'↺';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:var(--text-mid);opacity:0.25;pointer-events:none;-webkit-text-stroke:1px var(--text-mid)}
 
 /* Waveform */
 .sec-wave{flex:1;min-height:100px;background:var(--bg-panel);display:flex}
@@ -235,6 +235,33 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
 /* Noise overlay */
 .app::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.25;pointer-events:none;z-index:50;mix-blend-mode:overlay}
+
+/* Tutorial overlay */
+.tutorial-overlay{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s}
+.tutorial-overlay.active{opacity:1;pointer-events:auto}
+.tutorial-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);transition:clip-path .4s cubic-bezier(.4,0,.2,1)}
+.tutorial-tooltip{position:absolute;background:var(--bg-panel,#0c0e18);border:1px solid var(--accent);border-radius:10px;padding:14px 16px;max-width:260px;z-index:10001;transform:translate(-50%,0);transition:all .4s cubic-bezier(.4,0,.2,1)}
+.tutorial-tooltip-text{font-family:'Chakra Petch',sans-serif;font-size:.82rem;color:var(--text-bright,#eef0ff);line-height:1.5;margin-bottom:12px}
+.tutorial-tooltip-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tutorial-tooltip-dots{display:flex;gap:5px}
+.tutorial-tooltip-dot{width:6px;height:6px;border-radius:50%;background:var(--border,#2a2d40);transition:background .2s}
+.tutorial-tooltip-dot.active{background:var(--accent)}
+.tutorial-btn{font-family:'Chakra Petch',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s}
+.tutorial-btn-next{background:var(--accent);color:#000}
+.tutorial-btn-next:active{background:#00c888}
+.tutorial-btn-skip{background:transparent;color:var(--text-dim);border:1px solid var(--border-light,#2a2d40)}
+.tutorial-btn-skip:active{color:var(--text-bright)}
+.tutorial-continue{font-family:'Chakra Petch',sans-serif;font-size:.65rem;color:var(--text-dim);text-align:center;margin-top:8px;letter-spacing:.05em;opacity:.6;animation:tutPulse 2s ease-in-out infinite}
+@keyframes tutPulse{0%,100%{opacity:.4}50%{opacity:.8}}
+.tutorial-hand{position:absolute;z-index:10002;pointer-events:none;font-size:28px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+@keyframes tutTap{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(.85);opacity:1}}
+@keyframes tutSwipeLeft{0%{transform:translateX(0);opacity:.9}100%{transform:translateX(-60px);opacity:.4}}
+@keyframes tutSwipeRight{0%{transform:translateX(0);opacity:.9}100%{transform:translateX(60px);opacity:.4}}
+@keyframes tutSwipeUp{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(-40px);opacity:.4}}
+.tutorial-hand.anim-tap{animation:tutTap .8s ease-in-out infinite}
+.tutorial-hand.anim-swipe-left{animation:tutSwipeLeft 1s ease-in-out infinite}
+.tutorial-hand.anim-swipe-right{animation:tutSwipeRight 1s ease-in-out infinite}
+.tutorial-hand.anim-swipe-up{animation:tutSwipeUp 1s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -435,7 +462,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
     <div class="settings-body">
       <div class="settings-section">
-        <div class="settings-section-title">Appearance</div>
+        <div class="settings-section-title" data-i18n="appearance">Appearance</div>
         <div class="settings-row">
           <div class="settings-label" data-i18n="lightMode">Light Mode</div>
           <div class="settings-toggle" id="toggleTheme"></div>
@@ -454,7 +481,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         </div>
       </div>
       <div class="settings-section">
-        <div class="settings-section-title">Tuner</div>
+        <div class="settings-section-title" data-i18n="tunerSec">Tuner</div>
         <div class="settings-row">
           <div class="settings-label" data-i18n="refPitch">Reference Pitch</div>
           <div class="settings-val" id="refPitchVal">A = 440 Hz</div>
@@ -469,14 +496,21 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         </div>
       </div>
       <div class="settings-section">
-        <div class="settings-section-title">Audio</div>
+        <div class="settings-section-title" data-i18n="audio">Audio</div>
         <div class="settings-row">
           <div class="settings-label">Metronome Volume</div>
           <div class="settings-val">25%</div>
         </div>
       </div>
       <div class="settings-section">
-        <div class="settings-section-title">About</div>
+        <div class="settings-section-title" data-i18n="help">Help</div>
+        <div class="settings-row" id="tutorialBtn" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
+          <div class="settings-label">Tutorial</div>
+          <div class="settings-val" style="color:var(--accent)">Start &rsaquo;</div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title" data-i18n="about">About</div>
         <div class="settings-row">
           <div class="settings-label">TONESCOPE v1.0</div>
           <div class="settings-val" style="color:var(--text-dim)">Professional Music Tuner</div>
@@ -485,6 +519,20 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
   </div>
   </div><!-- end app-inner -->
+</div>
+
+<!-- Tutorial overlay -->
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-backdrop" id="tutorialBackdrop"></div>
+  <div class="tutorial-hand" id="tutorialHand">👆</div>
+  <div class="tutorial-tooltip" id="tutorialTooltip">
+    <div class="tutorial-tooltip-text" id="tutorialText"></div>
+    <div class="tutorial-tooltip-nav">
+      <button class="tutorial-btn tutorial-btn-skip" id="tutorialSkip">SKIP</button>
+      <div class="tutorial-tooltip-dots" id="tutorialDots"></div>
+    </div>
+    <div class="tutorial-continue" id="tutorialContinue">tap to continue</div>
+  </div>
 </div>
 
 <script>
@@ -2224,50 +2272,201 @@ function setupEvents() {
 
   // ---- Language / i18n ----
   const I18N = {
-    en: { spectrum:'Spectrum', tuner:'Tuner', tunerA440:'Tuner \u00b7 A440', metronome:'Metronome', waveform:'Waveform', tapToStart:'TAP TO START', recordToAnalyze:'RECORD TO ANALYZE', tapTempo:'TAP TEMPO', start:'START', stop:'STOP', settings:'Settings', appearance:'Appearance', lightMode:'Light Mode', language:'Language', selectLang:'Select Language', tunerSec:'Tuner', refPitch:'Reference Pitch', sensitivity:'Sensitivity', sensLow:'Low', sensMed:'Medium', sensHigh:'High', audio:'Audio', metroVol:'Metronome Volume', about:'About', rename:'Rename', share:'Share', delete:'Delete', cancel:'Cancel', empty:'Empty', live:'LIVE' },
-    zh: { spectrum:'頻譜', tuner:'調音器', tunerA440:'調音器 \u00b7 A440', metronome:'節拍器', waveform:'波形', tapToStart:'點擊開始', recordToAnalyze:'錄音以分析', tapTempo:'點擊測速', start:'開始', stop:'停止', settings:'設定', appearance:'外觀', lightMode:'淺色模式', language:'語言', selectLang:'選擇語言', tunerSec:'調音器', refPitch:'參考音高', sensitivity:'靈敏度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'音訊', metroVol:'節拍器音量', about:'關於', rename:'重新命名', share:'分享', delete:'刪除', cancel:'取消', empty:'空白', live:'即時' },
-    ja: { spectrum:'スペクトラム', tuner:'チューナー', tunerA440:'チューナー \u00b7 A440', metronome:'メトロノーム', waveform:'波形', tapToStart:'タップして開始', recordToAnalyze:'録音して分析', tapTempo:'タップテンポ', start:'開始', stop:'停止', settings:'設定', appearance:'外観', lightMode:'ライトモード', language:'言語', selectLang:'言語を選択', tunerSec:'チューナー', refPitch:'基準ピッチ', sensitivity:'感度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'オーディオ', metroVol:'メトロノーム音量', about:'概要', rename:'名前変更', share:'共有', delete:'削除', cancel:'キャンセル', empty:'空', live:'ライブ' },
-    es: { spectrum:'Espectro', tuner:'Afinador', tunerA440:'Afinador \u00b7 A440', metronome:'Metrónomo', waveform:'Forma de onda', tapToStart:'TOCA PARA INICIAR', recordToAnalyze:'GRABAR PARA ANALIZAR', tapTempo:'TEMPO POR TOQUE', start:'INICIO', stop:'PARAR', settings:'Ajustes', appearance:'Apariencia', lightMode:'Modo Claro', language:'Idioma', selectLang:'Seleccionar Idioma', tunerSec:'Afinador', refPitch:'Tono de Referencia', sensitivity:'Sensibilidad', sensLow:'Bajo', sensMed:'Medio', sensHigh:'Alto', audio:'Audio', metroVol:'Volumen del Metrónomo', about:'Acerca de', rename:'Renombrar', share:'Compartir', delete:'Eliminar', cancel:'Cancelar', empty:'Vacío', live:'EN VIVO' }
+    en: { spectrum:'Spectrum', tuner:'Tuner', tunerA440:'Tuner \u00b7 A440', metronome:'Metronome', waveform:'Waveform', tapToStart:'TAP TO START', recordToAnalyze:'RECORD TO ANALYZE', tapTempo:'TAP TEMPO', start:'START', stop:'STOP', settings:'Settings', appearance:'Appearance', lightMode:'Light Mode', language:'Language', selectLang:'Select Language', tunerSec:'Tuner', refPitch:'Reference Pitch', sensitivity:'Sensitivity', sensLow:'Low', sensMed:'Medium', sensHigh:'High', audio:'Audio', metroVol:'Metronome Volume', about:'About', rename:'Rename', share:'Share', delete:'Delete', cancel:'Cancel', empty:'Empty', live:'LIVE',
+      // Config panels
+      fftSize:'FFT Size', maxFreq:'Max Freq', smoothing:'Smoothing', colorScheme:'Color Scheme',
+      notation:'Notation', transpose:'Transpose', pitchPlayerVol:'Pitch Player Vol', sharpNotation:'Sharp (C#)', flatNotation:'Flat (D\u266D)', none:'None',
+      clickSound:'Click Sound', volume:'Volume', accent:'Accent', subdivision:'Subdivision', countIn:'Count-in', flashBeat:'Flash Beat',
+      classic:'Classic', wood:'Wood', digital:'Digital', noise:'Noise', eighth:'8th', triplet:'Triplet', sixteenth:'16th', off:'Off', on:'On',
+      oneBar:'1 Bar', twoBars:'2 Bars', fourBars:'4 Bars',
+      sampleRate:'Sample Rate', bitDepth:'Bit Depth', waveZoom:'Waveform Zoom', micGain:'Mic Gain',
+      compact:'Compact', normal:'Normal', wide:'Wide', extraWide:'Extra Wide',
+      // Settings
+      help:'Help', tutorial:'Tutorial', tutorialStart:'Start',
+      // Tutorial
+      tapToContinue:'tap to continue',
+      tut1:'This is the Spectrum \u2014 it shows a real-time frequency analysis of what your mic picks up.',
+      tut2:'Swipe left from the right edge of any section to reveal its config panel.',
+      tut3:'Swipe right to close the config panel.',
+      tut4:'The Tuner detects pitch and shows how many cents sharp or flat you are from the nearest note.',
+      tut5:'Tap the note name on the tuner to play a reference tone. Tap again to stop.',
+      tut6:'The Metronome \u2014 tap anywhere on this area to start/stop.',
+      tut7:'Tap this button to cycle beat patterns: Standard, Swing, and March.',
+      tut8:'This counts bars. Tap it to reset the count.',
+      tut9:'The Waveform section \u2014 shows your recording. Pinch to zoom, drag to scrub.',
+      tut10:'Tap to record. Tap again to stop. Your recording appears in the waveform.',
+      tut11:'The bottom bar manages recordings. Swipe to switch slots, long-press for actions (share, rename, delete).',
+      tut12:'Tap the gear icon to open Settings \u2014 theme, language, reference pitch, and more.'
+    },
+    zh: { spectrum:'頻譜', tuner:'調音器', tunerA440:'調音器 \u00b7 A440', metronome:'節拍器', waveform:'波形', tapToStart:'點擊開始', recordToAnalyze:'錄音以分析', tapTempo:'點擊測速', start:'開始', stop:'停止', settings:'設定', appearance:'外觀', lightMode:'淺色模式', language:'語言', selectLang:'選擇語言', tunerSec:'調音器', refPitch:'參考音高', sensitivity:'靈敏度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'音訊', metroVol:'節拍器音量', about:'關於', rename:'重新命名', share:'分享', delete:'刪除', cancel:'取消', empty:'空白', live:'即時',
+      fftSize:'FFT 大小', maxFreq:'最大頻率', smoothing:'平滑度', colorScheme:'配色方案',
+      notation:'記譜法', transpose:'移調', pitchPlayerVol:'音高播放器音量', sharpNotation:'升號 (C#)', flatNotation:'降號 (D\u266D)', none:'無',
+      clickSound:'點擊音效', volume:'音量', accent:'重音', subdivision:'細分', countIn:'預備拍', flashBeat:'閃爍節拍',
+      classic:'經典', wood:'木質', digital:'數位', noise:'噪音', eighth:'八分', triplet:'三連音', sixteenth:'十六分', off:'關', on:'開',
+      oneBar:'1 小節', twoBars:'2 小節', fourBars:'4 小節',
+      sampleRate:'取樣率', bitDepth:'位元深度', waveZoom:'波形縮放', micGain:'麥克風增益',
+      compact:'緊湊', normal:'正常', wide:'寬', extraWide:'超寬',
+      help:'幫助', tutorial:'教學導覽', tutorialStart:'開始',
+      tapToContinue:'點擊繼續',
+      tut1:'這是頻譜 \u2014 即時顯示麥克風接收到的頻率分析。',
+      tut2:'從任何區段的右側邊緣向左滑動，可開啟設定面板。',
+      tut3:'向右滑動可關閉設定面板。',
+      tut4:'調音器可偵測音高，並顯示與最近音符的偏差（以音分為單位）。',
+      tut5:'點擊調音器上的音符名稱可播放參考音。再次點擊可停止。',
+      tut6:'節拍器 \u2014 點擊此區域即可啟動/停止。',
+      tut7:'點擊此按鈕可切換節拍模式：標準、搖擺、進行曲。',
+      tut8:'這是小節計數器。點擊可重置。',
+      tut9:'波形區段 \u2014 顯示您的錄音。捏合縮放，拖動可刮擦播放。',
+      tut10:'點擊開始錄音，再次點擊停止。您的錄音會顯示在波形中。',
+      tut11:'底部欄管理錄音。滑動切換錄音槽，長按可操作（分享、重新命名、刪除）。',
+      tut12:'點擊齒輪圖示可開啟設定 \u2014 主題、語言、參考音高等。'
+    },
+    ja: { spectrum:'スペクトラム', tuner:'チューナー', tunerA440:'チューナー \u00b7 A440', metronome:'メトロノーム', waveform:'波形', tapToStart:'タップして開始', recordToAnalyze:'録音して分析', tapTempo:'タップテンポ', start:'開始', stop:'停止', settings:'設定', appearance:'外観', lightMode:'ライトモード', language:'言語', selectLang:'言語を選択', tunerSec:'チューナー', refPitch:'基準ピッチ', sensitivity:'感度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'オーディオ', metroVol:'メトロノーム音量', about:'概要', rename:'名前変更', share:'共有', delete:'削除', cancel:'キャンセル', empty:'空', live:'ライブ',
+      fftSize:'FFT サイズ', maxFreq:'最大周波数', smoothing:'スムージング', colorScheme:'配色',
+      notation:'記譜法', transpose:'移調', pitchPlayerVol:'ピッチ音量', sharpNotation:'シャープ (C#)', flatNotation:'フラット (D\u266D)', none:'なし',
+      clickSound:'クリック音', volume:'音量', accent:'アクセント', subdivision:'細分化', countIn:'カウントイン', flashBeat:'フラッシュビート',
+      classic:'クラシック', wood:'ウッド', digital:'デジタル', noise:'ノイズ', eighth:'8分', triplet:'3連符', sixteenth:'16分', off:'オフ', on:'オン',
+      oneBar:'1小節', twoBars:'2小節', fourBars:'4小節',
+      sampleRate:'サンプルレート', bitDepth:'ビット深度', waveZoom:'波形ズーム', micGain:'マイクゲイン',
+      compact:'コンパクト', normal:'標準', wide:'ワイド', extraWide:'エクストラワイド',
+      help:'ヘルプ', tutorial:'チュートリアル', tutorialStart:'開始',
+      tapToContinue:'タップして続ける',
+      tut1:'これはスペクトラムです。マイクが拾った音のリアルタイム周波数分析を表示します。',
+      tut2:'各セクションの右端から左にスワイプすると、設定パネルが開きます。',
+      tut3:'右にスワイプすると設定パネルが閉じます。',
+      tut4:'チューナーはピッチを検出し、最も近い音からのセント偏差を表示します。',
+      tut5:'チューナーの音名をタップすると基準音が鳴ります。もう一度タップで停止。',
+      tut6:'メトロノーム \u2014 このエリアをタップで開始/停止。',
+      tut7:'このボタンをタップしてビートパターンを切り替え：スタンダード、スウィング、マーチ。',
+      tut8:'小節カウンターです。タップでリセット。',
+      tut9:'波形セクション \u2014 録音を表示。ピンチでズーム、ドラッグでスクラブ。',
+      tut10:'タップで録音開始。もう一度タップで停止。録音は波形に表示されます。',
+      tut11:'下部バーで録音を管理。スワイプでスロット切り替え、長押しでアクション（共有、名前変更、削除）。',
+      tut12:'歯車アイコンをタップして設定を開く \u2014 テーマ、言語、基準ピッチなど。'
+    },
+    es: { spectrum:'Espectro', tuner:'Afinador', tunerA440:'Afinador \u00b7 A440', metronome:'Metrónomo', waveform:'Forma de onda', tapToStart:'TOCA PARA INICIAR', recordToAnalyze:'GRABAR PARA ANALIZAR', tapTempo:'TEMPO POR TOQUE', start:'INICIO', stop:'PARAR', settings:'Ajustes', appearance:'Apariencia', lightMode:'Modo Claro', language:'Idioma', selectLang:'Seleccionar Idioma', tunerSec:'Afinador', refPitch:'Tono de Referencia', sensitivity:'Sensibilidad', sensLow:'Bajo', sensMed:'Medio', sensHigh:'Alto', audio:'Audio', metroVol:'Volumen del Metrónomo', about:'Acerca de', rename:'Renombrar', share:'Compartir', delete:'Eliminar', cancel:'Cancelar', empty:'Vacío', live:'EN VIVO',
+      fftSize:'Tamaño FFT', maxFreq:'Frec. Máx.', smoothing:'Suavizado', colorScheme:'Esquema de Color',
+      notation:'Notación', transpose:'Transposición', pitchPlayerVol:'Vol. Reproductor', sharpNotation:'Sostenido (C#)', flatNotation:'Bemol (D\u266D)', none:'Ninguno',
+      clickSound:'Sonido de Clic', volume:'Volumen', accent:'Acento', subdivision:'Subdivisión', countIn:'Cuenta Previa', flashBeat:'Flash de Pulso',
+      classic:'Clásico', wood:'Madera', digital:'Digital', noise:'Ruido', eighth:'Corchea', triplet:'Tresillo', sixteenth:'Semicorchea', off:'Apagado', on:'Encendido',
+      oneBar:'1 Compás', twoBars:'2 Compases', fourBars:'4 Compases',
+      sampleRate:'Frecuencia de Muestreo', bitDepth:'Profundidad de Bits', waveZoom:'Zoom de Onda', micGain:'Ganancia del Mic',
+      compact:'Compacto', normal:'Normal', wide:'Amplio', extraWide:'Extra Amplio',
+      help:'Ayuda', tutorial:'Tutorial', tutorialStart:'Iniciar',
+      tapToContinue:'toca para continuar',
+      tut1:'Este es el Espectro \u2014 muestra un análisis de frecuencia en tiempo real de lo que capta tu micrófono.',
+      tut2:'Desliza hacia la izquierda desde el borde derecho de cualquier sección para abrir su panel de configuración.',
+      tut3:'Desliza hacia la derecha para cerrar el panel de configuración.',
+      tut4:'El Afinador detecta el tono y muestra cuántos centésimos estás por encima o por debajo de la nota más cercana.',
+      tut5:'Toca el nombre de la nota en el afinador para reproducir un tono de referencia. Toca de nuevo para detener.',
+      tut6:'El Metrónomo \u2014 toca en cualquier lugar de esta área para iniciar/detener.',
+      tut7:'Toca este botón para cambiar patrones de ritmo: Estándar, Swing y Marcha.',
+      tut8:'Esto cuenta compases. Tócalo para reiniciar.',
+      tut9:'La sección de Forma de Onda \u2014 muestra tu grabación. Pellizca para zoom, arrastra para recorrer.',
+      tut10:'Toca para grabar. Toca de nuevo para detener. Tu grabación aparece en la forma de onda.',
+      tut11:'La barra inferior gestiona las grabaciones. Desliza para cambiar ranuras, mantén pulsado para acciones (compartir, renombrar, eliminar).',
+      tut12:'Toca el icono del engranaje para abrir Ajustes \u2014 tema, idioma, tono de referencia y más.'
+    }
   };
   let curLang = 'en';
   function t(key) { return (I18N[curLang] || I18N.en)[key] || I18N.en[key] || key; }
+  window.t = t;
+  // Helper: translate a text node by trying all langs to find current text, then replace
+  function tSpan(el, key) { if (el) el.textContent = t(key); }
+  function tOpt(sel, idx, key) { if (sel && sel.options[idx]) sel.options[idx].textContent = t(key); }
+
   function applyLang() {
     // Section labels
-    document.querySelectorAll('.sec-spectrum .section-label')[0].textContent = t('spectrum');
-    document.querySelectorAll('.sec-tuner .section-label')[0].textContent = t('tuner');
-    document.querySelectorAll('.sec-metro .section-label')[0].textContent = t('metronome');
-    document.querySelectorAll('.sec-wave .section-label')[0].textContent = t('waveform');
+    tSpan(document.querySelector('.sec-spectrum .section-label'), 'spectrum');
+    tSpan(document.querySelector('.sec-tuner .section-label'), 'tuner');
+    tSpan(document.querySelector('.sec-metro .section-label'), 'metronome');
+    tSpan(document.querySelector('.sec-wave .section-label'), 'waveform');
     // Startup
-    document.querySelector('.startup-sub').textContent = t('tapToStart');
+    tSpan(document.querySelector('.startup-sub'), 'tapToStart');
     // Waveform empty
-    elWaveEmpty.textContent = t('recordToAnalyze');
+    tSpan(elWaveEmpty, 'recordToAnalyze');
     // BPM tap hint
-    document.querySelector('.bpm-tap-hint').textContent = t('tapTempo');
-    // Settings
-    document.querySelector('.settings-title').textContent = t('settings');
+    tSpan(document.querySelector('.bpm-tap-hint'), 'tapTempo');
+    // Metronome toggle
+    if ($('metroToggle')) $('metroToggle').textContent = S.metroOn ? t('stop') : t('start');
+
+    // Settings panel
+    tSpan(document.querySelector('.settings-title'), 'settings');
+    // Settings section titles — match by data-i18n-sec attribute
+    const secTitleMap = {appearance:'appearance', language:'language', tunerSec:'tunerSec', audio:'audio', help:'help', about:'about'};
     document.querySelectorAll('.settings-section-title').forEach(el => {
-      const map = {'Appearance':t('appearance'),'Language':t('language'),'Tuner':t('tunerSec'),'Audio':t('audio'),'About':t('about')};
-      if (map[el.textContent]) el.textContent = map[el.textContent];
-      else { for (const lang of Object.values(I18N)) { for (const [k,v] of Object.entries(map)) { if (el.textContent === v || Object.values(I18N).some(l => l[k.toLowerCase()] === el.textContent)) { el.textContent = map[k]; break; } } } }
-    });
-    // Settings labels
-    const labelMap = {'Light Mode':'lightMode','Select Language':'selectLang','Reference Pitch':'refPitch','Metronome Volume':'metroVol'};
-    document.querySelectorAll('.settings-label').forEach(el => {
       const dk = el.getAttribute('data-i18n');
       if (dk) { el.textContent = t(dk); return; }
-      for (const [txt, key] of Object.entries(labelMap)) {
+      // Fallback: match any known translation
+      for (const key of Object.values(secTitleMap)) {
         for (const lang of Object.values(I18N)) { if (el.textContent === lang[key]) { el.textContent = t(key); return; } }
       }
     });
+    // Settings labels with data-i18n
+    document.querySelectorAll('.settings-label[data-i18n]').forEach(el => {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    // Settings label: Metronome Volume, Tutorial
+    const settingsLabelMap = {'metroVol':'metroVol', 'tutorial':'tutorial'};
+    document.querySelectorAll('.settings-label').forEach(el => {
+      for (const key of Object.keys(settingsLabelMap)) {
+        for (const lang of Object.values(I18N)) { if (el.textContent === lang[key]) { el.textContent = t(key); return; } }
+      }
+    });
+    // Tutorial start button
+    const tutStartVal = document.querySelector('#tutorialBtn .settings-val');
+    if (tutStartVal) tutStartVal.innerHTML = t('tutorialStart') + ' &rsaquo;';
+
+    // Sensitivity dropdowns (settings + tuner config)
+    const sensSel = $('sensitivitySelect');
+    tOpt(sensSel, 0, 'sensLow'); tOpt(sensSel, 1, 'sensMed'); tOpt(sensSel, 2, 'sensHigh');
+    const cfgSens = $('cfgTunerSens');
+    tOpt(cfgSens, 0, 'sensLow'); tOpt(cfgSens, 1, 'sensMed'); tOpt(cfgSens, 2, 'sensHigh');
+
     // Popup menu
     $('recActShare').lastChild.textContent = '\n      ' + t('share');
     $('recActRename').lastChild.textContent = '\n      ' + t('rename');
     $('recActDelete').lastChild.textContent = '\n      ' + t('delete');
-    // Sensitivity dropdown
-    const sensSel = $('sensitivitySelect');
-    sensSel.options[0].textContent = t('sensLow');
-    sensSel.options[1].textContent = t('sensMed');
-    sensSel.options[2].textContent = t('sensHigh');
+
+    // ---- Config panel labels (span inside .config-item) ----
+    const cfgLabelMap = [
+      ['FFT Size','fftSize'],['Max Freq','maxFreq'],['Smoothing','smoothing'],['Color Scheme','colorScheme'],
+      ['Reference Pitch','refPitch'],['Sensitivity','sensitivity'],['Notation','notation'],['Transpose','transpose'],['Pitch Player Vol','pitchPlayerVol'],
+      ['Click Sound','clickSound'],['Volume','volume'],['Accent','accent'],['Subdivision','subdivision'],['Count-in','countIn'],['Flash Beat','flashBeat'],
+      ['Sample Rate','sampleRate'],['Bit Depth','bitDepth'],['Waveform Zoom','waveZoom'],['Mic Gain','micGain']
+    ];
+    document.querySelectorAll('.config-item > span:first-child').forEach(el => {
+      for (const [, key] of cfgLabelMap) {
+        for (const lang of Object.values(I18N)) { if (el.textContent === lang[key]) { el.textContent = t(key); return; } }
+      }
+    });
+
+    // ---- Config panel select options ----
+    // Tuner: Notation
+    const notSel = $('cfgNotation');
+    if (notSel) { tOpt(notSel, 0, 'sharpNotation'); tOpt(notSel, 1, 'flatNotation'); }
+    // Tuner: Transpose option 0
+    const trSel = $('cfgTranspose');
+    if (trSel) tOpt(trSel, 0, 'none');
+    // Metronome: Click Sound
+    const csSel = $('cfgClickSound');
+    if (csSel) { tOpt(csSel, 0, 'classic'); tOpt(csSel, 1, 'wood'); tOpt(csSel, 2, 'digital'); tOpt(csSel, 3, 'noise'); }
+    // Metronome: Subdivision
+    const sdSel = $('cfgSubdiv');
+    if (sdSel) { tOpt(sdSel, 0, 'none'); tOpt(sdSel, 1, 'eighth'); tOpt(sdSel, 2, 'triplet'); tOpt(sdSel, 3, 'sixteenth'); }
+    // Metronome: Count-in
+    const ciSel = $('cfgCountIn');
+    if (ciSel) { tOpt(ciSel, 0, 'off'); tOpt(ciSel, 1, 'oneBar'); tOpt(ciSel, 2, 'twoBars'); tOpt(ciSel, 3, 'fourBars'); }
+    // Metronome: Flash Beat
+    const fbSel = $('cfgFlashBeat');
+    if (fbSel) { tOpt(fbSel, 0, 'on'); tOpt(fbSel, 1, 'off'); }
+    // Waveform: Zoom
+    const wzSel = $('cfgWaveZoom');
+    if (wzSel) { tOpt(wzSel, 0, 'compact'); tOpt(wzSel, 1, 'normal'); tOpt(wzSel, 2, 'wide'); tOpt(wzSel, 3, 'extraWide'); }
+
+    // Tutorial "tap to continue"
+    const tutCont = $('tutorialContinue');
+    if (tutCont) tutCont.textContent = t('tapToContinue');
   }
   $('langSelect').addEventListener('change', function() {
     curLang = this.value;
@@ -2519,6 +2718,143 @@ function setupEvents() {
       else if (dx > THRESHOLD) slider.classList.remove('open');
     });
   });
+})();
+
+// ================================================================
+//  TUTORIAL
+// ================================================================
+(function initTutorial() {
+  const overlay = $('tutorialOverlay');
+  const backdrop = $('tutorialBackdrop');
+  const hand = $('tutorialHand');
+  const tooltip = $('tutorialTooltip');
+  const textEl = $('tutorialText');
+  const dotsEl = $('tutorialDots');
+  const skipBtn = $('tutorialSkip');
+  const continueEl = $('tutorialContinue');
+  let step = 0;
+
+  const STEPS = [
+    { target:'.sec-spectrum', i18n:'tut1', hand:'none', tooltipPos:'below' },
+    { target:'.sec-spectrum .section-slider', i18n:'tut2', hand:'swipe-left', handPos:'right-edge', tooltipPos:'below' },
+    { target:'.sec-spectrum .section-slider', i18n:'tut3', hand:'swipe-right', handPos:'center', tooltipPos:'below',
+      action: () => { const sl = document.querySelector('.sec-spectrum .section-slider'); sl.classList.add('open'); setTimeout(() => sl.classList.remove('open'), 1500); }
+    },
+    { target:'.sec-tuner', i18n:'tut4', hand:'none', tooltipPos:'below' },
+    { target:'.sec-tuner canvas', i18n:'tut5', hand:'tap', handPos:'center', tooltipPos:'below' },
+    { target:'.sec-metro', i18n:'tut6', hand:'tap', handPos:'center', tooltipPos:'above' },
+    { target:'#subdivBtn', i18n:'tut7', hand:'tap', handPos:'center', tooltipPos:'above' },
+    { target:'#barCounter', i18n:'tut8', hand:'tap', handPos:'center', tooltipPos:'above' },
+    { target:'.sec-wave', i18n:'tut9', hand:'none', tooltipPos:'above' },
+    { target:'#btnMain', i18n:'tut10', hand:'tap', handPos:'center', tooltipPos:'above' },
+    { target:'.rec-bar', i18n:'tut11', hand:'swipe-left', handPos:'center', tooltipPos:'above' },
+    { target:'#settingsBtn', i18n:'tut12', hand:'tap', handPos:'center', tooltipPos:'above' }
+  ];
+
+  function getRect(sel) {
+    const el = document.querySelector(sel);
+    if (!el) return { top: 0, left: 0, width: 0, height: 0, right: 0, bottom: 0 };
+    return el.getBoundingClientRect();
+  }
+
+  function buildDots() {
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < STEPS.length; i++) {
+      const d = document.createElement('div');
+      d.className = 'tutorial-tooltip-dot' + (i === step ? ' active' : '');
+      dotsEl.appendChild(d);
+    }
+  }
+
+  function showStep() {
+    const s = STEPS[step];
+    const r = getRect(s.target);
+    const pad = 6;
+
+    // Spotlight cutout
+    const cx = r.left - pad, cy = r.top - pad;
+    const cw = r.width + pad * 2, ch = r.height + pad * 2;
+    const rad = 8;
+    backdrop.style.clipPath = `polygon(
+      0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
+      ${cx}px ${cy + rad}px,
+      ${cx + rad}px ${cy}px,
+      ${cx + cw - rad}px ${cy}px,
+      ${cx + cw}px ${cy + rad}px,
+      ${cx + cw}px ${cy + ch - rad}px,
+      ${cx + cw - rad}px ${cy + ch}px,
+      ${cx + rad}px ${cy + ch}px,
+      ${cx}px ${cy + ch - rad}px,
+      ${cx}px ${cy + rad}px
+    )`;
+
+    // Text (i18n)
+    textEl.textContent = t(s.i18n);
+    continueEl.textContent = t('tapToContinue');
+    buildDots();
+
+    // Position tooltip
+    const ttW = 260;
+    let ttLeft = r.left + r.width / 2;
+    ttLeft = Math.max(ttW / 2 + 10, Math.min(window.innerWidth - ttW / 2 - 10, ttLeft));
+    tooltip.style.left = ttLeft + 'px';
+    if (s.tooltipPos === 'above') {
+      tooltip.style.top = 'auto';
+      tooltip.style.bottom = (window.innerHeight - r.top + 12) + 'px';
+    } else {
+      tooltip.style.top = (r.bottom + 12) + 'px';
+      tooltip.style.bottom = 'auto';
+    }
+
+    // Hand
+    hand.className = 'tutorial-hand';
+    if (s.hand === 'none') {
+      hand.style.display = 'none';
+    } else {
+      hand.style.display = 'block';
+      let hx, hy;
+      if (s.handPos === 'right-edge') {
+        hx = r.right - 20;
+        hy = r.top + r.height / 2;
+      } else {
+        hx = r.left + r.width / 2;
+        hy = r.top + r.height / 2;
+      }
+      hand.style.left = hx + 'px';
+      hand.style.top = hy + 'px';
+      hand.classList.add('anim-' + s.hand);
+    }
+
+    // Run step action (e.g. open/close config panel demo)
+    if (s.action) s.action();
+  }
+
+  function start() {
+    // Close settings first
+    document.getElementById('app').classList.remove('settings-open');
+    step = 0;
+    overlay.classList.add('active');
+    showStep();
+  }
+
+  function end() {
+    overlay.classList.remove('active');
+  }
+
+  function advance(e) {
+    e.stopPropagation();
+    if (step >= STEPS.length - 1) { end(); return; }
+    step++;
+    showStep();
+  }
+  skipBtn.addEventListener('click', e => { e.stopPropagation(); end(); });
+  backdrop.addEventListener('click', advance);
+  tooltip.addEventListener('click', advance);
+
+  $('tutorialBtn').addEventListener('click', start);
+
+  // Expose for external use
+  window.startTutorial = start;
 })();
 
 // ================================================================
