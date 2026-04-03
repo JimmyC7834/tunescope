@@ -43,6 +43,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
 /* ===== SECTIONS ===== */
+.scroll-area{flex:0 0 75%;overflow-y:auto;overflow-x:hidden;min-height:0;-webkit-overflow-scrolling:touch}
+.bottom-area{flex:0 0 25%;display:flex;flex-direction:column;min-height:0}
 .section{position:relative;border-bottom:1px solid var(--border);overflow:hidden;flex-shrink:0}
 .section-slider{position:relative;width:100%;height:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .section-slider.open{transform:translateX(-100%)}
@@ -58,13 +60,13 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .section-label{position:absolute;top:8px;left:12px;font-size:.7rem;font-weight:600;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;z-index:2;display:none}
 
 /* Spectrum */
-.sec-spectrum{flex:0 0 20%;min-height:110px;background:linear-gradient(180deg,rgba(28,32,55,.9),rgba(20,24,45,.85));transition:background .4s;display:flex}
+.sec-spectrum{height:calc(75dvh * 3 / 13);background:linear-gradient(180deg,rgba(28,32,55,.9),rgba(20,24,45,.85));transition:background .4s;display:flex}
 .sec-spectrum .section-main{padding-top:6px}
 .sec-spectrum.live-mode{background:linear-gradient(180deg,rgba(2,3,8,.95),rgba(4,5,12,.9))}
 .sec-spectrum canvas{width:100%;height:100%;display:block}
 
 /* Tuner */
-.sec-tuner{flex:0 0 32.5%;min-height:170px;background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
+.sec-tuner{height:calc(75dvh * 6 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
@@ -81,7 +83,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .note-arrow:active{color:var(--accent)}
 
 /* Metronome */
-.sec-metro{flex:0 0 22%;min-height:140px;background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
+.sec-metro{height:calc(75dvh * 4 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
 .beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:10px 0;flex-shrink:0}
@@ -141,7 +143,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .bar-counter-label.counting::after{content:'↺';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:var(--text-mid);opacity:0.25;pointer-events:none;-webkit-text-stroke:1px var(--text-mid)}
 
 /* Waveform */
-.sec-wave{flex:1;min-height:100px;background:var(--bg-panel);display:flex}
+.sec-wave{flex:1;min-height:0;background:var(--bg-panel);display:flex}
 .wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0}
 .wave-time{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--text-dim)}
 .wave-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none}
@@ -279,6 +281,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     <div class="startup-sub">TAP TO START</div>
   </div>
 
+  <!-- Scrollable top area -->
+  <div class="scroll-area" id="scrollArea">
+
   <!-- 1. Spectrum -->
   <div class="section sec-spectrum">
     <div class="section-slider" data-swipe-section>
@@ -369,13 +374,23 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
   </div>
 
-  <!-- 4. Waveform -->
+  <!-- 4. Test Card -->
+  <div class="section sec-test" style="height:calc(75dvh * 4 / 13);background:var(--bg-panel);display:flex;align-items:center;justify-content:center">
+    <div class="section-main" style="display:flex;align-items:center;justify-content:center;width:100%">
+      <span style="font-size:1.2rem;color:var(--text-dim);letter-spacing:.15em">TEST CARD</span>
+    </div>
+  </div>
+
+  </div><!-- end scroll-area -->
+
+  <div class="bottom-area">
+  <!-- 5. Waveform -->
   <div class="section sec-wave">
     <div class="section-slider" data-swipe-section>
       <div class="section-main">
         <div class="wave-header">
           <div class="section-label" style="position:static">Waveform</div>
-          <div class="wave-time" id="waveTime">0:00 / 0:00</div>
+          <div class="wave-time" id="waveTime" style="display:none">0:00 / 0:00</div>
         </div>
         <div class="wave-wrap" id="waveWrap">
           <canvas id="cvWave"></canvas>
@@ -457,6 +472,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
     <button class="rec-add" id="recAdd">+</button>
   </div>
+  </div><!-- end bottom-area -->
   </div><!-- end app-content -->
 
   <!-- Settings panel -->
@@ -679,6 +695,7 @@ function startRecording() {
   };
   S.recorder.start(100);
   S.mode = 'recording';
+  elWaveTime.style.display = '';
   // Collect live peaks
   S.peakCollectorId = setInterval(collectLivePeak, 1000 / PEAK_RATE);
   updateControlState();
@@ -1047,7 +1064,7 @@ function drawTuner() {
   c.clearRect(0, 0, w, h);
 
   const cx = w / 2;
-  const padSide = 28, padTop = 18, padBot = 30; // reduced bottom padding — labels overlap pivot
+  const padSide = 28, padTop = 18, padBot = 50; // extra bottom for larger labels
   const arcSpan = Math.PI * 0.85; // ~153° wide sweep
   const halfSpan = arcSpan / 2;
   const r = Math.min(w / 2 - padSide, h - padTop - padBot);
@@ -1166,62 +1183,66 @@ function drawTuner() {
   c.fill();
 
   c.textAlign = 'center';
+  // Draw note label: base letter centered, sharp/flat superscript, octave subscript
+  function drawNoteLabel(name, oct, col, labelY) {
+    const base = name[0];
+    const acc = name.length > 1 ? name.slice(1) : '';
+    c.font = '700 ' + sf(40) + 'px "Chakra Petch"';
+    c.fillStyle = col;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    const baseW = c.measureText(base).width;
+    c.fillText(base, cx, labelY);
+    const right = cx + baseW / 2 + 2;
+    if (acc) {
+      c.font = '600 ' + sf(18) + 'px "Chakra Petch"';
+      c.textAlign = 'left'; c.textBaseline = 'top';
+      c.fillText(acc, right, labelY - sf(20));
+    }
+    c.font = '500 ' + sf(16) + 'px "Share Tech Mono"';
+    c.fillStyle = lt ? '#5a5d72' : '#8a8da8';
+    c.textAlign = 'left'; c.textBaseline = 'bottom';
+    c.fillText(oct, right, labelY + sf(18));
+    c.textAlign = 'center';
+  }
+
   if (S.pitchPlaying) {
     // Show played note
     const dispMidi = S.pitchMidi + tunerTranspose;
     const pName = NOTES[((dispMidi % 12) + 12) % 12];
     const pOct = Math.floor(dispMidi / 12) - 1;
     const pFreq = A4 * Math.pow(2, (S.pitchMidi - A4_MIDI) / 12);
-    c.font = '700 ' + sf(30) + 'px "Chakra Petch"';
-    c.fillStyle = '#00e89a';
-    c.textBaseline = 'middle';
-    const noteW = c.measureText(pName).width;
-    c.fillText(pName, cx - 6, cy - maskR * 0.78);
-    c.font = '500 ' + sf(14) + 'px "Share Tech Mono"';
-    c.fillStyle = lt ? '#5a5d72' : '#8a8da8';
-    c.textBaseline = 'middle';
-    c.fillText(pOct, cx + noteW / 2 + 2, cy - maskR * 0.84);
-    c.font = '600 ' + sf(15) + 'px "Share Tech Mono"';
+    drawNoteLabel(pName, pOct, '#00e89a', cy - maskR * 0.72);
+    c.font = '600 ' + sf(17) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
-    c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 39);
+    c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 35);
     // "♪ PLAYING" indicator
-    c.font = '600 ' + sf(10) + 'px "Chakra Petch"';
+    c.font = '600 ' + sf(12) + 'px "Chakra Petch"';
     c.fillStyle = '#00e89a';
-    c.fillText('♪ TAP TO STOP', cx, cy - 20);
+    c.fillText('♪ TAP TO STOP', cx, cy - 16);
   } else if (S.freq > 0 && S.note) {
     const absCents = Math.abs(S.cents);
     const col = absCents < 10 ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
-    // Note name + octave — centered in mask
-    c.font = '700 ' + sf(30) + 'px "Chakra Petch"';
-    c.fillStyle = col;
-    c.textBaseline = 'middle';
-    const noteTxt = S.note.name;
-    const noteW = c.measureText(noteTxt).width;
-    c.fillText(noteTxt, cx - 6, cy - maskR * 0.78);
-    c.font = '500 ' + sf(14) + 'px "Share Tech Mono"';
-    c.fillStyle = lt ? '#5a5d72' : '#8a8da8';
-    c.textBaseline = 'middle';
-    c.fillText(S.note.oct, cx + noteW / 2 + 2, cy - maskR * 0.84);
+    drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.72);
     // Hz
-    c.font = '600 ' + sf(15) + 'px "Share Tech Mono"';
+    c.font = '600 ' + sf(17) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
-    c.fillText(S.freq.toFixed(1) + ' Hz', cx, cy - 39);
+    c.fillText(S.freq.toFixed(1) + ' Hz', cx, cy - 35);
     // Cents
     const cSign = S.cents >= 0 ? '+' : '';
-    c.font = '600 ' + sf(14) + 'px "Share Tech Mono"';
+    c.font = '600 ' + sf(16) + 'px "Share Tech Mono"';
     c.fillStyle = col;
-    c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy - 23);
+    c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy - 16);
   } else {
-    c.font = '700 ' + sf(30) + 'px "Chakra Petch"';
+    c.font = '700 ' + sf(40) + 'px "Chakra Petch"';
     c.fillStyle = lt ? '#1a1c28' : '#e4e6f0';
     c.textBaseline = 'middle';
-    c.fillText('--', cx, cy - maskR * 0.78);
-    c.font = '600 ' + sf(15) + 'px "Share Tech Mono"';
+    c.fillText('--', cx, cy - maskR * 0.72);
+    c.font = '600 ' + sf(17) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#8a8da0' : '#4a4d68';
     c.textBaseline = 'top';
-    c.fillText('--- Hz', cx, cy - 39);
+    c.fillText('--- Hz', cx, cy - 35);
   }
 
   // ---- dB indicator (top-right corner) ----
@@ -1483,7 +1504,7 @@ function drawWaveTimeAxis(c, w, plotH, labelH, tStart, tEnd) {
     if (dur / iv <= 8) { step = iv; break; }
   }
   const firstTick = Math.ceil(tStart / step) * step;
-  c.font = sf(8) + 'px "Share Tech Mono"';
+  c.font = sf(11) + 'px "Share Tech Mono"';
   c.textBaseline = 'top';
   for (let t = firstTick; t <= tEnd; t += step) {
     if (t < 0) continue;
@@ -1713,6 +1734,7 @@ function switchToRecording(idx) {
     S.lastAnalyzedPos = -1;
     S.mode = 'paused';
     S.liveOverride = false;
+    elWaveTime.style.display = '';
   } else {
     resetToEmpty();
   }
@@ -1746,6 +1768,7 @@ function resetToEmpty() {
   S.outputGain.gain.value = 0;
   elWaveEmpty.style.display = '';
   elWaveInd.style.display = 'none';
+  elWaveTime.style.display = 'none';
 }
 
 // ================================================================
@@ -2015,9 +2038,15 @@ function setupEvents() {
 
   function updatePatternOptions() {
     currentPatterns = getPatternsForTS(S.beats, S.tsDenom);
-    patternIdx = 0;
-    S.beatPattern = currentPatterns[0].id;
-    elSubdiv.textContent = currentPatterns[0].label;
+    // Preserve user's current selection if it still exists
+    const kept = currentPatterns.findIndex(p => p.id === S.beatPattern);
+    if (kept >= 0) {
+      patternIdx = kept;
+    } else {
+      patternIdx = 0;
+      S.beatPattern = currentPatterns[0].id;
+    }
+    elSubdiv.textContent = currentPatterns[patternIdx].label;
   }
 
   let subdivStartX = 0, subdivStartY = 0;
