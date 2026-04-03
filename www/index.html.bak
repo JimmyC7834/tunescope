@@ -25,7 +25,7 @@
   --cyan:#00c8ff;
   --font-scale:1;
 }
-html,body{height:100%;overflow:hidden;background:var(--bg-deep);color:var(--text-bright);font-family:'Chakra Petch',sans-serif;font-size:calc(16px * var(--font-scale))}
+html,body{height:100%;overflow:hidden;background:var(--bg-deep);color:var(--text-bright);font-family:'Chakra Petch',sans-serif;font-size:calc(16px * var(--font-scale));touch-action:manipulation}
 body{display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#0d1020 0%,var(--bg-deep) 60%);transition:background .4s}
 body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 60%)}
 
@@ -58,13 +58,13 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .section-label{position:absolute;top:8px;left:12px;font-size:.7rem;font-weight:600;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;z-index:2;display:none}
 
 /* Spectrum */
-.sec-spectrum{flex:0 0 20%;min-height:110px;background:linear-gradient(180deg,rgba(28,32,55,.9),rgba(20,24,45,.85));transition:background .4s;display:flex}
+.sec-spectrum{flex:0 0 auto;height:20vh;min-height:110px;background:linear-gradient(180deg,rgba(28,32,55,.9),rgba(20,24,45,.85));transition:background .4s;display:flex}
 .sec-spectrum .section-main{padding-top:6px}
 .sec-spectrum.live-mode{background:linear-gradient(180deg,rgba(2,3,8,.95),rgba(4,5,12,.9))}
 .sec-spectrum canvas{width:100%;height:100%;display:block}
 
 /* Tuner */
-.sec-tuner{flex:0 0 32.5%;min-height:170px;background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
+.sec-tuner{flex:0 0 auto;height:32.5vh;min-height:170px;background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
@@ -74,21 +74,21 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .ref-pitch-label{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text-bright);padding:0 6px;white-space:nowrap;letter-spacing:.04em;border-left:1px solid rgba(255,255,255,0.08);border-right:1px solid rgba(255,255,255,0.08)}
 .app.light .ref-pitch-cfg{border-color:rgba(0,0,0,0.1);background:rgba(240,241,245,0.4)}
 .app.light .ref-pitch-label{border-color:rgba(0,0,0,0.08)}
-.note-arrow{position:absolute;bottom:24%;z-index:5;border:none;background:transparent;color:var(--text-dim);font-size:4.8rem;padding:20px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent;font-family:'Share Tech Mono',monospace;line-height:1}
+.note-arrow{position:absolute;bottom:24%;z-index:5;border:none;background:transparent;color:var(--text-dim);font-size:2.8rem;padding:12px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent;font-family:'Share Tech Mono',monospace;line-height:1}
 .note-arrow-left{left:22%}
 .note-arrow-right{right:22%}
 .note-arrow.visible{opacity:1;pointer-events:auto}
 .note-arrow:active{color:var(--accent)}
 
 /* Metronome */
-.sec-metro{flex:0 0 22%;min-height:140px;background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
+.sec-metro{flex:0 0 auto;height:22vh;min-height:140px;background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
 .beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:10px 0;flex-shrink:0}
-.beat-tri{width:40px;height:40px;transition:filter .06s;filter:none;pointer-events:none}
+.beat-tri{width:42px;height:42px;transition:filter .06s;filter:none;pointer-events:none}
 .beat-tri svg{width:100%;height:100%;display:block}
 .beat-tri path{fill:var(--border);transition:fill .06s}
-.beat-tri.accent{width:52px;height:52px}
+.beat-tri.accent{width:54px;height:54px}
 .beat-tri.on path{fill:var(--accent)}
 .beat-tri.on{filter:drop-shadow(0 0 6px var(--accent-glow))}
 .beat-tri.accent.on path{fill:var(--warning)}
@@ -132,7 +132,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .metro-toggle{display:none}
 
 /* Beat pattern button — bottom right */
-.subdiv-btn{position:absolute;bottom:6px;right:10px;font-family:'Share Tech Mono',monospace;font-size:.82rem;letter-spacing:1px;color:var(--text-mid);background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:18px;min-width:36px;height:36px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;z-index:3;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
+.subdiv-btn{position:absolute;bottom:6px;right:10px;font-family:'Chakra Petch',sans-serif;font-size:1rem;letter-spacing:0;color:var(--text-mid);background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;z-index:3;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
 .subdiv-btn:active{color:var(--accent);border-color:var(--accent)}
 .app.light .subdiv-btn{border-color:rgba(0,0,0,0.1)}
 .bar-counter-group{position:absolute;bottom:6px;left:10px;display:flex;align-items:center;z-index:3}
@@ -141,10 +141,12 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .bar-counter-label.counting::after{content:'↺';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:var(--text-mid);opacity:0.25;pointer-events:none;-webkit-text-stroke:1px var(--text-mid)}
 
 /* Waveform */
-.sec-wave{flex:1;min-height:100px;background:var(--bg-panel);display:flex}
+.sec-wave{flex:1;min-height:0;background:var(--bg-panel);display:flex;flex-direction:column;border-top:1px solid var(--border);overflow:visible}
+.sec-wave .section-main{height:auto;overflow:visible}
+.sec-wave .section-slider{height:auto}
 .wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0}
 .wave-time{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--text-dim)}
-.wave-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none}
+.wave-wrap{flex:1;min-height:0;position:relative;overflow:hidden;cursor:grab;touch-action:none}
 .wave-wrap:active{cursor:grabbing}
 .wave-wrap canvas{width:100%;height:100%;display:block}
 .wave-indicator{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--warning);transform:translateX(-50%);z-index:3;pointer-events:none;box-shadow:0 0 4px var(--warning-glow)}
@@ -153,6 +155,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .wave-indicator::after{bottom:0;border-bottom:4px solid var(--warning)}
 .wave-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:var(--text-dim);letter-spacing:.1em;pointer-events:none}
 .wave-controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:2px 0 3px}
+.float-controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0 10px;flex-shrink:0;background:var(--bg-panel)}
 .ctrl-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border-light);background:transparent;color:var(--text-mid);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
 .ctrl-btn:active{transform:scale(.9)}
 .ctrl-btn.rec{border-color:var(--danger);color:var(--danger)}
@@ -163,7 +166,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .ctrl-btn svg{width:16px;height:16px;fill:currentColor}
 
 /* Recording manager — bottom bar */
-.rec-bar{position:relative;height:38px;background:rgba(8,10,18,.95);border-top:1px solid var(--border);flex-shrink:0;user-select:none;display:flex;align-items:stretch;margin-bottom:6px}
+.rec-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:44px;background:rgba(8,10,18,.98);border-top:1px solid var(--border);user-select:none;display:flex;align-items:stretch;z-index:50}
 .rec-settings-btn{width:52px;flex-shrink:0;border:none;border-right:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color .12s}
 .rec-settings-btn:hover{color:var(--text-bright)}
 .rec-settings-btn:active{background:rgba(255,255,255,.04)}
@@ -171,7 +174,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .rec-slot{position:relative;flex:1;overflow:hidden;cursor:grab;touch-action:none}
 .rec-slot:active{cursor:grabbing}
 .rec-slot-inner{position:absolute;top:0;left:0;display:flex;align-items:center;height:100%;pointer-events:none;transition:transform .15s ease-out;white-space:nowrap}
-.rec-slot-item{width:100px;height:38px;line-height:38px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.84rem;color:var(--text-dim);flex-shrink:0;transition:color .15s,opacity .15s;opacity:.35}
+.rec-slot-item{width:100px;height:44px;line-height:44px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.84rem;color:var(--text-dim);flex-shrink:0;transition:color .15s,opacity .15s;opacity:.35}
 .rec-slot-item.active{color:var(--text-bright);opacity:1}
 .rec-slot-item.near{opacity:.55}
 .rec-slot-fade-l,.rec-slot-fade-r{position:absolute;top:0;bottom:0;width:40px;pointer-events:none;z-index:1}
@@ -184,7 +187,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 /* Settings panel — push-up design */
 .app-inner{display:flex;flex-direction:column;min-height:170%;flex-shrink:0;transition:transform .4s cubic-bezier(.4,0,.2,1)}
 .app.settings-open .app-inner{transform:translateY(calc(-70% / 1.7))}
-.app-content{display:flex;flex-direction:column;height:100dvh;flex-shrink:0;position:relative}
+.app-content{display:flex;flex-direction:column;height:100dvh;flex-shrink:0;position:relative;overflow:hidden}
+.scroll-area{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
 @media(min-width:500px){.app-content{height:98vh;max-height:1100px}}
 .settings-panel{flex:1;background:var(--bg-surface);display:flex;flex-direction:column;border-top:1px solid var(--border-light)}
 .settings-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -205,6 +209,17 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .settings-select{background:var(--bg-panel);color:var(--text-bright);border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-family:'Chakra Petch',sans-serif;font-size:.85rem;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8da8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:20px}
 .settings-select option{background:var(--bg-panel);color:var(--text-bright)}
 
+/* Piano Roll */
+.sec-piano{flex:0 0 auto;height:25vh;min-height:120px;background:linear-gradient(180deg,rgba(8,10,20,.95),var(--bg-panel));display:flex;border-bottom:1px solid var(--border)}
+.sec-piano .section-main{display:flex;flex-direction:row;padding:0;position:relative}
+.piano-keys{flex:0 0 36px;display:flex;flex-direction:column;border-right:1px solid var(--border);z-index:2;overflow:hidden}
+.piano-key{flex:1;font-family:'Share Tech Mono',monospace;font-size:7px;display:flex;align-items:center;justify-content:flex-end;padding-right:3px;color:var(--text-dim);border-bottom:1px solid rgba(255,255,255,.03);white-space:nowrap}
+.piano-key.black{background:rgba(255,255,255,.04);color:var(--text-mid)}
+.piano-key.c-note{border-bottom:1px solid rgba(0,232,154,.15)}
+.piano-roll-wrap{flex:1;position:relative;overflow:hidden}
+.piano-roll-wrap canvas{width:100%;height:100%;display:block}
+.piano-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:var(--text-dim);letter-spacing:.1em;pointer-events:none}
+
 /* Light theme */
 .app.light{--bg-deep:#f0f1f5;--bg-panel:#ffffff;--bg-surface:#f5f6fa;--border:#d8dae4;--border-light:#c8cad8;--text-bright:#1a1c28;--text-mid:#5a5d72;--text-dim:#8a8da0;--accent:#00b874;--accent-glow:rgba(0,184,116,.25);--warning:#e09800;--warning-glow:rgba(224,152,0,.2);--danger:#e0304a;--danger-glow:rgba(224,48,74,.25)}
 .app.light .rec-bar{background:rgba(240,241,245,.95)}
@@ -218,6 +233,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.light .sec-spectrum.live-mode{background:linear-gradient(180deg,rgba(210,215,228,.95),rgba(220,224,235,.9))}
 .app.light .sec-tuner.live-mode{background:rgba(220,224,235,.95)}
 .app.light .sec-metro{background:linear-gradient(180deg,var(--bg-panel),rgba(230,232,240,.95))}
+.app.light .sec-piano{background:linear-gradient(180deg,rgba(240,241,245,.95),#fff)}
+.app.light .piano-key{border-bottom-color:rgba(0,0,0,.05)}
+.app.light .piano-key.black{background:rgba(0,0,0,.06)}
 .app.light .bpm-notch{background:rgba(0,0,0,0.1)}
 .app.light .bpm-notch.big{background:rgba(0,0,0,0.22)}
 .app.light .bpm-track{border-color:var(--border)}
@@ -229,7 +247,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.light::after{opacity:.08}
 
 /* Recording action bar — push-up thin bar */
-.rec-actions{height:0;overflow:hidden;display:flex;align-items:stretch;background:var(--bg-surface);border-top:1px solid var(--border-light);flex-shrink:0;transition:height .25s cubic-bezier(.4,0,.2,1)}
+.rec-actions{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:0;overflow:hidden;display:flex;align-items:stretch;background:var(--bg-surface);border-top:1px solid var(--border-light);z-index:50;transition:height .25s cubic-bezier(.4,0,.2,1)}
 .rec-actions.open{height:34px}
 .rec-action-item{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-family:'Chakra Petch',sans-serif;font-size:.82rem;font-weight:500;color:var(--text-mid);cursor:pointer;border-right:1px solid var(--border);-webkit-tap-highlight-color:transparent;transition:color .1s,background .1s}
 .rec-action-item:last-child{border-right:none}
@@ -279,6 +297,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     <div class="startup-sub">TAP TO START</div>
   </div>
 
+  <div class="scroll-area">
   <!-- 1. Spectrum -->
   <div class="section sec-spectrum">
     <div class="section-slider" data-swipe-section>
@@ -369,7 +388,21 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
   </div>
 
-  <!-- 4. Waveform -->
+  <!-- 4. Piano Roll -->
+  <div class="section sec-piano" id="secPiano">
+    <div class="section-main" style="width:100%">
+      <div class="section-label">Piano Roll</div>
+      <div class="piano-keys" id="pianoKeys"></div>
+      <div class="piano-roll-wrap" id="pianoRollWrap">
+        <canvas id="cvPianoRoll"></canvas>
+        <div class="piano-empty" id="pianoEmpty">RECORD TO SEE NOTE TRAIL</div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end scroll-area -->
+
+  <!-- 5. Waveform -->
   <div class="section sec-wave">
     <div class="section-slider" data-swipe-section>
       <div class="section-main">
@@ -382,7 +415,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           <div class="wave-indicator" id="waveInd" style="display:none"></div>
           <div class="wave-empty" id="waveEmpty">RECORD TO ANALYZE</div>
         </div>
-        <div class="wave-controls">
+        <div class="float-controls" id="floatControls">
           <button class="ctrl-btn rec" id="btnMain" title="Record">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>
           </button>
@@ -574,8 +607,10 @@ const S = {
   // Recording
   recorder: null, chunks: [], audioBuffer: null,
   livePeaks: [], peaks: [], peakCollectorId: null,
+  // Piano roll note trail: [{time, midi, cents}] — sampled at PEAK_RATE
+  noteTrail: [], liveNoteTrail: [],
   // Recording slots
-  recordings: [], // [{audioBuffer, peaks, name}]
+  recordings: [], // [{audioBuffer, peaks, name, noteTrail}]
   recIdx: 0, // current recording index
   // Pitch player
   pitchPlaying: false, pitchMidi: 60,
@@ -583,7 +618,7 @@ const S = {
   playSrc: null, playStart: 0, playOffset: 0,
   // Metronome
   metroOn: false, bpm: 120, beats: 4, tsDenom: 4, curBeat: -1,
-  nextBeatTime: 0, metroTimer: null, beatPattern: 'single',
+  nextBeatTime: 0, metroTimer: null, beatPattern: 'standard',
   metroSound: 'sine', metroSubdiv: 1, metroCountIn: 0, metroFlash: true, metroAccentMul: 1.0,
   // Waveform drag
   dragging: false, dragX: 0, dragOffset: 0, lastAnalyzedPos: -1,
@@ -606,6 +641,7 @@ const elWaveTime = $('waveTime'), elWaveWrap = $('waveWrap');
 const elWaveInd = $('waveInd'), elWaveEmpty = $('waveEmpty');
 const btnMain = $('btnMain');
 const elRecSlot = $('recSlot'), elRecSlotInner = $('recSlotInner'), elRecAdd = $('recAdd');
+const cvPianoRoll = $('cvPianoRoll'), elPianoEmpty = $('pianoEmpty'), elPianoKeys = $('pianoKeys');
 const elRecActions = $('recActions');
 
 // ================================================================
@@ -658,7 +694,7 @@ function startRecording() {
   S.liveOverride = false;
   if (S.micGain) { try { S.micGain.connect(S.analyser); } catch(_){} }
   S.outputGain.gain.value = 0;
-  S.chunks = []; S.livePeaks = [];
+  S.chunks = []; S.livePeaks = []; S.liveNoteTrail = [];
   S.audioBuffer = null; S.peaks = [];
   // Record from amplified stream, not raw mic
   S.recorder = new MediaRecorder(S.recDest ? S.recDest.stream : S.micStream);
@@ -669,9 +705,10 @@ function startRecording() {
       const ab = await blob.arrayBuffer();
       S.audioBuffer = await S.ctx.decodeAudioData(ab);
       genPeaks();
+      genNoteTrail();
       S.playOffset = 0;
       // Save into recordings slot
-      S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice(), name: S.recordings[S.recIdx]?.name || null };
+      S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice(), noteTrail: S.noteTrail.slice(), name: S.recordings[S.recIdx]?.name || null };
       S.mode = 'paused';
       updateControlState();
       renderRecSlots();
@@ -932,6 +969,37 @@ function collectLivePeak() {
   let mx = 0;
   for (let i = 0; i < S.timeBuf.length; i++) { const v = Math.abs(S.timeBuf[i]); if (v > mx) mx = v; }
   S.livePeaks.push(mx);
+  // Collect note for piano roll
+  const f = autoCorrelate(S.timeBuf, S.ctx.sampleRate);
+  if (f > 0) {
+    const midi = Math.round(12 * Math.log2(f / A4) + A4_MIDI);
+    S.liveNoteTrail.push(midi);
+  } else {
+    S.liveNoteTrail.push(-1); // silence
+  }
+}
+
+// Generate note trail from audioBuffer
+function genNoteTrail() {
+  if (!S.audioBuffer) { S.noteTrail = []; return; }
+  const ch = S.audioBuffer.getChannelData(0);
+  const sr = S.audioBuffer.sampleRate;
+  const total = Math.ceil(S.audioBuffer.duration * PEAK_RATE);
+  const samplesPerStep = Math.floor(ch.length / total);
+  const trail = [];
+  for (let i = 0; i < total; i++) {
+    const start = i * samplesPerStep;
+    const win = Math.min(FFT_SIZE, ch.length - start);
+    const buf = new Float32Array(FFT_SIZE);
+    for (let j = 0; j < win; j++) buf[j] = ch[start + j] || 0;
+    const f = autoCorrelate(buf, sr);
+    if (f > 0) {
+      trail.push(Math.round(12 * Math.log2(f / A4) + A4_MIDI));
+    } else {
+      trail.push(-1);
+    }
+  }
+  S.noteTrail = trail;
 }
 
 // Canvas font scaler — reads --font-scale CSS variable
@@ -1309,7 +1377,7 @@ function metroClick(time, type) {
 function scheduleBeats() {
   const ahead = 0.1;
   const beatInterval = 60 / S.bpm;
-  const pattern = S.beatPattern || 'single';
+  const pattern = S.beatPattern || 'standard';
 
   while (S.nextBeatTime < S.ctx.currentTime + ahead) {
     const beat = S.curBeat;
@@ -1317,22 +1385,15 @@ function scheduleBeats() {
     // Count-in phase: only click, no recording logic
     const isCountIn = S.metroCountInLeft > 0;
 
-    // Main beat click
-    metroClick(S.nextBeatTime, beat === 0 ? 'accent' : 'normal');
-    // Subdivision clicks within the beat
-    if (pattern === 'double') {
-      metroClick(S.nextBeatTime + beatInterval / 2, 'subdiv');
-    } else if (pattern === 'split3') {
-      metroClick(S.nextBeatTime + beatInterval * (2 / 3), 'subdiv');
-    } else if (pattern === 'split4') {
-      metroClick(S.nextBeatTime + beatInterval * (3 / 4), 'subdiv');
-    } else if (pattern === 'triple') {
-      metroClick(S.nextBeatTime + beatInterval / 3, 'subdiv');
-      metroClick(S.nextBeatTime + beatInterval * (2 / 3), 'subdiv');
-    } else if (pattern === 'quad') {
-      metroClick(S.nextBeatTime + beatInterval / 4, 'subdiv');
-      metroClick(S.nextBeatTime + beatInterval / 2, 'subdiv');
-      metroClick(S.nextBeatTime + beatInterval * (3 / 4), 'subdiv');
+    if (pattern === 'standard') {
+      metroClick(S.nextBeatTime, beat === 0 ? 'accent' : 'normal');
+    } else if (pattern === 'swing') {
+      metroClick(S.nextBeatTime, beat === 0 ? 'accent' : 'normal');
+      const swingTime = S.nextBeatTime + beatInterval * (2 / 3);
+      metroClick(swingTime, 'swing');
+    } else if (pattern === 'march') {
+      const isAccent = beat === 0 || (S.beats >= 4 && beat === Math.floor(S.beats / 2));
+      metroClick(S.nextBeatTime, isAccent ? 'accent' : 'normal');
     }
 
     // Subdivisions
@@ -1514,6 +1575,111 @@ function fmtTime(s) {
 }
 
 // ================================================================
+//  PIANO ROLL
+// ================================================================
+const PIANO_LOW = 36, PIANO_HIGH = 84; // C2 to C6 (48 notes)
+const PIANO_NOTES = PIANO_HIGH - PIANO_LOW + 1;
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const BLACK_NOTES = new Set([1,3,6,8,10]); // semitone indices that are black keys
+
+function buildPianoKeys() {
+  elPianoKeys.innerHTML = '';
+  for (let midi = PIANO_HIGH; midi >= PIANO_LOW; midi--) {
+    const nn = midi % 12;
+    const oct = Math.floor(midi / 12) - 1;
+    const div = document.createElement('div');
+    div.className = 'piano-key' + (BLACK_NOTES.has(nn) ? ' black' : '') + (nn === 0 ? ' c-note' : '');
+    div.textContent = nn === 0 ? 'C' + oct : (BLACK_NOTES.has(nn) ? '' : NOTE_NAMES[nn] + oct);
+    elPianoKeys.appendChild(div);
+  }
+}
+
+function drawPianoRoll() {
+  const c = S.ctxP, w = S.cw.pw, h = S.cw.ph;
+  if (!c || w < 1 || h < 1) return;
+  const lt = isLight();
+  c.clearRect(0, 0, w, h);
+
+  const isRec = S.mode === 'recording';
+  const trail = isRec ? S.liveNoteTrail : S.noteTrail;
+  const hasTrail = trail && trail.length > 0;
+
+  // Show/hide empty message
+  elPianoEmpty.style.display = hasTrail ? 'none' : '';
+
+  if (!hasTrail) return;
+
+  const noteH = h / PIANO_NOTES;
+
+  // Draw horizontal grid lines (per note)
+  for (let i = 0; i <= PIANO_NOTES; i++) {
+    const y = i * noteH;
+    const midi = PIANO_HIGH - i;
+    const nn = midi % 12;
+    c.strokeStyle = nn === 0 ? (lt ? 'rgba(0,0,0,0.12)' : 'rgba(0,232,154,0.08)') : (lt ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.025)');
+    c.lineWidth = nn === 0 ? 1 : 0.5;
+    c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke();
+    // Shade black keys
+    if (BLACK_NOTES.has(nn)) {
+      c.fillStyle = lt ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.015)';
+      c.fillRect(0, y, w, noteH);
+    }
+  }
+
+  // Draw note blocks
+  const totalSamples = trail.length;
+  const pxPerSample = w / Math.max(1, totalSamples);
+
+  // For scrolling: if recording live, show latest portion that fits
+  let startIdx = 0;
+  const maxVisible = Math.ceil(w / Math.max(pxPerSample, 2));
+  if (isRec && totalSamples > maxVisible) {
+    startIdx = totalSamples - maxVisible;
+  }
+
+  const blockW = isRec ? Math.max(2, pxPerSample) : pxPerSample;
+
+  // Merge consecutive same-midi into blocks for cleaner rendering
+  let i = startIdx;
+  while (i < totalSamples) {
+    const midi = trail[i];
+    if (midi < PIANO_LOW || midi > PIANO_HIGH) { i++; continue; }
+    // Find run of same note
+    let j = i + 1;
+    while (j < totalSamples && trail[j] === midi) j++;
+    const x = (i - startIdx) * blockW;
+    const bw = Math.max(1, (j - i) * blockW - 0.5);
+    const row = PIANO_HIGH - midi;
+    const y = row * noteH + 1;
+    const bh = noteH - 2;
+
+    // Color by note distance from in-tune
+    const hue = (midi % 12) * 30; // rainbow by pitch class
+    c.fillStyle = `hsla(${hue}, 70%, ${lt ? '50%' : '60%'}, 0.8)`;
+    c.beginPath();
+    c.roundRect(x, y, bw, Math.max(2, bh), 2);
+    c.fill();
+
+    // Subtle glow
+    c.fillStyle = `hsla(${hue}, 80%, 70%, 0.15)`;
+    c.beginPath();
+    c.roundRect(x - 1, y - 1, bw + 2, Math.max(4, bh + 2), 3);
+    c.fill();
+
+    i = j;
+  }
+
+  // Playhead indicator during playback/paused
+  if (!isRec && S.audioBuffer && (S.mode === 'paused' || S.mode === 'playback')) {
+    const pos = S.playOffset / S.audioBuffer.duration;
+    const px = pos * w;
+    c.strokeStyle = lt ? 'rgba(0,0,0,0.5)' : 'rgba(255,176,32,0.8)';
+    c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(px, 0); c.lineTo(px, h); c.stroke();
+  }
+}
+
+// ================================================================
 //  WAVEFORM SCRUBBING
 // ================================================================
 function wavePointerDown(e) {
@@ -1562,6 +1728,7 @@ function setupCanvases() {
   const s = init(cvSpectrum); S.ctxS = s.ctx; S.cw.sw = s.w; S.cw.sh = s.h;
   const t = init(cvTuner); S.ctxT = t.ctx; S.cw.tw = t.w; S.cw.th = t.h;
   const wv = init(cvWave); S.ctxW = wv.ctx; S.cw.ww = wv.w; S.cw.wh = wv.h;
+  const pr = init(cvPianoRoll); S.ctxP = pr.ctx; S.cw.pw = pr.w; S.cw.ph = pr.h;
 }
 
 // ================================================================
@@ -1627,6 +1794,7 @@ function animate() {
 
   drawSpectrum();
   drawTuner();
+  drawPianoRoll();
   drawWaveform();
 }
 
@@ -1697,7 +1865,7 @@ function switchToRecording(idx) {
   if (idx < 0 || idx >= S.recordings.length || idx === S.recIdx) return;
   // Save current if exists
   if (S.audioBuffer) {
-    S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice() };
+    S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice(), noteTrail: S.noteTrail.slice() };
   }
   // Stop any playback
   if (S.mode === 'playback') {
@@ -1709,6 +1877,7 @@ function switchToRecording(idx) {
   if (rec && rec.audioBuffer) {
     S.audioBuffer = rec.audioBuffer;
     S.peaks = rec.peaks;
+    S.noteTrail = rec.noteTrail || [];
     S.playOffset = 0;
     S.lastAnalyzedPos = -1;
     S.mode = 'paused';
@@ -1723,7 +1892,7 @@ function switchToRecording(idx) {
 function addNewRecording() {
   // Save current if exists
   if (S.audioBuffer) {
-    S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice() };
+    S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice(), noteTrail: S.noteTrail.slice() };
   }
   // Stop any playback
   if (S.mode === 'playback') {
@@ -1738,7 +1907,7 @@ function addNewRecording() {
 }
 
 function resetToEmpty() {
-  S.audioBuffer = null; S.peaks = []; S.livePeaks = [];
+  S.audioBuffer = null; S.peaks = []; S.livePeaks = []; S.noteTrail = []; S.liveNoteTrail = [];
   S.playOffset = 0; S.lastAnalyzedPos = -1;
   S.liveOverride = false;
   S.mode = S.micStream ? 'live' : 'idle';
@@ -1758,6 +1927,7 @@ function setupEvents() {
     await initAudio();
     setupCanvases();
     buildBeats();
+    buildPianoKeys();
     updateControlState();
     animate();
   });
@@ -1997,16 +2167,31 @@ function setupEvents() {
     return state;
   }
 
-  // Beat pattern button — subdivision patterns per beat
-  function getPatternsForTS() {
-    return [
-      { id:'single',  label:'♩' },
-      { id:'double',  label:'♫' },
-      { id:'split3',  label:'♩·♩' },
-      { id:'split4',  label:'♩··♩' },
-      { id:'triple',  label:'♫♩' },
-      { id:'quad',    label:'♬♬' }
+  // Beat pattern button — options vary by time signature
+  function getPatternsForTS(beats, den) {
+    // ♩=standard ♪=swing ⚐=march
+    if (den === 8 && beats % 3 === 0) return [
+      { id:'standard', label:'♩' },
+      { id:'swing', label:'♪' }
     ];
+    if (beats === 2) return [
+      { id:'standard', label:'♩' },
+      { id:'march', label:'⚐' }
+    ];
+    if (beats === 3) return [
+      { id:'standard', label:'♩' },
+      { id:'swing', label:'♪' }
+    ];
+    if (beats === 4) return [
+      { id:'standard', label:'♩' },
+      { id:'swing', label:'♪' },
+      { id:'march', label:'⚐' }
+    ];
+    if (beats >= 5) return [
+      { id:'standard', label:'♩' },
+      { id:'march', label:'⚐' }
+    ];
+    return [{ id:'standard', label:'♩' }];
   }
   let patternIdx = 0;
   let currentPatterns = getPatternsForTS(S.beats, S.tsDenom);
@@ -2355,7 +2540,7 @@ function setupEvents() {
       tut4:'The Tuner detects pitch and shows how many cents sharp or flat you are from the nearest note.',
       tut5:'Tap the note name on the tuner to play a reference tone. Tap again to stop.',
       tut6:'The Metronome \u2014 tap anywhere on this area to start/stop.',
-      tut7:'Tap this button to cycle beat patterns: ♩, ♫, ♩·♩, ♩··♩, ♫♩, ♬♬.',
+      tut7:'Tap this button to cycle beat patterns: Standard, Swing, and March.',
       tut8:'This counts bars. Tap it to reset the count.',
       tut9:'The Waveform section \u2014 shows your recording. Pinch to zoom, drag to scrub.',
       tut10:'Tap to record. Tap again to stop. Your recording appears in the waveform.',
@@ -2379,7 +2564,7 @@ function setupEvents() {
       tut4:'調音器可偵測音高，並顯示與最近音符的偏差（以音分為單位）。',
       tut5:'點擊調音器上的音符名稱可播放參考音。再次點擊可停止。',
       tut6:'節拍器 \u2014 點擊此區域即可啟動/停止。',
-      tut7:'點擊此按鈕可切換節拍模式：♩、♫、♩·♩、♩··♩、♫♩、♬♬。',
+      tut7:'點擊此按鈕可切換節拍模式：標準、搖擺、進行曲。',
       tut8:'這是小節計數器。點擊可重置。',
       tut9:'波形區段 \u2014 顯示您的錄音。捏合縮放，拖動可刮擦播放。',
       tut10:'點擊開始錄音，再次點擊停止。您的錄音會顯示在波形中。',
@@ -2403,7 +2588,7 @@ function setupEvents() {
       tut4:'チューナーはピッチを検出し、最も近い音からのセント偏差を表示します。',
       tut5:'チューナーの音名をタップすると基準音が鳴ります。もう一度タップで停止。',
       tut6:'メトロノーム \u2014 このエリアをタップで開始/停止。',
-      tut7:'このボタンをタップしてビートパターンを切り替え：♩、♫、♩·♩、♩··♩、♫♩、♬♬。',
+      tut7:'このボタンをタップしてビートパターンを切り替え：スタンダード、スウィング、マーチ。',
       tut8:'小節カウンターです。タップでリセット。',
       tut9:'波形セクション \u2014 録音を表示。ピンチでズーム、ドラッグでスクラブ。',
       tut10:'タップで録音開始。もう一度タップで停止。録音は波形に表示されます。',
@@ -2427,7 +2612,7 @@ function setupEvents() {
       tut4:'El Afinador detecta el tono y muestra cuántos centésimos estás por encima o por debajo de la nota más cercana.',
       tut5:'Toca el nombre de la nota en el afinador para reproducir un tono de referencia. Toca de nuevo para detener.',
       tut6:'El Metrónomo \u2014 toca en cualquier lugar de esta área para iniciar/detener.',
-      tut7:'Toca este botón para cambiar patrones de ritmo: ♩, ♫, ♩·♩, ♩··♩, ♫♩, ♬♬.',
+      tut7:'Toca este botón para cambiar patrones de ritmo: Estándar, Swing y Marcha.',
       tut8:'Esto cuenta compases. Tócalo para reiniciar.',
       tut9:'La sección de Forma de Onda \u2014 muestra tu grabación. Pellizca para zoom, arrastra para recorrer.',
       tut10:'Toca para grabar. Toca de nuevo para detener. Tu grabación aparece en la forma de onda.',
