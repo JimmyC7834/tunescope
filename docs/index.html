@@ -144,7 +144,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
 /* Waveform */
 .sec-wave{flex:1;min-height:0;background:var(--bg-panel);display:flex}
-.wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0;position:relative}
+.wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 6px;position:relative}
 .wave-header .wave-time{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
 .wave-time{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--text-dim)}
 .wave-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none}
@@ -1365,7 +1365,7 @@ function metroClick(time, type) {
 }
 
 function scheduleBeats() {
-  const ahead = 0.1;
+  const ahead = 0.5; // 500ms lookahead — pre-schedules beats so lock-screen pauses don't cause gaps
   const beatInterval = 60 / S.bpm;
   const pattern = S.beatPattern || 'single';
 
@@ -1426,8 +1426,20 @@ function scheduleBeats() {
     }
     S.nextBeatTime += beatInterval;
   }
-  S.metroTimer = setTimeout(scheduleBeats, 25);
+  // Scheduling is driven by _metroWorker ticks — no setTimeout needed here
 }
+
+// Web Worker drives metronome timing — its setInterval is not throttled
+// by the browser when screen locks, unlike main-thread setTimeout
+const _metroWorkerCode = `
+  let iv = null;
+  self.onmessage = e => {
+    if (e.data === 'start') { if (iv) clearInterval(iv); iv = setInterval(() => postMessage('tick'), 25); }
+    else if (e.data === 'stop') { clearInterval(iv); iv = null; }
+  };
+`;
+const _metroWorker = new Worker(URL.createObjectURL(new Blob([_metroWorkerCode], { type: 'application/javascript' })));
+_metroWorker.onmessage = () => { if (S.metroOn && S.ctx) scheduleBeats(); };
 
 function startMetronome() {
   if (!S.ctx) return;
@@ -1438,12 +1450,12 @@ function startMetronome() {
   const bc = $('barCounter');
   if (bc) { bc.textContent = '0'; bc.classList.remove('counting'); }
   S.nextBeatTime = S.ctx.currentTime + 0.05;
-  scheduleBeats();
+  _metroWorker.postMessage('start');
 }
 
 function stopMetronome() {
   S.metroOn = false;
-  clearTimeout(S.metroTimer);
+  _metroWorker.postMessage('stop');
   // Kill already-scheduled clicks by disconnecting and recreating metroGain
   if (S.metroGain) {
     S.metroGain.disconnect();
