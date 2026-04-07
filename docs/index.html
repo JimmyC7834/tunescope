@@ -51,12 +51,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .section.collapsed .section-main>*:not(.drag-handle):not(.section-label){visibility:hidden}
 .section.collapsed .section-label{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.75rem;letter-spacing:.15em;color:var(--text-bright);white-space:nowrap}
 .section.collapsed .drag-handle{top:50%;transform:translateY(-50%)}
+/*.section.maximized{height:var(--scroll-h,75dvh) !important;overflow:hidden}
+.scroll-area.has-maximized>.section:not(.maximized){display:none}*/
 .section-drag-source{opacity:0.2;pointer-events:none}
 .section-drag-placeholder{border:2px dashed var(--accent);background:rgba(0,232,154,0.07);flex-shrink:0;box-sizing:border-box}
 .section-drag-ghost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:0.88;border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.6);border:2px solid var(--accent)}
 .drag-handle{position:absolute;top:6px;left:6px;z-index:10;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;opacity:0.35;transition:opacity .15s,top .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
 .drag-handle:active{cursor:grabbing;opacity:0.8}
-.drag-handle svg{display:block}
+.drag-handle svg{display:block;width:7px;height:10px}
 .section-slider{position:relative;width:100%;height:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .section-slider.open{transform:translateX(-100%)}
 .section-main{position:relative;width:100%;height:100%;min-width:0;display:flex;flex-direction:column;overflow:hidden}
@@ -95,10 +97,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
 /* Metronome */
 .sec-metro{height:calc(75dvh * 4.5 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
-.sec-test{height:calc(75dvh * 2 / 13);background:var(--bg-panel);display:flex}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
-.beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 0 2px;flex-shrink:0}
+.beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 52px 2px 36px;flex-shrink:0;overflow:hidden}
 .beat-tri{width:40px;height:40px;transition:filter .06s;filter:none;pointer-events:none}
 .beat-tri svg{width:100%;height:100%;display:block}
 .beat-tri path{fill:var(--border);transition:fill .06s}
@@ -109,11 +110,11 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .beat-tri.accent.on{filter:drop-shadow(0 0 8px var(--warning-glow))}
 .metro-row{display:flex;align-items:flex-start;justify-content:center;flex:1;position:relative;z-index:2;padding:0 4px}
 .metro-vol-row{display:flex;justify-content:center;padding:0;margin-top:-4px}
-.metro-vol-slider{width:120px;-webkit-appearance:none;appearance:none;height:28px;background:transparent;outline:none;cursor:pointer;accent-color:var(--accent)}
+.metro-vol-slider{width:160px;-webkit-appearance:none;appearance:none;height:44px;background:transparent;outline:none;cursor:pointer;accent-color:var(--accent)}
 .metro-vol-slider::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--border-light)}
-.metro-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--accent-glow);margin-top:-5.5px}
+.metro-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 8px var(--accent-glow);margin-top:-9.5px}
 .metro-vol-slider::-moz-range-track{height:3px;border-radius:2px;background:var(--border-light)}
-.metro-vol-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
+.metro-vol-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
 .bpm-wheel{display:flex;flex-direction:column;align-items:center;user-select:none;position:relative;width:100%;max-width:220px}
@@ -385,22 +386,6 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
   </div>
 
-
-  <!-- TEST CARD -->
-  <div class="section sec-test">
-    <div class="section-slider" data-swipe-section>
-      <div class="section-main">
-        <div class="drag-handle" title="Drag to reorder"><svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor"><circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/></svg></div>
-        <div class="section-label">Test</div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;padding:16px">
-          <div style="color:var(--text-dim);font-size:.8rem;letter-spacing:.1em">TEST CARD</div>
-        </div>
-      </div>
-      <div class="section-config">
-        <div class="config-item"><span>Placeholder</span><span style="color:var(--text-dim);font-size:.8rem">—</span></div>
-      </div>
-    </div>
-  </div>
 
   </div><!-- end scroll-area -->
 
@@ -1229,8 +1214,8 @@ function drawTuner() {
       c.save();
       c.translate(lx, ly);
       c.rotate(ang + Math.PI / 2);
-      c.font = sf(11) + 'px "Share Tech Mono"';
-      c.fillStyle = ct === 0 ? (lt ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)') : (lt ? 'rgba(0,0,0,0.22)' : 'rgba(255,255,255,0.2)');
+      c.font = (ct === 0 ? ('700 ' + sf(17)) : sf(11)) + 'px "Share Tech Mono"';
+      c.fillStyle = ct === 0 ? (lt ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.85)') : (lt ? 'rgba(0,0,0,0.22)' : 'rgba(255,255,255,0.2)');
       c.textAlign = 'center'; c.textBaseline = 'middle';
       c.fillText(Math.round(hz), 0, 0);
       c.restore();
@@ -1378,9 +1363,11 @@ function drawTuner() {
 function buildBeats() {
   elBeatRow.innerHTML = '';
   const triSvg = '<svg viewBox="0 0 24 24"><path d="M6 4.5C6 2.8 7.8 1.7 9.2 2.6l8.4 5.8c2 1.4 2 4.4 0 5.8l-8.4 5.8C7.8 21 6 20 6 18.2V4.5z"/></svg>';
+  const groupOf3 = S.tsDenom === 8; // 3/8, 6/8, 9/8, 12/8 — accent every 3rd beat
   for (let i = 0; i < S.beats; i++) {
     const t = document.createElement('div');
-    t.className = 'beat-tri' + (i === 0 ? ' accent' : '');
+    const isAccent = groupOf3 ? (i % 3 === 0) : (i === 0);
+    t.className = 'beat-tri' + (isAccent ? ' accent' : '');
     t.innerHTML = triSvg;
     elBeatRow.appendChild(t);
   }
@@ -2052,18 +2039,14 @@ function setupEvents() {
 
   // ---- Time signature vertical scroll pickers ----
   const TS_COMBOS = [
-    { label:'2/2', beats:2, den:2 },
+    { label:'1/4', beats:1, den:4 },
     { label:'2/4', beats:2, den:4 },
     { label:'3/4', beats:3, den:4 },
     { label:'4/4', beats:4, den:4 },
-    { label:'5/4', beats:5, den:4 },
     { label:'3/8', beats:3, den:8 },
     { label:'6/8', beats:6, den:8 },
-    { label:'7/8', beats:7, den:8 },
     { label:'9/8', beats:9, den:8 },
     { label:'12/8', beats:12, den:8 },
-    { label:'5/8', beats:5, den:8 },
-    { label:'6/4', beats:6, den:4 }
   ];
   const TS_LABELS = TS_COMBOS.map(c => c.label);
   const ITEM_H = 16; // must match CSS .scroll-picker-item height
@@ -3195,6 +3178,7 @@ setupEvents();
     const sections = Array.from(document.querySelectorAll('.scroll-area > .section'));
     p.sectionOrder = sections.map(el => [...el.classList].find(c => c.startsWith('sec-')));
     p.sectionCollapsed = sections.map(el => el.classList.contains('collapsed'));
+    // p.sectionMaximized = sections.findIndex(el => el.classList.contains('maximized')); // expand feature disabled
     return p;
   }
 
@@ -3280,6 +3264,7 @@ setupEvents();
         if (Array.isArray(p.sectionCollapsed) && p.sectionCollapsed[i]) {
           el.classList.add('collapsed');
         }
+        // expand feature disabled: maximized state not restored
       });
     }
     // Restore beat pattern after TS is set
@@ -3417,9 +3402,50 @@ setupEvents();
     pendingSection = null; pendingHandle = null;
   }
 
+  /* EXPAND FEATURE — commented out for now
+  const DOUBLE_TAP_MS = 300;
+  let lastTapSection = null, lastTapTime = 0;
+
+  function setMaxScrollH() {
+    scrollArea.style.setProperty('--scroll-h', scrollArea.clientHeight + 'px');
+  }
+
+  function toggleMaximize(section) {
+    section.classList.remove('collapsed');
+    const isMax = section.classList.contains('maximized');
+    if (isMax) {
+      section.querySelectorAll('canvas').forEach(c => { c.style.height = ''; c.style.flex = ''; c.style.width = ''; });
+      section.classList.remove('maximized');
+      scrollArea.classList.remove('has-maximized');
+      setTimeout(() => { if (typeof setupCanvases === 'function' && window.S && S.ctx) setupCanvases(); }, 320);
+    } else {
+      section.querySelectorAll('canvas').forEach(c => {
+        const r = c.getBoundingClientRect();
+        c.style.height = r.height + 'px';
+        c.style.width = r.width + 'px';
+        c.style.flex = 'none';
+      });
+      setMaxScrollH();
+      document.querySelectorAll('.scroll-area > .section.maximized').forEach(s => {
+        s.querySelectorAll('canvas').forEach(c => { c.style.height = ''; c.style.width = ''; c.style.flex = ''; });
+        s.classList.remove('maximized');
+      });
+      section.classList.add('maximized');
+      scrollArea.classList.add('has-maximized');
+    }
+    if (window._savePrefs) window._savePrefs();
+  }
+  END EXPAND FEATURE */
+
+  const scrollArea = document.querySelector('.scroll-area');
+
   function toggleCollapse(section) {
     section.classList.toggle('collapsed');
     if (window._savePrefs) window._savePrefs();
+  }
+
+  function handleTap(section) {
+    toggleCollapse(section);
   }
 
   // Attach to each handle directly
@@ -3457,8 +3483,7 @@ setupEvents();
         endDrag(false);
         if (window._savePrefs) window._savePrefs();
       } else {
-        // Tap — toggle collapse
-        if (pendingSection) toggleCollapse(pendingSection);
+        if (pendingSection) handleTap(pendingSection);
         pointerId = null;
         pendingSection = null;
         pendingHandle = null;
@@ -3470,6 +3495,7 @@ setupEvents();
       endDrag(true);
     });
   });
+
 })();
 </script>
 </body>
