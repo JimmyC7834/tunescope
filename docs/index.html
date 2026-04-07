@@ -86,7 +86,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-metro{height:calc(75dvh * 4 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
-.beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:10px 0;flex-shrink:0}
+.beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 0 2px;flex-shrink:0}
 .beat-tri{width:40px;height:40px;transition:filter .06s;filter:none;pointer-events:none}
 .beat-tri svg{width:100%;height:100%;display:block}
 .beat-tri path{fill:var(--border);transition:fill .06s}
@@ -96,7 +96,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .beat-tri.accent.on path{fill:var(--warning)}
 .beat-tri.accent.on{filter:drop-shadow(0 0 8px var(--warning-glow))}
 .metro-row{display:flex;align-items:flex-start;justify-content:center;flex:1;position:relative;z-index:2;padding:0 4px}
-.metro-vol-row{display:flex;justify-content:center;padding:2px 0 0}
+.metro-vol-row{display:flex;justify-content:center;padding:0;margin-top:-4px}
 .metro-vol-slider{width:120px;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border-light);outline:none;cursor:pointer;accent-color:var(--accent)}
 .metro-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--accent-glow)}
 .metro-vol-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
@@ -133,7 +133,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .metro-toggle{display:none}
 
 /* Beat pattern button — bottom right */
-.subdiv-btn{position:absolute;bottom:6px;right:10px;font-family:'Share Tech Mono',monospace;font-size:.82rem;letter-spacing:1px;color:var(--text-mid);background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:18px;min-width:36px;height:36px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;z-index:3;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
+.subdiv-btn{position:absolute;bottom:6px;right:10px;color:var(--text-mid);background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:18px;min-width:44px;height:36px;padding:0 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;z-index:3;-webkit-tap-highlight-color:transparent;transition:color .15s,border-color .15s}
+.subdiv-btn svg{display:block;pointer-events:none}
 .subdiv-btn:active{color:var(--accent);border-color:var(--accent)}
 .app.light .subdiv-btn{border-color:rgba(0,0,0,0.1)}
 .bar-counter-group{position:absolute;bottom:6px;left:10px;display:flex;align-items:center;z-index:3}
@@ -326,6 +327,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         <div class="beat-row" id="beatRow"></div>
         <div class="metro-row">
           <div class="bpm-wheel">
+            <div class="bpm-tempo-label" id="bpmTempoLabel">Allegro</div>
             <div class="bpm-row">
               <button class="bpm-btn bpm-btn-tempo" id="bpmPrevTempo">‹</button>
               <button class="bpm-btn" id="bpmMinus">−</button>
@@ -333,7 +335,6 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
               <button class="bpm-btn" id="bpmPlus">+</button>
               <button class="bpm-btn bpm-btn-tempo" id="bpmNextTempo">›</button>
             </div>
-            <div class="bpm-tempo-label" id="bpmTempoLabel">Allegro</div>
             <div class="bpm-tap-hint">TAP TEMPO</div>
           </div>
         </div>
@@ -350,7 +351,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             </div>
           </div>
         </div>
-        <div class="subdiv-btn" id="subdivBtn">♩</div>
+        <div class="subdiv-btn" id="subdivBtn"></div>
         <div class="bar-counter-group">
           <div class="bar-counter-label" id="barCounter">0</div>
         </div>
@@ -635,9 +636,15 @@ async function initAudio() {
   try {
     S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
+    // Disconnect mic cleanly if track ends (e.g. screen lock revokes mic access)
+    S.micStream.getTracks().forEach(track => {
+      track.addEventListener('ended', () => {
+        try { if (S.micGain) S.micGain.disconnect(S.analyser); } catch(_) {}
+      });
+    });
     // Mic input gain — higher on native mobile where mic signal is lower
     S.micGain = S.ctx.createGain();
-    S.micGain.gain.value = window.Capacitor ? 10.0 : 5.0;
+    S.micGain.gain.value = window.Capacitor ? 16.0 : 5.0;
     S.micSrc.connect(S.micGain);
     S.micGain.connect(S.analyser);
     // Create a destination stream for recording the amplified signal
@@ -655,24 +662,41 @@ async function initAudio() {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       requestWakeLock();
-      if (S.ctx && S.ctx.state === 'suspended') S.ctx.resume();
+      if (S.ctx && S.ctx.state === 'suspended') {
+        S.ctx.resume().then(() => {
+          if (S.metroOn) {
+            clearTimeout(S.metroTimer);
+            S.nextBeatTime = S.ctx.currentTime + 0.05;
+            scheduleBeats();
+          }
+        });
+      }
     }
   });
 }
 
 function startAudioKeepalive() {
   if (!S.ctx || S._keepAlive) return;
-  // 1-second silent buffer looped indefinitely — signals to the OS that
-  // audio is active so it doesn't suspend the AudioContext in background
-  const buf = S.ctx.createBuffer(1, S.ctx.sampleRate, S.ctx.sampleRate);
-  const src = S.ctx.createBufferSource();
-  src.buffer = buf;
-  src.loop = true;
+  // Oscillator at 1 Hz with near-zero gain — iOS requires non-zero audio
+  // output to keep the AudioContext alive when screen is locked
+  const osc = S.ctx.createOscillator();
   const g = S.ctx.createGain();
-  g.gain.value = 0; // completely silent
-  src.connect(g).connect(S.ctx.destination);
-  src.start();
-  S._keepAlive = src;
+  osc.frequency.value = 1;
+  g.gain.value = 0.0001; // inaudible but non-zero
+  osc.connect(g).connect(S.ctx.destination);
+  osc.start();
+  S._keepAlive = osc;
+  // Immediately resume if context ever suspends (e.g. screen lock)
+  S.ctx.addEventListener('statechange', () => {
+    if (S.ctx.state === 'suspended') {
+      S.ctx.resume();
+    } else if (S.ctx.state === 'running' && S.metroOn) {
+      // Re-sync metronome beat scheduling after context resumes
+      clearTimeout(S.metroTimer);
+      S.nextBeatTime = S.ctx.currentTime + 0.05;
+      scheduleBeats();
+    }
+  });
 }
 
 async function requestWakeLock() {
@@ -2030,20 +2054,85 @@ function setupEvents() {
   }
 
   // Beat pattern button — subdivision patterns per beat
+  const BEAT_ICONS = {
+    // Quarter note: filled head + stem
+    single: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 28" height="16" fill="currentColor">
+      <ellipse cx="8" cy="23" rx="5" ry="3.2" transform="rotate(-20 8 23)"/>
+      <rect x="12.5" y="4" width="1.1" height="19"/>
+    </svg>`,
+    // Two beamed eighth notes
+    double: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 28" height="16" fill="currentColor">
+      <ellipse cx="7" cy="24" rx="5" ry="3.2" transform="rotate(-20 7 24)"/>
+      <ellipse cx="25" cy="22" rx="5" ry="3.2" transform="rotate(-20 25 22)"/>
+      <rect x="11.5" y="6" width="1.1" height="18"/>
+      <rect x="29.5" y="4" width="1.1" height="18"/>
+      <polygon points="11.5,6 30.6,4 30.6,6.5 11.5,8.5"/>
+    </svg>`,
+    // Dotted eighth + sixteenth (swing)
+    split3: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 28" height="16" fill="currentColor">
+      <ellipse cx="7" cy="24" rx="5" ry="3.2" transform="rotate(-20 7 24)"/>
+      <circle cx="15.5" cy="22.5" r="1.6"/>
+      <rect x="11.5" y="6" width="1.1" height="18"/>
+      <ellipse cx="31" cy="22" rx="5" ry="3.2" transform="rotate(-20 31 22)"/>
+      <rect x="35.5" y="4" width="1.1" height="18"/>
+      <polygon points="11.5,6 36.6,4 36.6,6.5 11.5,8.5"/>
+      <polygon points="24,8.5 36.6,6.5 36.6,9 24,11"/>
+    </svg>`,
+    // Double-dotted + sixteenth
+    split4: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28" height="16" fill="currentColor">
+      <ellipse cx="7" cy="24" rx="5" ry="3.2" transform="rotate(-20 7 24)"/>
+      <circle cx="15.5" cy="22.5" r="1.6"/>
+      <circle cx="20.5" cy="22.5" r="1.6"/>
+      <rect x="11.5" y="6" width="1.1" height="18"/>
+      <ellipse cx="37" cy="22" rx="5" ry="3.2" transform="rotate(-20 37 22)"/>
+      <rect x="41.5" y="4" width="1.1" height="18"/>
+      <polygon points="11.5,6 42.6,4 42.6,6.5 11.5,8.5"/>
+      <polygon points="28,8.5 42.6,6.5 42.6,9 28,11"/>
+    </svg>`,
+    // Triplet: three beamed eighth notes with bracket + "3"
+    triple: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" height="16" fill="currentColor">
+      <ellipse cx="6" cy="26" rx="5" ry="3.2" transform="rotate(-20 6 26)"/>
+      <ellipse cx="22" cy="25" rx="5" ry="3.2" transform="rotate(-20 22 25)"/>
+      <ellipse cx="38" cy="24" rx="5" ry="3.2" transform="rotate(-20 38 24)"/>
+      <rect x="10.5" y="8" width="1.1" height="18"/>
+      <rect x="26.5" y="7" width="1.1" height="18"/>
+      <rect x="42.5" y="6" width="1.1" height="18"/>
+      <polygon points="10.5,8 43.6,6 43.6,8.5 10.5,10.5"/>
+      <rect x="10.5" y="1" width="1.1" height="5"/>
+      <rect x="42.5" y="1" width="1.1" height="5"/>
+      <rect x="11.6" y="1" width="9" height="1.1"/>
+      <rect x="32.5" y="1" width="10" height="1.1"/>
+      <text x="27" y="7" font-size="6.5" font-weight="700" text-anchor="middle" font-family="sans-serif">3</text>
+    </svg>`,
+    // Four sixteenth notes: 4 heads, 2 beams
+    quad: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 28" height="16" fill="currentColor">
+      <ellipse cx="6" cy="25" rx="5" ry="3.2" transform="rotate(-20 6 25)"/>
+      <ellipse cx="19" cy="24" rx="5" ry="3.2" transform="rotate(-20 19 24)"/>
+      <ellipse cx="33" cy="23" rx="5" ry="3.2" transform="rotate(-20 33 23)"/>
+      <ellipse cx="46" cy="22" rx="5" ry="3.2" transform="rotate(-20 46 22)"/>
+      <rect x="10.5" y="7" width="1.1" height="18"/>
+      <rect x="23.5" y="6" width="1.1" height="18"/>
+      <rect x="37.5" y="5" width="1.1" height="18"/>
+      <rect x="50.5" y="4" width="1.1" height="18"/>
+      <polygon points="10.5,7 51.6,4 51.6,6.5 10.5,9.5"/>
+      <polygon points="10.5,9.5 51.6,6.5 51.6,9 10.5,12"/>
+    </svg>`
+  };
+
   function getPatternsForTS() {
     return [
-      { id:'single',  label:'♩' },
-      { id:'double',  label:'♫' },
-      { id:'split3',  label:'♩.♪' },
-      { id:'split4',  label:'♩..♪' },
-      { id:'triple',  label:'♩³' },
-      { id:'quad',    label:'♬♬' }
+      { id:'single',  label: BEAT_ICONS.single },
+      { id:'double',  label: BEAT_ICONS.double },
+      { id:'split3',  label: BEAT_ICONS.split3 },
+      { id:'split4',  label: BEAT_ICONS.split4 },
+      { id:'triple',  label: BEAT_ICONS.triple },
+      { id:'quad',    label: BEAT_ICONS.quad }
     ];
   }
   let patternIdx = 0;
   let currentPatterns = getPatternsForTS(S.beats, S.tsDenom);
   const elSubdiv = $('subdivBtn');
-  elSubdiv.textContent = currentPatterns[0].label;
+  elSubdiv.innerHTML = currentPatterns[0].label;
 
   function updatePatternOptions() {
     currentPatterns = getPatternsForTS(S.beats, S.tsDenom);
@@ -2055,7 +2144,7 @@ function setupEvents() {
       patternIdx = 0;
       S.beatPattern = currentPatterns[0].id;
     }
-    elSubdiv.textContent = currentPatterns[patternIdx].label;
+    elSubdiv.innerHTML = currentPatterns[patternIdx].label;
   }
 
   let subdivStartX = 0, subdivStartY = 0;
@@ -2072,7 +2161,7 @@ function setupEvents() {
     patternIdx = (patternIdx + 1) % currentPatterns.length;
     const opt = currentPatterns[patternIdx];
     S.beatPattern = opt.id;
-    elSubdiv.textContent = opt.label;
+    elSubdiv.innerHTML = opt.label;
     if (S.metroOn) { stopMetronome(); startMetronome(); }
   });
   // Desktop fallback
@@ -2083,7 +2172,7 @@ function setupEvents() {
     patternIdx = (patternIdx + 1) % currentPatterns.length;
     const opt = currentPatterns[patternIdx];
     S.beatPattern = opt.id;
-    elSubdiv.textContent = opt.label;
+    elSubdiv.innerHTML = opt.label;
     if (S.metroOn) { stopMetronome(); startMetronome(); }
   });
 
@@ -2739,7 +2828,7 @@ function setupEvents() {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
-      S.micGain.gain.value = window.Capacitor ? 10.0 : 5.0;
+      S.micGain.gain.value = window.Capacitor ? 16.0 : 5.0;
       S.micSrc.connect(S.micGain);
       S.micGain.connect(S.analyser);
       S.recDest = S.ctx.createMediaStreamDestination();
