@@ -144,7 +144,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
 /* Waveform */
 .sec-wave{flex:1;min-height:0;background:var(--bg-panel);display:flex}
-.wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 6px;position:relative}
+.wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 12px;position:relative}
 .wave-header .wave-time{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
 .wave-time{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--text-dim)}
 .wave-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none}
@@ -432,6 +432,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             <option value="8">8x</option>
             <option value="10">10x</option>
             <option value="15">15x</option>
+            <option value="25">25x</option>
+            <option value="50">50x</option>
+            <option value="80">80x</option>
           </select>
         </div>
       </div>
@@ -644,7 +647,7 @@ async function initAudio() {
     });
     // Mic input gain — higher on native mobile where mic signal is lower
     S.micGain = S.ctx.createGain();
-    S.micGain.gain.value = window.Capacitor ? 16.0 : 5.0;
+    S.micGain.gain.value = window.Capacitor ? 50.0 : 5.0;
     S.micSrc.connect(S.micGain);
     S.micGain.connect(S.analyser);
     // Create a destination stream for recording the amplified signal
@@ -2840,7 +2843,7 @@ function setupEvents() {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
-      S.micGain.gain.value = window.Capacitor ? 16.0 : 5.0;
+      S.micGain.gain.value = window.Capacitor ? 50.0 : 5.0;
       S.micSrc.connect(S.micGain);
       S.micGain.connect(S.analyser);
       S.recDest = S.ctx.createMediaStreamDestination();
