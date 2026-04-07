@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -25,7 +25,7 @@
   --cyan:#00c8ff;
   --font-scale:1;
 }
-html,body{height:100%;overflow:hidden;background:var(--bg-deep);color:var(--text-bright);font-family:'Chakra Petch',sans-serif;font-size:calc(16px * var(--font-scale))}
+html,body{height:100%;overflow:hidden;background:var(--bg-deep);color:var(--text-bright);font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:calc(16px * var(--font-scale))}
 body{display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#0d1020 0%,var(--bg-deep) 60%);transition:background .4s}
 body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 60%)}
 
@@ -43,7 +43,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
 /* ===== SECTIONS ===== */
-.scroll-area{flex:0 0 75%;overflow-y:auto;overflow-x:hidden;min-height:0;-webkit-overflow-scrolling:touch}
+.scroll-area{flex:0 0 75%;overflow-y:auto;overflow-x:hidden;min-height:0;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}.scroll-area::-webkit-scrollbar{display:none}
 .bottom-area{flex:0 0 25%;display:flex;flex-direction:column;min-height:0}
 .section{position:relative;border-bottom:1px solid var(--border);overflow:hidden;flex-shrink:0}
 .section-slider{position:relative;width:100%;height:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}
@@ -99,21 +99,16 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
 .bpm-wheel{display:flex;flex-direction:column;align-items:center;user-select:none;position:relative;width:100%;max-width:220px}
-.bpm-display{font-family:'Share Tech Mono',monospace;font-size:1.3rem;color:var(--text-bright);text-align:center;position:relative;z-index:3;background:linear-gradient(180deg,rgba(12,14,24,0.95) 40%,transparent);padding:0 8px 2px;pointer-events:none}
-.bpm-display span{font-size:.7rem;color:var(--text-dim);letter-spacing:.1em;margin-left:3px}
+.bpm-display{font-family:'Share Tech Mono',monospace;font-size:2.0rem;color:#fff;text-shadow:0 0 24px rgba(255,255,255,0.35);text-align:center;position:relative;z-index:3;flex:1;min-width:0;display:flex;align-items:baseline;justify-content:center;gap:6px;padding:0 20px;cursor:grab;touch-action:none;user-select:none}
+.bpm-display:active{cursor:grabbing}
+.bpm-unit{font-size:1rem;color:var(--accent);letter-spacing:.12em;opacity:.85;text-shadow:0 0 10px var(--accent-glow);padding:0 6px}
 .bpm-tap-hint{font-size:.65rem;color:var(--text-dim);letter-spacing:.12em;text-align:center;margin-top:1px;opacity:.5;pointer-events:none}
-.bpm-tempo-label{font-family:'Chakra Petch',sans-serif;font-size:.75rem;color:var(--accent);letter-spacing:.08em;text-align:center;margin-top:3px;opacity:.8;pointer-events:none}
+.bpm-tempo-label{font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:.75rem;color:var(--accent);letter-spacing:.08em;text-align:center;margin-top:3px;opacity:.8;pointer-events:none}
 .bpm-btn-tempo{font-size:1.2rem;font-weight:700}
-.bpm-row{display:flex;align-items:center;width:100%;gap:4px;margin-top:-10px}
-.bpm-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-deep);color:var(--text-bright);font-size:1rem;font-family:'Share Tech Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,border-color .15s;padding:0;line-height:1}
-.bpm-btn:active{background:var(--accent);border-color:var(--accent);color:#000}
-.bpm-track{position:relative;flex:1;min-width:0;height:36px;border:1px solid var(--border-light);border-radius:10px;overflow:hidden;cursor:grab;touch-action:none;background:var(--bg-deep)}
-.bpm-track:active{cursor:grabbing}
-.bpm-track-inner{position:absolute;top:0;bottom:0;display:flex;align-items:center;pointer-events:none}
-.bpm-notch{width:1px;height:14px;background:rgba(255,255,255,0.12);flex-shrink:0;margin:0 5px}
-.bpm-notch.big{height:22px;background:rgba(255,255,255,0.25);width:1.5px}
-.bpm-center{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--accent);transform:translateX(-50%);z-index:2;pointer-events:none;box-shadow:0 0 8px var(--accent-glow)}
-.bpm-tap-flash{position:absolute;inset:0;background:var(--accent);opacity:0;transition:opacity .08s;pointer-events:none;border-radius:9px}
+.bpm-row{display:flex;align-items:center;width:100%;gap:4px}
+.bpm-btn{width:28px;height:28px;border-radius:50%;border:none;background:transparent;color:var(--text-bright);font-size:1rem;font-family:'Share Tech Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,background .15s;padding:0;line-height:1}
+.bpm-btn:active{color:var(--accent);background:rgba(255,255,255,0.1)}
+.bpm-tap-flash{position:absolute;inset:0;background:var(--accent);opacity:0;transition:opacity .08s;pointer-events:none;border-radius:9px;z-index:0}
 
 /* Time signature dial wheels — bottom right */
 .timesig-group{position:absolute;top:6px;right:10px;display:flex;align-items:center;gap:0;user-select:none;z-index:3}
@@ -144,7 +139,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
 /* Waveform */
 .sec-wave{flex:1;min-height:0;background:var(--bg-panel);display:flex}
-.wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0}
+.wave-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0;position:relative}
+.wave-header .wave-time{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
 .wave-time{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--text-dim)}
 .wave-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none}
 .wave-wrap:active{cursor:grabbing}
@@ -179,7 +175,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .rec-slot-fade-l,.rec-slot-fade-r{position:absolute;top:0;bottom:0;width:40px;pointer-events:none;z-index:1}
 .rec-slot-fade-l{left:0;background:linear-gradient(90deg,rgba(8,10,18,.95) 0%,transparent 100%)}
 .rec-slot-fade-r{right:0;background:linear-gradient(270deg,rgba(8,10,18,.95) 0%,transparent 100%)}
-.rec-add{width:52px;flex-shrink:0;border:none;border-left:1px solid var(--border);background:transparent;color:var(--text-mid);font-size:1.2rem;font-family:'Chakra Petch',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color .12s,background .12s}
+.rec-add{width:52px;flex-shrink:0;border:none;border-left:1px solid var(--border);background:transparent;color:var(--text-mid);font-size:1.2rem;font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color .12s,background .12s}
 .rec-add:hover{color:var(--text-bright)}
 .rec-add:active{background:rgba(255,255,255,.04)}
 
@@ -204,7 +200,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .settings-toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:var(--text-bright);border-radius:50%;transition:transform .2s}
 .settings-toggle.on::after{transform:translateX(18px)}
 .settings-val{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--text-bright)}
-.settings-select{background:var(--bg-panel);color:var(--text-bright);border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-family:'Chakra Petch',sans-serif;font-size:.85rem;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8da8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:20px}
+.settings-select{background:var(--bg-panel);color:var(--text-bright);border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:.85rem;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8da8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:20px}
 .settings-select option{background:var(--bg-panel);color:var(--text-bright)}
 
 /* Light theme */
@@ -213,17 +209,13 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.light .rec-slot-fade-l{background:linear-gradient(90deg,rgba(240,241,245,.95) 0%,transparent 100%)}
 .app.light .rec-slot-fade-r{background:linear-gradient(270deg,rgba(240,241,245,.95) 0%,transparent 100%)}
 .app.light .settings-panel{background:#fff}
-.app.light .bpm-display{background:linear-gradient(180deg,rgba(255,255,255,0.95) 40%,transparent)}
 .app.light .scroll-picker-fade-top{background:linear-gradient(180deg,rgba(240,241,245,.95) 0%,transparent 100%)}
 .app.light .scroll-picker-fade-bot{background:linear-gradient(0deg,rgba(240,241,245,.95) 0%,transparent 100%)}
 .app.light .sec-spectrum{background:linear-gradient(180deg,rgba(230,232,240,.9),#fff)}
 .app.light .sec-spectrum.live-mode{background:linear-gradient(180deg,rgba(210,215,228,.95),rgba(220,224,235,.9))}
 .app.light .sec-tuner.live-mode{background:rgba(220,224,235,.95)}
 .app.light .sec-metro{background:linear-gradient(180deg,var(--bg-panel),rgba(230,232,240,.95))}
-.app.light .bpm-notch{background:rgba(0,0,0,0.1)}
-.app.light .bpm-notch.big{background:rgba(0,0,0,0.22)}
-.app.light .bpm-track{border-color:var(--border)}
-.app.light .bpm-btn{border-color:var(--border);background:rgba(240,241,245,.95);color:var(--text-bright)}
+.app.light .bpm-btn{color:var(--text-bright)}
 .app.light .scroll-picker-track{border-color:rgba(0,0,0,0.1)}
 .app.light .rec-action-item:active{background:rgba(0,0,0,.05)}
 .app.light .rec-settings-btn:active{background:rgba(0,0,0,.04)}
@@ -233,7 +225,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 /* Recording action bar — push-up thin bar */
 .rec-actions{height:0;overflow:hidden;display:flex;align-items:stretch;background:var(--bg-surface);border-top:1px solid var(--border-light);flex-shrink:0;transition:height .25s cubic-bezier(.4,0,.2,1)}
 .rec-actions.open{height:34px}
-.rec-action-item{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-family:'Chakra Petch',sans-serif;font-size:.82rem;font-weight:500;color:var(--text-mid);cursor:pointer;border-right:1px solid var(--border);-webkit-tap-highlight-color:transparent;transition:color .1s,background .1s}
+.rec-action-item{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:.82rem;font-weight:500;color:var(--text-mid);cursor:pointer;border-right:1px solid var(--border);-webkit-tap-highlight-color:transparent;transition:color .1s,background .1s}
 .rec-action-item:last-child{border-right:none}
 .rec-action-item:active{background:rgba(255,255,255,.05);color:var(--text-bright)}
 .rec-action-item.danger{color:var(--danger)}
@@ -248,17 +240,17 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .tutorial-overlay.active{opacity:1;pointer-events:auto}
 .tutorial-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);transition:clip-path .4s cubic-bezier(.4,0,.2,1)}
 .tutorial-tooltip{position:absolute;background:var(--bg-panel,#0c0e18);border:1px solid var(--accent);border-radius:10px;padding:14px 16px;max-width:260px;z-index:10001;transform:translate(-50%,0);transition:all .4s cubic-bezier(.4,0,.2,1)}
-.tutorial-tooltip-text{font-family:'Chakra Petch',sans-serif;font-size:.82rem;color:var(--text-bright,#eef0ff);line-height:1.5;margin-bottom:12px}
+.tutorial-tooltip-text{font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:.82rem;color:var(--text-bright,#eef0ff);line-height:1.5;margin-bottom:12px}
 .tutorial-tooltip-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .tutorial-tooltip-dots{display:flex;gap:5px}
 .tutorial-tooltip-dot{width:6px;height:6px;border-radius:50%;background:var(--border,#2a2d40);transition:background .2s}
 .tutorial-tooltip-dot.active{background:var(--accent)}
-.tutorial-btn{font-family:'Chakra Petch',sans-serif;font-size:.84rem;font-weight:600;letter-spacing:.08em;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s}
+.tutorial-btn{font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:.84rem;font-weight:600;letter-spacing:.08em;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s}
 .tutorial-btn-next{background:var(--accent);color:#000}
 .tutorial-btn-next:active{background:#00c888}
 .tutorial-btn-skip{background:transparent;color:var(--text-dim);border:1px solid var(--border-light,#2a2d40)}
 .tutorial-btn-skip:active{color:var(--text-bright)}
-.tutorial-continue{font-family:'Chakra Petch',sans-serif;font-size:.78rem;color:var(--text-dim);text-align:center;margin-top:8px;letter-spacing:.05em;opacity:.6;animation:tutPulse 2s ease-in-out infinite}
+.tutorial-continue{font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:.78rem;color:var(--text-dim);text-align:center;margin-top:8px;letter-spacing:.05em;opacity:.6;animation:tutPulse 2s ease-in-out infinite}
 @keyframes tutPulse{0%,100%{opacity:.4}50%{opacity:.8}}
 .tutorial-hand{position:absolute;z-index:10002;pointer-events:none;font-size:28px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
 @keyframes tutTap{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(.85);opacity:1}}
@@ -330,15 +322,10 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         <div class="beat-row" id="beatRow"></div>
         <div class="metro-row">
           <div class="bpm-wheel">
-            <div class="bpm-display" id="bpmDisplay">120<span>BPM</span></div>
             <div class="bpm-row">
               <button class="bpm-btn bpm-btn-tempo" id="bpmPrevTempo">‹</button>
               <button class="bpm-btn" id="bpmMinus">−</button>
-              <div class="bpm-track" id="bpmTrack">
-                <div class="bpm-track-inner" id="bpmInner"></div>
-                <div class="bpm-center"></div>
-                <div class="bpm-tap-flash" id="bpmFlash"></div>
-              </div>
+              <div class="bpm-display" id="bpmDisplay"><span id="bpmValue" style="position:relative;z-index:1">120<span class="bpm-unit">BPM</span></span><div class="bpm-tap-flash" id="bpmFlash"></div></div>
               <button class="bpm-btn" id="bpmPlus">+</button>
               <button class="bpm-btn bpm-btn-tempo" id="bpmNextTempo">›</button>
             </div>
@@ -377,7 +364,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <!-- 4. Test Card -->
   <div class="section sec-test" style="height:calc(75dvh * 4 / 13);background:var(--bg-panel);display:flex;align-items:center;justify-content:center">
     <div class="section-main" style="display:flex;align-items:center;justify-content:center;width:100%">
-      <span style="font-size:1.2rem;color:var(--text-dim);letter-spacing:.15em">TEST CARD</span>
+      <span style="font-size:1.2rem;color:var(--text-dim);letter-spacing:.15em">TBA</span>
     </div>
   </div>
 
@@ -615,7 +602,7 @@ const $ = id => document.getElementById(id);
 const elStartup = $('startup');
 const cvSpectrum = $('cvSpectrum'), cvTuner = $('cvTuner'), cvWave = $('cvWave');
 const elSecSpectrum = document.querySelector('.sec-spectrum'), elSecTuner = document.querySelector('.sec-tuner');
-const elBpmDisplay = $('bpmDisplay'), elBpmTrack = $('bpmTrack'), elBpmInner = $('bpmInner'), elBpmFlash = $('bpmFlash');
+const elBpmDisplay = $('bpmDisplay'), elBpmFlash = $('bpmFlash');
 const elTsCombo = $('tsCombo'), elTsComboItems = $('tsComboItems');
 const elBeatRow = $('beatRow'), elMetroToggle = $('metroToggle');
 const elWaveTime = $('waveTime'), elWaveWrap = $('waveWrap');
@@ -1048,7 +1035,7 @@ function drawSpectrum() {
   // Live mode badge
   const isLiveAnalysis = S.mode === 'live' || S.mode === 'recording' || (S.mode === 'paused' && S.liveOverride);
   if (isLiveAnalysis) {
-    c.font = '600 ' + sf(8) + 'px "Chakra Petch"';
+    c.font = '600 ' + sf(8) + 'px "Century Gothic"';
     c.fillStyle = '#ff3d5a';
     c.textAlign = 'right'; c.textBaseline = 'top';
     c.fillText('● LIVE', w - 6, 8);
@@ -1177,7 +1164,7 @@ function drawTuner() {
 
   // ---- Labels drawn on canvas overlapping pivot ----
   // Mask 50% of the needle root so labels are readable
-  const maskR = Math.round((r - 20) * 0.5) + 10;
+  const maskR = Math.round((r - 20) * 0.65) + 10;
   c.beginPath(); c.arc(cx, cy, maskR, 0, Math.PI * 2);
   c.fillStyle = lt ? (document.querySelector('.sec-tuner').classList.contains('live-mode') ? 'rgba(220,224,235,0.95)' : 'rgba(240,241,245,0.95)') : (document.querySelector('.sec-tuner').classList.contains('live-mode') ? 'rgba(4,5,12,0.95)' : 'rgba(12,14,24,0.95)');
   c.fill();
@@ -1187,21 +1174,21 @@ function drawTuner() {
   function drawNoteLabel(name, oct, col, labelY) {
     const base = name[0];
     const acc = name.length > 1 ? name.slice(1) : '';
-    c.font = '700 ' + sf(40) + 'px "Chakra Petch"';
+    c.font = '700 ' + sf(58) + 'px "Century Gothic"';
     c.fillStyle = col;
     c.textAlign = 'center'; c.textBaseline = 'middle';
     const baseW = c.measureText(base).width;
     c.fillText(base, cx, labelY);
     const right = cx + baseW / 2 + 2;
     if (acc) {
-      c.font = '600 ' + sf(18) + 'px "Chakra Petch"';
+      c.font = '600 ' + sf(26) + 'px "Century Gothic"';
       c.textAlign = 'left'; c.textBaseline = 'top';
-      c.fillText(acc, right, labelY - sf(20));
+      c.fillText(acc, right, labelY - sf(28));
     }
-    c.font = '500 ' + sf(16) + 'px "Share Tech Mono"';
+    c.font = '500 ' + sf(22) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#5a5d72' : '#8a8da8';
     c.textAlign = 'left'; c.textBaseline = 'bottom';
-    c.fillText(oct, right, labelY + sf(18));
+    c.fillText(oct, right, labelY + sf(26));
     c.textAlign = 'center';
   }
 
@@ -1217,7 +1204,7 @@ function drawTuner() {
     c.textBaseline = 'top';
     c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 35);
     // "♪ PLAYING" indicator
-    c.font = '600 ' + sf(12) + 'px "Chakra Petch"';
+    c.font = '600 ' + sf(12) + 'px "Century Gothic"';
     c.fillStyle = '#00e89a';
     c.fillText('♪ TAP TO STOP', cx, cy - 16);
   } else if (S.freq > 0 && S.note) {
@@ -1235,7 +1222,7 @@ function drawTuner() {
     c.fillStyle = col;
     c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy - 16);
   } else {
-    c.font = '700 ' + sf(40) + 'px "Chakra Petch"';
+    c.font = '700 ' + sf(58) + 'px "Century Gothic"';
     c.fillStyle = lt ? '#1a1c28' : '#e4e6f0';
     c.textBaseline = 'middle';
     c.fillText('--', cx, cy - maskR * 0.72);
@@ -1776,14 +1763,21 @@ function resetToEmpty() {
 // ================================================================
 function setupEvents() {
   // Startup
-  elStartup.addEventListener('click', async () => {
+  async function doStart() {
     elStartup.classList.add('hidden');
     await initAudio();
     setupCanvases();
     buildBeats();
     updateControlState();
     animate();
-  });
+  }
+  if (window.Capacitor) {
+    // Native app — no user-gesture needed for AudioContext; init immediately
+    doStart();
+  } else {
+    // Web — AudioContext requires a user gesture; keep tap-to-start
+    elStartup.addEventListener('click', doStart);
+  }
 
   // Unified recording/playback button
   btnMain.addEventListener('click', () => {
@@ -1808,22 +1802,11 @@ function setupEvents() {
   cvSpectrum.addEventListener('click', toggleLiveOverride);
   cvTuner.addEventListener('click', toggleLiveOverride);
 
-  // ---- BPM horizontal scroll wheel ----
-  // Build notch marks inside the track
-  const NOTCH_COUNT = 60;
-  const NOTCH_SPACING = 11; // px between notches
-  for (let i = 0; i < NOTCH_COUNT; i++) {
-    const d = document.createElement('div');
-    d.className = 'bpm-notch' + (i % 5 === 0 ? ' big' : '');
-    elBpmInner.appendChild(d);
-  }
-  const innerTotalW = NOTCH_COUNT * NOTCH_SPACING;
-  function bpmToOffset(bpm) {
-    return -(((bpm - 20) / (300 - 20)) * innerTotalW - elBpmTrack.offsetWidth / 2);
-  }
+  // ---- BPM display (draggable) ----
+  const BPM_PX_PER_BPM = 2.36; // drag sensitivity (px per 1 BPM)
   function updateBpmWheel() {
-    elBpmInner.style.transform = 'translateX(' + bpmToOffset(S.bpm) + 'px)';
-    elBpmDisplay.innerHTML = S.bpm + '<span>BPM</span>';
+    const bv = $('bpmValue');
+    if (bv) bv.firstChild.textContent = S.bpm;
     // Update tempo marking label
     const tl = $('bpmTempoLabel');
     if (tl) tl.textContent = getTempoMarking(S.bpm);
@@ -1894,7 +1877,7 @@ function setupEvents() {
     const x = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : bpmDragX);
     const dx = x - bpmDragX;
     if (Math.abs(dx) > 4) bpmDragMoved = true;
-    const bpmDelta = -dx / (innerTotalW / (300 - 20));
+    const bpmDelta = -dx / BPM_PX_PER_BPM;
     S.bpm = Math.round(Math.max(20, Math.min(300, bpmDragStart + bpmDelta)));
     updateBpmWheel();
   }
@@ -1902,14 +1885,14 @@ function setupEvents() {
     if (bpmDragActive && !bpmDragMoved) handleTapTempo();
     bpmDragActive = false;
   }
-  elBpmTrack.addEventListener('mousedown', bpmPointerDown);
-  elBpmTrack.addEventListener('touchstart', e => { e.preventDefault(); bpmPointerDown(e.touches[0]); }, {passive:false});
+  elBpmDisplay.addEventListener('mousedown', bpmPointerDown);
+  elBpmDisplay.addEventListener('touchstart', e => { e.preventDefault(); bpmPointerDown(e.touches[0]); }, {passive:false});
   document.addEventListener('mousemove', bpmPointerMove);
   document.addEventListener('touchmove', e => { if (bpmDragActive) bpmPointerMove(e); }, {passive:false});
   document.addEventListener('mouseup', bpmPointerUp);
   document.addEventListener('touchend', bpmPointerUp);
-  // Mouse wheel on BPM track
-  elBpmTrack.addEventListener('wheel', e => {
+  // Mouse wheel on BPM display
+  elBpmDisplay.addEventListener('wheel', e => {
     e.preventDefault();
     S.bpm = Math.max(20, Math.min(300, S.bpm + (e.deltaY > 0 ? -1 : 1)));
     updateBpmWheel();
@@ -2674,7 +2657,7 @@ function setupEvents() {
     const cxC = cvTuner.width / 2, cyC = cvTuner.height - 30 * scaleY;
     const dist = Math.sqrt((canvasX - cxC) ** 2 + (canvasY - cyC) ** 2);
     const r = Math.min(cvTuner.width / 2 - 28, cvTuner.height - 48);
-    const maskR = r * 0.5 + 10;
+    const maskR = r * 0.65 + 10;
     if (dist < maskR) {
       e.stopImmediatePropagation();
       S.pitchPlaying ? stopPitch() : startPitch();
@@ -2825,7 +2808,7 @@ function setupEvents() {
   const dotsEl = $('tutorialDots');
   const skipBtn = $('tutorialSkip');
   const continueEl = $('tutorialContinue');
-  let step = 0;
+  let step = 0, tutorialReady = false;
 
   const STEPS = [
     { target:'.sec-spectrum', i18n:'tut1', hand:'none', tooltipPos:'below' },
@@ -2923,11 +2906,18 @@ function setupEvents() {
   }
 
   function start() {
-    // Close settings first
+    // Close settings and scroll to top first
     document.getElementById('app').classList.remove('settings-open');
+    const sa = document.getElementById('scrollArea');
+    if (sa) sa.scrollTop = 0;
     step = 0;
+    tutorialReady = false;
     overlay.classList.add('active');
-    showStep();
+    // Delay showStep until settings panel transform animation finishes (0.4s)
+    setTimeout(() => {
+      showStep();
+      tutorialReady = true;
+    }, 420);
   }
 
   function end() {
@@ -2935,6 +2925,7 @@ function setupEvents() {
   }
 
   function advance(e) {
+    if (!tutorialReady) return;
     e.stopPropagation();
     if (step >= STEPS.length - 1) { end(); return; }
     step++;
