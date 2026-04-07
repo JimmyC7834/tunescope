@@ -66,7 +66,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-spectrum canvas{width:100%;height:100%;display:block}
 
 /* Tuner */
-.sec-tuner{height:calc(75dvh * 6 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
+.sec-tuner{height:calc(75dvh * 5.5 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
@@ -83,7 +83,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .note-arrow:active{color:var(--accent)}
 
 /* Metronome */
-.sec-metro{height:calc(75dvh * 4 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
+.sec-metro{height:calc(75dvh * 4.5 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
 .beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 0 2px;flex-shrink:0}
@@ -97,8 +97,10 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .beat-tri.accent.on{filter:drop-shadow(0 0 8px var(--warning-glow))}
 .metro-row{display:flex;align-items:flex-start;justify-content:center;flex:1;position:relative;z-index:2;padding:0 4px}
 .metro-vol-row{display:flex;justify-content:center;padding:0;margin-top:-4px}
-.metro-vol-slider{width:120px;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border-light);outline:none;cursor:pointer;accent-color:var(--accent)}
-.metro-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--accent-glow)}
+.metro-vol-slider{width:120px;-webkit-appearance:none;appearance:none;height:28px;background:transparent;outline:none;cursor:pointer;accent-color:var(--accent)}
+.metro-vol-slider::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--border-light)}
+.metro-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--accent-glow);margin-top:-5.5px}
+.metro-vol-slider::-moz-range-track{height:3px;border-radius:2px;background:var(--border-light)}
 .metro-vol-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
@@ -368,12 +370,6 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
   </div>
 
-  <!-- 4. Test Card -->
-  <div class="section sec-test" style="height:calc(75dvh * 4 / 13);background:var(--bg-panel);display:flex;align-items:center;justify-content:center">
-    <div class="section-main" style="display:flex;align-items:center;justify-content:center;width:100%">
-      <span style="font-size:1.2rem;color:var(--text-dim);letter-spacing:.15em">TBA</span>
-    </div>
-  </div>
 
   </div><!-- end scroll-area -->
 
@@ -647,7 +643,7 @@ async function initAudio() {
     });
     // Mic input gain — higher on native mobile where mic signal is lower
     S.micGain = S.ctx.createGain();
-    S.micGain.gain.value = window.Capacitor ? 50.0 : 5.0;
+    S.micGain.gain.value = window.Capacitor ? 25.0 : 5.0;
     S.micSrc.connect(S.micGain);
     S.micGain.connect(S.analyser);
     // Create a destination stream for recording the amplified signal
@@ -662,6 +658,7 @@ async function initAudio() {
   requestWakeLock();
   // Silent audio loop — keeps AudioContext alive when screen locks (iOS/Android)
   startAudioKeepalive();
+  setupMediaSession();
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       requestWakeLock();
@@ -680,12 +677,12 @@ async function initAudio() {
 
 function startAudioKeepalive() {
   if (!S.ctx || S._keepAlive) return;
-  // Oscillator at 1 Hz with near-zero gain — iOS requires non-zero audio
-  // output to keep the AudioContext alive when screen is locked
+  // Oscillator at 1 Hz — gain low enough to be inaudible but non-zero so
+  // iOS/Android audio session stays active when screen locks
   const osc = S.ctx.createOscillator();
   const g = S.ctx.createGain();
   osc.frequency.value = 1;
-  g.gain.value = 0.0001; // inaudible but non-zero
+  g.gain.value = 0.001;
   osc.connect(g).connect(S.ctx.destination);
   osc.start();
   S._keepAlive = osc;
@@ -694,12 +691,34 @@ function startAudioKeepalive() {
     if (S.ctx.state === 'suspended') {
       S.ctx.resume();
     } else if (S.ctx.state === 'running' && S.metroOn) {
-      // Re-sync metronome beat scheduling after context resumes
       clearTimeout(S.metroTimer);
       S.nextBeatTime = S.ctx.currentTime + 0.05;
       scheduleBeats();
     }
   });
+}
+
+function setupMediaSession() {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: 'ToneScope Metronome',
+    artist: 'ToneScope',
+  });
+  // Dummy handlers so the OS treats this as an active media player
+  navigator.mediaSession.setActionHandler('play', () => {
+    if (!S.metroOn) startMetronome();
+  });
+  navigator.mediaSession.setActionHandler('pause', () => {
+    if (S.metroOn) stopMetronome();
+  });
+  navigator.mediaSession.setActionHandler('stop', () => {
+    if (S.metroOn) stopMetronome();
+  });
+}
+
+function updateMediaSession(playing) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
 }
 
 async function requestWakeLock() {
@@ -1070,7 +1089,7 @@ function drawSpectrum() {
   }
 
   // X-axis labels
-  c.font = sf(9) + 'px "Share Tech Mono"';
+  c.font = sf(11) + 'px "Share Tech Mono"';
   c.fillStyle = lt ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)';
   c.textBaseline = 'top';
   const maxKhz = maxFreq / 1000;
@@ -1104,7 +1123,7 @@ function drawTuner() {
   c.clearRect(0, 0, w, h);
 
   const cx = w / 2;
-  const padSide = 28, padTop = 18, padBot = 50; // extra bottom for larger labels
+  const padSide = 28, padTop = 18, padBot = 30; // extra bottom for larger labels
   const arcSpan = Math.PI * 0.85; // ~153° wide sweep
   const halfSpan = arcSpan / 2;
   const r = Math.min(w / 2 - padSide, h - padTop - padBot);
@@ -1158,10 +1177,10 @@ function drawTuner() {
     c.lineWidth = big ? 1.8 : (med ? 1.2 : 0.8);
     c.stroke();
     if (big) {
-      const lblR = inner - len - 14;
+      const lblR = inner - len - 22;
       const lbl = cx + lblR * Math.cos(ang);
       const lby = cy + lblR * Math.sin(ang);
-      c.font = '600 ' + sf(9) + 'px "Share Tech Mono"';
+      c.font = '600 ' + sf(13) + 'px "Share Tech Mono"';
       c.fillStyle = lt ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.4)';
       c.textAlign = 'center'; c.textBaseline = 'middle';
       c.fillText(ct === 0 ? '0' : (ct > 0 ? '+' + ct : String(ct)), lbl, lby);
@@ -1179,7 +1198,7 @@ function drawTuner() {
       c.save();
       c.translate(lx, ly);
       c.rotate(ang + Math.PI / 2);
-      c.font = sf(9) + 'px "Share Tech Mono"';
+      c.font = sf(11) + 'px "Share Tech Mono"';
       c.fillStyle = ct === 0 ? (lt ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)') : (lt ? 'rgba(0,0,0,0.22)' : 'rgba(255,255,255,0.2)');
       c.textAlign = 'center'; c.textBaseline = 'middle';
       c.fillText(Math.round(hz), 0, 0);
@@ -1252,7 +1271,7 @@ function drawTuner() {
     const pOct = Math.floor(dispMidi / 12) - 1;
     const pFreq = A4 * Math.pow(2, (S.pitchMidi - A4_MIDI) / 12);
     drawNoteLabel(pName, pOct, '#00e89a', cy - maskR * 0.72);
-    c.font = '600 ' + sf(17) + 'px "Share Tech Mono"';
+    c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
     c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 35);
@@ -1265,7 +1284,7 @@ function drawTuner() {
     const col = absCents < 10 ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
     drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.72);
     // Hz
-    c.font = '600 ' + sf(17) + 'px "Share Tech Mono"';
+    c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
     c.fillText(S.freq.toFixed(1) + ' Hz', cx, cy - 35);
@@ -1273,13 +1292,13 @@ function drawTuner() {
     const cSign = S.cents >= 0 ? '+' : '';
     c.font = '600 ' + sf(16) + 'px "Share Tech Mono"';
     c.fillStyle = col;
-    c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy - 16);
+    c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy - 6);
   } else {
     c.font = '700 ' + sf(58) + 'px "Century Gothic"';
     c.fillStyle = lt ? '#1a1c28' : '#e4e6f0';
     c.textBaseline = 'middle';
     c.fillText('--', cx, cy - maskR * 0.72);
-    c.font = '600 ' + sf(17) + 'px "Share Tech Mono"';
+    c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#8a8da0' : '#4a4d68';
     c.textBaseline = 'top';
     c.fillText('--- Hz', cx, cy - 35);
@@ -1313,13 +1332,13 @@ function drawTuner() {
     c.fillRect(barX, barY + barH - filledH, barW, filledH);
   }
   // dB text
-  c.font = '600 ' + sf(10) + 'px "Share Tech Mono"';
+  c.font = '600 ' + sf(13) + 'px "Share Tech Mono"';
   c.fillStyle = dDb > -10 ? '#ff3d5a' : dDb > -30 ? '#ffb020' : (lt ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.45)');
   c.textAlign = 'center'; c.textBaseline = 'bottom';
   c.fillText(Math.round(dDb) + '', barX + barW / 2, barY - 3);
-  c.font = sf(10) + 'px "Share Tech Mono"';
+  c.font = sf(13) + 'px "Share Tech Mono"';
   c.fillStyle = lt ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.3)';
-  c.fillText('dB', barX + barW / 2, barY + barH + 11);
+  c.fillText('dB', barX + barW / 2, barY + barH + 13);
 }
 
 // ================================================================
@@ -1454,11 +1473,13 @@ function startMetronome() {
   if (bc) { bc.textContent = '0'; bc.classList.remove('counting'); }
   S.nextBeatTime = S.ctx.currentTime + 0.05;
   _metroWorker.postMessage('start');
+  updateMediaSession(true);
 }
 
 function stopMetronome() {
   S.metroOn = false;
   _metroWorker.postMessage('stop');
+  updateMediaSession(false);
   // Kill already-scheduled clicks by disconnecting and recreating metroGain
   if (S.metroGain) {
     S.metroGain.disconnect();
@@ -2843,7 +2864,7 @@ function setupEvents() {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
-      S.micGain.gain.value = window.Capacitor ? 50.0 : 5.0;
+      S.micGain.gain.value = window.Capacitor ? 25.0 : 5.0;
       S.micSrc.connect(S.micGain);
       S.micGain.connect(S.analyser);
       S.recDest = S.ctx.createMediaStreamDestination();
