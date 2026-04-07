@@ -46,6 +46,12 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .scroll-area{flex:0 0 75%;overflow-y:auto;overflow-x:hidden;min-height:0;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}.scroll-area::-webkit-scrollbar{display:none}
 .bottom-area{flex:0 0 25%;display:flex;flex-direction:column;min-height:0}
 .section{position:relative;border-bottom:1px solid var(--border);overflow:hidden;flex-shrink:0}
+.section-drag-source{opacity:0.2;pointer-events:none}
+.section-drag-placeholder{border:2px dashed var(--accent);background:rgba(0,232,154,0.07);flex-shrink:0;box-sizing:border-box}
+.section-drag-ghost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:0.88;border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.6);border:2px solid var(--accent)}
+.drag-handle{position:absolute;top:6px;left:6px;z-index:10;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;opacity:0.35;transition:opacity .15s}
+.drag-handle:active{cursor:grabbing;opacity:0.8}
+.drag-handle svg{display:block}
 .section-slider{position:relative;width:100%;height:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .section-slider.open{transform:translateX(-100%)}
 .section-main{position:relative;width:100%;height:100%;min-width:0;display:flex;flex-direction:column;overflow:hidden}
@@ -287,6 +293,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <div class="section sec-spectrum">
     <div class="section-slider" data-swipe-section>
       <div class="section-main">
+        <div class="drag-handle" title="Drag to reorder"><svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor"><circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/></svg></div>
         <div class="section-label">Spectrum</div>
         <canvas id="cvSpectrum"></canvas>
       </div>
@@ -304,6 +311,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <div class="section sec-tuner">
     <div class="section-slider" data-swipe-section>
       <div class="section-main">
+        <div class="drag-handle" title="Drag to reorder"><svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor"><circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/></svg></div>
         <div class="section-label">Tuner</div>
         <canvas id="cvTuner"></canvas>
         <button class="note-arrow note-arrow-left" id="pitchDown">‹</button>
@@ -324,6 +332,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <div class="section sec-metro">
     <div class="section-slider" data-swipe-section>
       <div class="section-main">
+        <div class="drag-handle" title="Drag to reorder"><svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor"><circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/></svg></div>
         <div class="section-label">Metronome</div>
         <div class="metro-core">
         <div class="beat-row" id="beatRow"></div>
@@ -378,6 +387,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <div class="section sec-wave">
     <div class="section-slider" data-swipe-section>
       <div class="section-main">
+        <div class="drag-handle" title="Drag to reorder"><svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor"><circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/></svg></div>
         <div class="wave-header">
           <div class="section-label" style="position:static">Waveform</div>
           <div class="wave-time" id="waveTime" style="display:none">0:00 / 0:00</div>
@@ -3109,6 +3119,106 @@ function setupEvents() {
 //  INIT
 // ================================================================
 setupEvents();
+
+// ================================================================
+//  SECTION DRAG-TO-REORDER
+// ================================================================
+(function() {
+  let dragEl = null;
+  let ghost = null;
+  let placeholder = null;
+  let ghostOffX = 0, ghostOffY = 0;
+  let pointerId = null;
+
+  function getSections() {
+    return Array.from(document.querySelectorAll('.scroll-area > .section'));
+  }
+
+  function startDrag(el, clientX, clientY) {
+    dragEl = el;
+    const rect = el.getBoundingClientRect();
+
+    ghost = el.cloneNode(true);
+    ghost.className = 'section-drag-ghost';
+    ghost.style.width = rect.width + 'px';
+    ghost.style.height = rect.height + 'px';
+    ghostOffX = clientX - rect.left;
+    ghostOffY = clientY - rect.top;
+    moveGhost(clientX, clientY);
+    document.body.appendChild(ghost);
+
+    placeholder = document.createElement('div');
+    placeholder.className = 'section-drag-placeholder';
+    placeholder.style.height = rect.height + 'px';
+    el.parentNode.insertBefore(placeholder, el.nextSibling);
+
+    el.classList.add('section-drag-source');
+    if (navigator.vibrate) navigator.vibrate(30);
+  }
+
+  function moveGhost(clientX, clientY) {
+    ghost.style.transform = `translate(${clientX - ghostOffX}px, ${clientY - ghostOffY}px)`;
+  }
+
+  function updatePlaceholder(clientY) {
+    const sections = getSections().filter(s => s !== dragEl);
+    const scrollArea = document.querySelector('.scroll-area');
+    const scrollTop = scrollArea.scrollTop;
+    let insertBefore = null;
+    for (const s of sections) {
+      const r = s.getBoundingClientRect();
+      if (clientY < r.top + r.height / 2) { insertBefore = s; break; }
+    }
+    if (insertBefore) {
+      insertBefore.parentNode.insertBefore(placeholder, insertBefore);
+    } else {
+      const last = sections[sections.length - 1];
+      if (last) last.parentNode.insertBefore(placeholder, last.nextSibling);
+    }
+    scrollArea.scrollTop = scrollTop;
+  }
+
+  function endDrag(cancelled) {
+    if (!dragEl) return;
+    if (!cancelled && placeholder && placeholder.parentNode) {
+      placeholder.parentNode.insertBefore(dragEl, placeholder);
+    }
+    dragEl.classList.remove('section-drag-source');
+    if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+    ghost = null; placeholder = null; dragEl = null; pointerId = null;
+  }
+
+  // Attach to each handle directly
+  document.querySelectorAll('.drag-handle').forEach(handle => {
+    handle.addEventListener('pointerdown', e => {
+      if (pointerId !== null) return;
+      e.preventDefault();
+      const section = handle.closest('.section');
+      if (!section) return;
+      pointerId = e.pointerId;
+      handle.setPointerCapture(e.pointerId);
+      startDrag(section, e.clientX, e.clientY);
+    });
+
+    handle.addEventListener('pointermove', e => {
+      if (e.pointerId !== pointerId || !dragEl) return;
+      e.preventDefault();
+      moveGhost(e.clientX, e.clientY);
+      updatePlaceholder(e.clientY);
+    });
+
+    handle.addEventListener('pointerup', e => {
+      if (e.pointerId !== pointerId) return;
+      endDrag(false);
+    });
+
+    handle.addEventListener('pointercancel', e => {
+      if (e.pointerId !== pointerId) return;
+      endDrag(true);
+    });
+  });
+})();
 </script>
 </body>
 </html>
