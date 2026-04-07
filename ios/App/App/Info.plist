@@ -47,5 +47,9 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>ToneScope needs microphone access for tuning, recording, and audio analysis.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>

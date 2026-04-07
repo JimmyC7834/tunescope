@@ -96,6 +96,10 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .beat-tri.accent.on path{fill:var(--warning)}
 .beat-tri.accent.on{filter:drop-shadow(0 0 8px var(--warning-glow))}
 .metro-row{display:flex;align-items:flex-start;justify-content:center;flex:1;position:relative;z-index:2;padding:0 4px}
+.metro-vol-row{display:flex;justify-content:center;padding:2px 0 0}
+.metro-vol-slider{width:120px;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border-light);outline:none;cursor:pointer;accent-color:var(--accent)}
+.metro-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--accent-glow)}
+.metro-vol-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
 .bpm-wheel{display:flex;flex-direction:column;align-items:center;user-select:none;position:relative;width:100%;max-width:220px}
@@ -333,6 +337,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             <div class="bpm-tap-hint">TAP TEMPO</div>
           </div>
         </div>
+        <div class="metro-vol-row">
+          <input type="range" class="metro-vol-slider" id="cfgMetroVol" min="0" max="3" step="0.05" value="0.25">
+        </div>
         </div>
         <div class="timesig-group">
           <div class="scroll-picker">
@@ -352,7 +359,6 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       <div class="section-config">
 
         <div class="config-item"><span>Click Sound</span><select class="config-select" id="cfgClickSound"><option value="sine" selected>Classic</option><option value="triangle">Wood</option><option value="square">Digital</option><option value="noise">Noise</option></select></div>
-        <div class="config-item"><span>Volume</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgMetroVol" min="0" max="1" step="0.05" value="0.25"><span class="config-range-val" id="cfgMetroVolVal">0.25</span></span></div>
         <div class="config-item"><span>Accent</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgAccentVol" min="0.5" max="2.5" step="0.1" value="1.0"><span class="config-range-val" id="cfgAccentVolVal">1.0x</span></span></div>
         <div class="config-item"><span>Subdivision</span><select class="config-select" id="cfgSubdiv"><option value="1" selected>None</option><option value="2">8th</option><option value="3">Triplet</option><option value="4">16th</option></select></div>
         <div class="config-item"><span>Count-in</span><select class="config-select" id="cfgCountIn"><option value="0" selected>Off</option><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option></select></div>
@@ -629,9 +635,9 @@ async function initAudio() {
   try {
     S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
-    // Mic input gain to compensate for iOS low volume
+    // Mic input gain — higher on native mobile where mic signal is lower
     S.micGain = S.ctx.createGain();
-    S.micGain.gain.value = 5.0;
+    S.micGain.gain.value = window.Capacitor ? 10.0 : 5.0;
     S.micSrc.connect(S.micGain);
     S.micGain.connect(S.analyser);
     // Create a destination stream for recording the amplified signal
@@ -644,9 +650,29 @@ async function initAudio() {
   }
   // Keep screen awake for practice sessions
   requestWakeLock();
+  // Silent audio loop — keeps AudioContext alive when screen locks (iOS/Android)
+  startAudioKeepalive();
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') requestWakeLock();
+    if (document.visibilityState === 'visible') {
+      requestWakeLock();
+      if (S.ctx && S.ctx.state === 'suspended') S.ctx.resume();
+    }
   });
+}
+
+function startAudioKeepalive() {
+  if (!S.ctx || S._keepAlive) return;
+  // 1-second silent buffer looped indefinitely — signals to the OS that
+  // audio is active so it doesn't suspend the AudioContext in background
+  const buf = S.ctx.createBuffer(1, S.ctx.sampleRate, S.ctx.sampleRate);
+  const src = S.ctx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  const g = S.ctx.createGain();
+  g.gain.value = 0; // completely silent
+  src.connect(g).connect(S.ctx.destination);
+  src.start();
+  S._keepAlive = src;
 }
 
 async function requestWakeLock() {
@@ -2008,9 +2034,9 @@ function setupEvents() {
     return [
       { id:'single',  label:'♩' },
       { id:'double',  label:'♫' },
-      { id:'split3',  label:'♩·♩' },
-      { id:'split4',  label:'♩··♩' },
-      { id:'triple',  label:'♫♩' },
+      { id:'split3',  label:'♩.♪' },
+      { id:'split4',  label:'♩..♪' },
+      { id:'triple',  label:'♩³' },
       { id:'quad',    label:'♬♬' }
     ];
   }
@@ -2096,7 +2122,6 @@ function setupEvents() {
   $('cfgMetroVol').addEventListener('input', function() {
     const v = parseFloat(this.value);
     if (S.metroGain) S.metroGain.gain.value = v;
-    $('cfgMetroVolVal').textContent = v.toFixed(2);
   });
   $('cfgAccentVol').addEventListener('input', function() {
     S.metroAccentMul = parseFloat(this.value);
@@ -2282,18 +2307,32 @@ function setupEvents() {
     }
   });
 
-  $('recActShare').addEventListener('click', () => {
+  $('recActShare').addEventListener('click', async () => {
     hideRecActions();
     if (!S.audioBuffer) return;
     const rec = S.recordings[S.recIdx];
     if (!rec || !rec.audioBuffer) return;
     const buf = rec.audioBuffer;
     const wav = audioBufferToWav(buf);
+    const filename = (rec.name || 'Rec ' + (S.recIdx + 1)) + '.wav';
     const blob = new Blob([wav], { type: 'audio/wav' });
+    // Use native share sheet on mobile if available
+    if (navigator.share && navigator.canShare) {
+      const file = new File([blob], filename, { type: 'audio/wav' });
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: filename });
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return; // user cancelled
+        }
+      }
+    }
+    // Fallback: download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = (rec.name || 'Rec ' + (S.recIdx + 1)) + '.wav';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   });
@@ -2367,7 +2406,7 @@ function setupEvents() {
       tut4:'The Tuner detects pitch and shows how many cents sharp or flat you are from the nearest note.',
       tut5:'Tap the note name on the tuner to play a reference tone. Tap again to stop.',
       tut6:'The Metronome \u2014 tap anywhere on this area to start/stop.',
-      tut7:'Tap this button to cycle beat patterns: ♩, ♫, ♩·♩, ♩··♩, ♫♩, ♬♬.',
+      tut7:'Tap this button to cycle beat patterns: ♩ (quarter), ♫ (8ths), ♩.♪ (swing), ♩..♪ (dotted), ♩³ (triplet), ♬♬ (16ths).',
       tut8:'This counts bars. Tap it to reset the count.',
       tut9:'The Waveform section \u2014 shows your recording. Pinch to zoom, drag to scrub.',
       tut10:'Tap to record. Tap again to stop. Your recording appears in the waveform.',
@@ -2485,8 +2524,8 @@ function setupEvents() {
     document.querySelectorAll('.settings-label[data-i18n]').forEach(el => {
       el.textContent = t(el.getAttribute('data-i18n'));
     });
-    // Settings label: Metronome Volume, Tutorial
-    const settingsLabelMap = {'metroVol':'metroVol', 'tutorial':'tutorial'};
+    // Settings label: Tutorial
+    const settingsLabelMap = {'tutorial':'tutorial'};
     document.querySelectorAll('.settings-label').forEach(el => {
       for (const key of Object.keys(settingsLabelMap)) {
         for (const lang of Object.values(I18N)) { if (el.textContent === lang[key]) { el.textContent = t(key); return; } }
@@ -2700,7 +2739,7 @@ function setupEvents() {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
-      S.micGain.gain.value = 5.0;
+      S.micGain.gain.value = window.Capacitor ? 10.0 : 5.0;
       S.micSrc.connect(S.micGain);
       S.micGain.connect(S.analyser);
       S.recDest = S.ctx.createMediaStreamDestination();
