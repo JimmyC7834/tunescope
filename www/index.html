@@ -79,7 +79,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-spectrum canvas{width:100%;height:100%;display:block}
 
 /* Tuner */
-.sec-tuner{height:calc(75dvh * 5.5 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
+.sec-tuner{height:calc(75dvh * 6 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
@@ -96,7 +96,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .note-arrow:active{color:var(--accent)}
 
 /* Metronome */
-.sec-metro{height:calc(75dvh * 4.5 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
+.sec-metro{height:calc(75dvh * 4 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
 .beat-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 52px 2px 36px;flex-shrink:0;overflow:hidden}
@@ -109,12 +109,13 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .beat-tri.accent.on path{fill:var(--warning)}
 .beat-tri.accent.on{filter:drop-shadow(0 0 8px var(--warning-glow))}
 .metro-row{display:flex;align-items:flex-start;justify-content:center;flex:1;position:relative;z-index:2;padding:0 4px}
-.metro-vol-row{display:flex;justify-content:center;padding:0;margin-top:-4px}
-.metro-vol-slider{width:160px;-webkit-appearance:none;appearance:none;height:44px;background:transparent;outline:none;cursor:pointer;accent-color:var(--accent)}
-.metro-vol-slider::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--border-light)}
-.metro-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 8px var(--accent-glow);margin-top:-9.5px}
-.metro-vol-slider::-moz-range-track{height:3px;border-radius:2px;background:var(--border-light)}
-.metro-vol-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
+.metro-selects-row{position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:space-between;padding:0 10px;pointer-events:none;z-index:3}
+.metro-inline-select{pointer-events:auto;font-family:'Share Tech Mono',monospace;font-size:0.8rem;background:transparent;color:var(--text-mid);border:none;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;padding:2px 4px}
+.app.light .metro-inline-select{color:#666}
+.metro-vol-row{display:flex;justify-content:center;align-items:center;padding:0;margin-top:-4px}
+.metro-vol-slider{display:none}
+.vol-dial{width:48px;height:48px;cursor:pointer;touch-action:none;user-select:none}
+.vol-dial canvas{width:100%;height:100%}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
 .bpm-wheel{display:flex;flex-direction:column;align-items:center;user-select:none;position:relative;width:100%;max-width:220px}
@@ -353,14 +354,15 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
               <button class="bpm-btn" id="bpmPlus">+</button>
               <button class="bpm-btn bpm-btn-tempo" id="bpmNextTempo">›</button>
             </div>
-            <div class="bpm-tap-hint">TAP TEMPO</div>
+            <div class="bpm-tap-hint" style="display:none">TAP TEMPO</div>
           </div>
         </div>
         <div class="metro-vol-row">
           <input type="range" class="metro-vol-slider" id="cfgMetroVol" min="0" max="3" step="0.05" value="0.25">
+          <div class="vol-dial" id="volDial"><canvas width="96" height="96"></canvas></div>
         </div>
         </div>
-        <div class="timesig-group">
+        <div class="timesig-group" style="display:none">
           <div class="scroll-picker">
             <div class="scroll-picker-track" id="tsCombo">
               <div class="scroll-picker-items" id="tsComboItems"></div>
@@ -369,9 +371,29 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             </div>
           </div>
         </div>
-        <div class="subdiv-btn" id="subdivBtn"></div>
-        <div class="bar-counter-group">
+        <div class="subdiv-btn" id="subdivBtn" style="display:none"></div>
+        <div class="bar-counter-group" style="display:none">
           <div class="bar-counter-label" id="barCounter">0</div>
+        </div>
+        <div class="metro-selects-row">
+          <select class="metro-inline-select" id="bpSelect">
+            <option value="single" selected>♩ Quarter</option>
+            <option value="double">♫ 8ths</option>
+            <option value="split3">♩.♪ Swing</option>
+            <option value="split4">♩..♪ Dotted</option>
+            <option value="triple">♩³ Triplet</option>
+            <option value="quad">♬♬ 16ths</option>
+          </select>
+          <select class="metro-inline-select" id="tsSelect">
+            <option value="1/4">1/4</option>
+            <option value="2/4">2/4</option>
+            <option value="3/4">3/4</option>
+            <option value="4/4" selected>4/4</option>
+            <option value="3/8">3/8</option>
+            <option value="6/8">6/8</option>
+            <option value="9/8">9/8</option>
+            <option value="12/8">12/8</option>
+          </select>
         </div>
         <button class="metro-toggle" id="metroToggle">START</button>
       </div>
@@ -594,6 +616,8 @@ const S = {
   stableFreq: 0,           // smoothed frequency
   noteHoldCount: 0,        // frames a candidate note has been consistent
   candidateNote: null,      // note waiting to become stable
+  octCorrCount: 0,         // consecutive frames octave-correction fired same direction
+  octCorrDir: 0,           // last correction direction: -1 = halved, +1 = doubled, 0 = none
   spectrumData: new Uint8Array(FFT_SIZE / 2),
   timeBuf: new Float32Array(FFT_SIZE),
   // Recording
@@ -659,7 +683,12 @@ async function initAudio() {
     });
     // Mic input gain — higher on native mobile where mic signal is lower
     S.micGain = S.ctx.createGain();
-    S.micGain.gain.value = window.Capacitor ? 25.0 : 5.0;
+    const isIOS = window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios';
+    const defaultGain = isIOS ? 25.0 : window.Capacitor ? 25.0 : 5.0;
+    S.micGain.gain.value = defaultGain;
+    if (!localStorage.getItem('tunescope_prefs')) {
+      $('cfgMicGain').value = String(defaultGain);
+    }
     S.micSrc.connect(S.micGain);
     S.micGain.connect(S.analyser);
     // Create a destination stream for recording the amplified signal
@@ -886,11 +915,56 @@ function autoCorrelate(buf, sr) {
 function stabilizePitch(rawFreq) {
   if (rawFreq <= 0) return;
 
-  // Octave-jump suppression
+  // Octave-jump suppression — but allow real octave changes through
   if (S.stableFreq > 0) {
     const ratio = rawFreq / S.stableFreq;
-    if (ratio > 1.8 && ratio < 2.2) rawFreq *= 0.5;
-    else if (ratio > 0.45 && ratio < 0.55) rawFreq *= 2.0;
+    let corrDir = 0;
+    if (ratio > 1.8 && ratio < 2.2) corrDir = -1;       // would halve
+    else if (ratio > 0.45 && ratio < 0.55) corrDir = 1;  // would double
+
+    if (corrDir !== 0) {
+      if (corrDir === S.octCorrDir) {
+        S.octCorrCount++;
+      } else {
+        S.octCorrDir = corrDir;
+        S.octCorrCount = 1;
+      }
+      // If correction fires same direction 4+ frames in a row,
+      // it's a real pitch change — accept uncorrected frequency and reset
+      if (S.octCorrCount >= 4) {
+        S.stableFreq = rawFreq;
+        S.pitchHistory = [rawFreq];
+        S.octCorrCount = 0;
+        S.octCorrDir = 0;
+        S.noteHoldCount = 0;
+        S.candidateNote = null;
+      } else {
+        // Transient artifact — apply correction
+        if (corrDir === -1) rawFreq *= 0.5;
+        else rawFreq *= 2.0;
+      }
+    } else {
+      S.octCorrCount = 0;
+      S.octCorrDir = 0;
+    }
+  }
+
+  // Large-jump detection: if raw freq is far from stable for several frames,
+  // reset filters to allow fast adaptation (covers non-octave interval changes)
+  if (S.stableFreq > 0) {
+    const jumpRatio = rawFreq / S.stableFreq;
+    if (jumpRatio < 0.7 || jumpRatio > 1.43) { // > ~6 semitones away
+      S._jumpCount = (S._jumpCount || 0) + 1;
+      if (S._jumpCount >= 3) {
+        S.stableFreq = rawFreq;
+        S.pitchHistory = [rawFreq];
+        S._jumpCount = 0;
+        S.noteHoldCount = 0;
+        S.candidateNote = null;
+      }
+    } else {
+      S._jumpCount = 0;
+    }
   }
 
   // Median filter (window = 7)
@@ -1139,11 +1213,13 @@ function drawTuner() {
   c.clearRect(0, 0, w, h);
 
   const cx = w / 2;
-  const padSide = 28, padTop = 18, padBot = 30; // extra bottom for larger labels
+  const padSide = 28, padBot = 30;
   const arcSpan = Math.PI * 0.85; // ~153° wide sweep
   const halfSpan = arcSpan / 2;
-  const r = Math.min(w / 2 - padSide, h - padTop - padBot);
-  const cy = h - padBot; // pivot above label area
+  const maxR = w / 2 - padSide;
+  const r = Math.min(maxR, (h - padBot) * 0.7);
+  // Vertically center: total extent = r (arc top) + padBot (labels below pivot)
+  const cy = (h + r - padBot) / 2;
   const totalCents = 100;
 
   // Smoothed display cents — hold last position when no note detected
@@ -1262,18 +1338,18 @@ function drawTuner() {
   function drawNoteLabel(name, oct, col, labelY) {
     const base = name[0];
     const acc = name.length > 1 ? name.slice(1) : '';
-    c.font = '700 ' + sf(58) + 'px "Century Gothic"';
+    c.font = '700 ' + sf(68) + 'px "Century Gothic"';
     c.fillStyle = col;
     c.textAlign = 'center'; c.textBaseline = 'middle';
     const baseW = c.measureText(base).width;
     c.fillText(base, cx, labelY);
     const right = cx + baseW / 2 + 2;
     if (acc) {
-      c.font = '600 ' + sf(26) + 'px "Century Gothic"';
+      c.font = '600 ' + sf(30) + 'px "Century Gothic"';
       c.textAlign = 'left'; c.textBaseline = 'top';
-      c.fillText(acc, right, labelY - sf(28));
+      c.fillText(acc, right, labelY - sf(32));
     }
-    c.font = '500 ' + sf(22) + 'px "Share Tech Mono"';
+    c.font = '500 ' + sf(26) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#5a5d72' : '#8a8da8';
     c.textAlign = 'left'; c.textBaseline = 'bottom';
     c.fillText(oct, right, labelY + sf(26));
@@ -1286,7 +1362,7 @@ function drawTuner() {
     const pName = NOTES[((dispMidi % 12) + 12) % 12];
     const pOct = Math.floor(dispMidi / 12) - 1;
     const pFreq = A4 * Math.pow(2, (S.pitchMidi - A4_MIDI) / 12);
-    drawNoteLabel(pName, pOct, '#00e89a', cy - maskR * 0.72);
+    drawNoteLabel(pName, pOct, '#00e89a', cy - maskR * 0.62);
     c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
@@ -1294,11 +1370,11 @@ function drawTuner() {
     // "♪ PLAYING" indicator
     c.font = '600 ' + sf(12) + 'px "Century Gothic"';
     c.fillStyle = '#00e89a';
-    c.fillText('♪ TAP TO STOP', cx, cy - 16);
+    c.fillText('♪ TAP TO STOP', cx, cy - 2);
   } else if (S.freq > 0 && S.note) {
     const absCents = Math.abs(S.cents);
     const col = absCents < 10 ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
-    drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.72);
+    drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.62);
     // Hz
     c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
@@ -1313,7 +1389,7 @@ function drawTuner() {
     c.font = '700 ' + sf(58) + 'px "Century Gothic"';
     c.fillStyle = lt ? '#1a1c28' : '#e4e6f0';
     c.textBaseline = 'middle';
-    c.fillText('--', cx, cy - maskR * 0.72);
+    c.fillText('--', cx, cy - maskR * 0.62);
     c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#8a8da0' : '#4a4d68';
     c.textBaseline = 'top';
@@ -1332,7 +1408,7 @@ function drawTuner() {
   S._displayDb += (db - S._displayDb) * 0.2;
   const dDb = S._displayDb;
   // Bar
-  const barW = 4, barH = h - 24, barX = w - 14, barY = 14;
+  const barW = 4, barH = h - 54, barX = w - 14, barY = 30;
   const pct = Math.max(0, Math.min(1, (dDb + 60) / 60));
   const filledH = pct * barH;
   // Track
@@ -2247,7 +2323,7 @@ function setupEvents() {
   function toggleMetronome(e) {
     const tag = e.target.tagName;
     if (tag === 'BUTTON' || tag === 'SELECT' || tag === 'INPUT' || e.target.classList.contains('subdiv-btn')
-        || e.target.closest('.bpm-wheel') || e.target.closest('.timesig-group') || e.target.closest('.bar-counter-group')) return;
+        || e.target.closest('.bpm-wheel') || e.target.closest('.timesig-group') || e.target.closest('.bar-counter-group') || e.target.closest('.vol-dial')) return;
     S.metroOn ? stopMetronome() : startMetronome();
   }
   document.querySelector('.metro-core').addEventListener('click', toggleMetronome);
@@ -2264,10 +2340,103 @@ function setupEvents() {
   $('cfgClickSound').addEventListener('change', function() {
     S.metroSound = this.value;
   });
+  // Inline time signature select
+  $('tsSelect').addEventListener('change', function() {
+    const combo = TS_COMBOS.find(c => c.label === this.value);
+    if (combo) {
+      S.beats = combo.beats;
+      S.tsDenom = combo.den;
+      buildBeats();
+      updatePatternOptions();
+      if (S.metroOn) { stopMetronome(); startMetronome(); }
+      if (window._savePrefs) window._savePrefs();
+    }
+  });
+  // Inline beat pattern select
+  $('bpSelect').addEventListener('change', function() {
+    S.beatPattern = this.value;
+    const idx = currentPatterns.findIndex(p => p.id === this.value);
+    if (idx >= 0) { patternIdx = idx; elSubdiv.innerHTML = currentPatterns[idx].label; }
+    if (S.metroOn) { stopMetronome(); startMetronome(); }
+    if (window._savePrefs) window._savePrefs();
+  });
   $('cfgMetroVol').addEventListener('input', function() {
     const v = parseFloat(this.value);
     if (S.metroGain) S.metroGain.gain.value = v;
+    drawVolDial();
   });
+
+  // ---- Volume Dial Knob ----
+  const volDialEl = $('volDial');
+  const volDialCvs = volDialEl.querySelector('canvas');
+  const volDialCtx = volDialCvs.getContext('2d');
+
+  function drawVolDial() {
+    const c = volDialCtx, w = 96, h = 96, cx = w / 2, cy = h / 2;
+    const lt = document.querySelector('.app').classList.contains('light');
+    c.clearRect(0, 0, w, h);
+    const slider = $('cfgMetroVol');
+    const val = parseFloat(slider.value);
+    const pct = val / parseFloat(slider.max);
+    const startA = (135 * Math.PI) / 180;
+    const endA = (405 * Math.PI) / 180;
+    const valA = startA + pct * (endA - startA);
+    const knobR = 34;
+
+    // Flat knob body
+    c.beginPath();
+    c.arc(cx, cy, knobR, 0, Math.PI * 2);
+    c.fillStyle = lt ? '#d0d0d6' : '#2a2d36';
+    c.fill();
+    // Subtle edge
+    c.beginPath();
+    c.arc(cx, cy, knobR, 0, Math.PI * 2);
+    c.strokeStyle = lt ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.06)';
+    c.lineWidth = 1;
+    c.stroke();
+
+    // Indicator line
+    const ix1 = cx + Math.cos(valA) * 8;
+    const iy1 = cy + Math.sin(valA) * 8;
+    const ix2 = cx + Math.cos(valA) * (knobR - 5);
+    const iy2 = cy + Math.sin(valA) * (knobR - 5);
+    c.beginPath();
+    c.moveTo(ix1, iy1);
+    c.lineTo(ix2, iy2);
+    c.strokeStyle = '#00e89a';
+    c.lineWidth = 2.5;
+    c.lineCap = 'round';
+    c.stroke();
+  }
+
+  // Dial drag interaction
+  let dialDragging = false;
+  function dialAngleToValue(e) {
+    const rect = volDialCvs.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    let angle = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
+    // Normalize to 0-360 starting from top-left (135°)
+    angle = ((angle - 135) % 360 + 360) % 360;
+    const pct = Math.max(0, Math.min(1, angle / 270));
+    const slider = $('cfgMetroVol');
+    slider.value = (pct * parseFloat(slider.max)).toFixed(2);
+    slider.dispatchEvent(new Event('input'));
+  }
+  volDialEl.addEventListener('pointerdown', function(e) {
+    dialDragging = true;
+    volDialEl.setPointerCapture(e.pointerId);
+    dialAngleToValue(e);
+  });
+  volDialEl.addEventListener('pointermove', function(e) {
+    if (dialDragging) dialAngleToValue(e);
+  });
+  volDialEl.addEventListener('pointerup', function() { dialDragging = false; });
+  volDialEl.addEventListener('pointercancel', function() { dialDragging = false; });
+
+  drawVolDial();
   $('cfgAccentVol').addEventListener('input', function() {
     S.metroAccentMul = parseFloat(this.value);
     $('cfgAccentVolVal').textContent = S.metroAccentMul.toFixed(1) + 'x';
@@ -2522,6 +2691,7 @@ function setupEvents() {
     const on = this.classList.contains('on');
     document.getElementById('app').classList.toggle('light', on);
     document.body.classList.toggle('light-body', on);
+    if (typeof drawVolDial === 'function') drawVolDial();
   });
 
   // ---- Font Size ----
@@ -2535,7 +2705,7 @@ function setupEvents() {
       // Config panels
       fftSize:'FFT Size', maxFreq:'Max Freq', smoothing:'Smoothing', colorScheme:'Color Scheme',
       notation:'Notation', transpose:'Transpose', pitchPlayerVol:'Pitch Player Vol', sharpNotation:'Sharp (C#)', flatNotation:'Flat (D\u266D)', none:'None',
-      clickSound:'Click Sound', volume:'Volume', accent:'Accent', subdivision:'Subdivision', countIn:'Count-in', flashBeat:'Flash Beat',
+      clickSound:'Click Sound', beatPattern:'Beat Pattern', volume:'Volume', accent:'Accent', subdivision:'Subdivision', countIn:'Count-in', flashBeat:'Flash Beat',
       classic:'Classic', wood:'Wood', digital:'Digital', noise:'Noise', eighth:'8th', triplet:'Triplet', sixteenth:'16th', off:'Off', on:'On',
       oneBar:'1 Bar', twoBars:'2 Bars', fourBars:'4 Bars',
       sampleRate:'Sample Rate', bitDepth:'Bit Depth', waveZoom:'Waveform Zoom', micGain:'Mic Gain',
@@ -2561,7 +2731,7 @@ function setupEvents() {
     zh: { spectrum:'頻譜', tuner:'調音器', tunerA440:'調音器 \u00b7 A440', metronome:'節拍器', waveform:'波形', tapToStart:'點擊開始', recordToAnalyze:'錄音以分析', tapTempo:'點擊測速', start:'開始', stop:'停止', settings:'設定', appearance:'外觀', lightMode:'淺色模式', language:'語言', selectLang:'選擇語言', tunerSec:'調音器', refPitch:'參考音高', sensitivity:'靈敏度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'音訊', metroVol:'節拍器音量', about:'關於', rename:'重新命名', share:'分享', delete:'刪除', cancel:'取消', empty:'空白', live:'即時',
       fftSize:'FFT 大小', maxFreq:'最大頻率', smoothing:'平滑度', colorScheme:'配色方案',
       notation:'記譜法', transpose:'移調', pitchPlayerVol:'音高播放器音量', sharpNotation:'升號 (C#)', flatNotation:'降號 (D\u266D)', none:'無',
-      clickSound:'點擊音效', volume:'音量', accent:'重音', subdivision:'細分', countIn:'預備拍', flashBeat:'閃爍節拍',
+      clickSound:'點擊音效', beatPattern:'節拍型態', volume:'音量', accent:'重音', subdivision:'細分', countIn:'預備拍', flashBeat:'閃爍節拍',
       classic:'經典', wood:'木質', digital:'數位', noise:'噪音', eighth:'八分', triplet:'三連音', sixteenth:'十六分', off:'關', on:'開',
       oneBar:'1 小節', twoBars:'2 小節', fourBars:'4 小節',
       sampleRate:'取樣率', bitDepth:'位元深度', waveZoom:'波形縮放', micGain:'麥克風增益',
@@ -2585,7 +2755,7 @@ function setupEvents() {
     ja: { spectrum:'スペクトラム', tuner:'チューナー', tunerA440:'チューナー \u00b7 A440', metronome:'メトロノーム', waveform:'波形', tapToStart:'タップして開始', recordToAnalyze:'録音して分析', tapTempo:'タップテンポ', start:'開始', stop:'停止', settings:'設定', appearance:'外観', lightMode:'ライトモード', language:'言語', selectLang:'言語を選択', tunerSec:'チューナー', refPitch:'基準ピッチ', sensitivity:'感度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'オーディオ', metroVol:'メトロノーム音量', about:'概要', rename:'名前変更', share:'共有', delete:'削除', cancel:'キャンセル', empty:'空', live:'ライブ',
       fftSize:'FFT サイズ', maxFreq:'最大周波数', smoothing:'スムージング', colorScheme:'配色',
       notation:'記譜法', transpose:'移調', pitchPlayerVol:'ピッチ音量', sharpNotation:'シャープ (C#)', flatNotation:'フラット (D\u266D)', none:'なし',
-      clickSound:'クリック音', volume:'音量', accent:'アクセント', subdivision:'細分化', countIn:'カウントイン', flashBeat:'フラッシュビート',
+      clickSound:'クリック音', beatPattern:'ビートパターン', volume:'音量', accent:'アクセント', subdivision:'細分化', countIn:'カウントイン', flashBeat:'フラッシュビート',
       classic:'クラシック', wood:'ウッド', digital:'デジタル', noise:'ノイズ', eighth:'8分', triplet:'3連符', sixteenth:'16分', off:'オフ', on:'オン',
       oneBar:'1小節', twoBars:'2小節', fourBars:'4小節',
       sampleRate:'サンプルレート', bitDepth:'ビット深度', waveZoom:'波形ズーム', micGain:'マイクゲイン',
@@ -2609,7 +2779,7 @@ function setupEvents() {
     es: { spectrum:'Espectro', tuner:'Afinador', tunerA440:'Afinador \u00b7 A440', metronome:'Metrónomo', waveform:'Forma de onda', tapToStart:'TOCA PARA INICIAR', recordToAnalyze:'GRABAR PARA ANALIZAR', tapTempo:'TEMPO POR TOQUE', start:'INICIO', stop:'PARAR', settings:'Ajustes', appearance:'Apariencia', lightMode:'Modo Claro', language:'Idioma', selectLang:'Seleccionar Idioma', tunerSec:'Afinador', refPitch:'Tono de Referencia', sensitivity:'Sensibilidad', sensLow:'Bajo', sensMed:'Medio', sensHigh:'Alto', audio:'Audio', metroVol:'Volumen del Metrónomo', about:'Acerca de', rename:'Renombrar', share:'Compartir', delete:'Eliminar', cancel:'Cancelar', empty:'Vacío', live:'EN VIVO',
       fftSize:'Tamaño FFT', maxFreq:'Frec. Máx.', smoothing:'Suavizado', colorScheme:'Esquema de Color',
       notation:'Notación', transpose:'Transposición', pitchPlayerVol:'Vol. Reproductor', sharpNotation:'Sostenido (C#)', flatNotation:'Bemol (D\u266D)', none:'Ninguno',
-      clickSound:'Sonido de Clic', volume:'Volumen', accent:'Acento', subdivision:'Subdivisión', countIn:'Cuenta Previa', flashBeat:'Flash de Pulso',
+      clickSound:'Sonido de Clic', beatPattern:'Patrón de Pulso', volume:'Volumen', accent:'Acento', subdivision:'Subdivisión', countIn:'Cuenta Previa', flashBeat:'Flash de Pulso',
       classic:'Clásico', wood:'Madera', digital:'Digital', noise:'Ruido', eighth:'Corchea', triplet:'Tresillo', sixteenth:'Semicorchea', off:'Apagado', on:'Encendido',
       oneBar:'1 Compás', twoBars:'2 Compases', fourBars:'4 Compases',
       sampleRate:'Frecuencia de Muestreo', bitDepth:'Profundidad de Bits', waveZoom:'Zoom de Onda', micGain:'Ganancia del Mic',
@@ -2697,7 +2867,7 @@ function setupEvents() {
     const cfgLabelMap = [
       ['FFT Size','fftSize'],['Max Freq','maxFreq'],['Smoothing','smoothing'],['Color Scheme','colorScheme'],
       ['Reference Pitch','refPitch'],['Sensitivity','sensitivity'],['Notation','notation'],['Transpose','transpose'],['Pitch Player Vol','pitchPlayerVol'],
-      ['Click Sound','clickSound'],['Volume','volume'],['Accent','accent'],['Subdivision','subdivision'],['Count-in','countIn'],['Flash Beat','flashBeat'],
+      ['Click Sound','clickSound'],['Beat Pattern','beatPattern'],['Volume','volume'],['Accent','accent'],['Subdivision','subdivision'],['Count-in','countIn'],['Flash Beat','flashBeat'],
       ['Sample Rate','sampleRate'],['Bit Depth','bitDepth'],['Waveform Zoom','waveZoom'],['Mic Gain','micGain']
     ];
     document.querySelectorAll('.config-item > span:first-child').forEach(el => {
@@ -2884,7 +3054,11 @@ function setupEvents() {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
-      S.micGain.gain.value = window.Capacitor ? 25.0 : 5.0;
+      const defGain2 = window.Capacitor ? 25.0 : 5.0;
+      S.micGain.gain.value = defGain2;
+      if (!localStorage.getItem('tunescope_prefs')) {
+        $('cfgMicGain').value = String(defGain2);
+      }
       S.micSrc.connect(S.micGain);
       S.micGain.connect(S.analyser);
       S.recDest = S.ctx.createMediaStreamDestination();
@@ -2944,7 +3118,7 @@ function setupEvents() {
       startX = t.clientX; startY = t.clientY;
       // Don't track swipe if touching an interactive element
       const el = e.target;
-      if (el.closest('button, select, input, .subdiv-btn, .timesig-group, .bar-counter-group, .scroll-picker')) { tracking = false; return; }
+      if (el.closest('button, select, input, .subdiv-btn, .timesig-group, .bar-counter-group, .scroll-picker, .vol-dial')) { tracking = false; return; }
       const isOpen = slider.classList.contains('open');
       // To open: must start from right edge. To close: anywhere on config panel is fine.
       tracking = isOpen || isEdgeSwipe(t.clientX);
@@ -3236,8 +3410,11 @@ setupEvents();
       if (bv && bv.firstChild) bv.firstChild.textContent = S.bpm;
     }
     if (p.beats && p.tsDenom) {
-      // Find matching TS combo label and scroll picker to it
       const target = p.beats + '/' + p.tsDenom;
+      // Sync inline select
+      $('tsSelect').value = target;
+      $('tsSelect').dispatchEvent(new Event('change'));
+      // Sync scroll picker too
       const items = document.querySelectorAll('#tsComboItems .scroll-picker-item');
       items.forEach(item => {
         if (item.textContent.trim() === target) item.click();
@@ -3270,21 +3447,7 @@ setupEvents();
     // Restore beat pattern after TS is set
     if (p.beatPattern) {
       S.beatPattern = p.beatPattern;
-      // The subdiv button label is managed by setupEvents closure; trigger via a small timeout
-      setTimeout(() => {
-        const btn = $('subdivBtn');
-        // Walk the currentPatterns to find matching icon
-        if (btn) {
-          const evts = ['touchend', 'click'];
-          // Just keep cycling until we land on saved pattern (max 8 attempts)
-          for (let i = 0; i < 8; i++) {
-            if (S.beatPattern === p.beatPattern) break;
-            btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-          }
-          // If internal state already matches saved (after TS restore set it), update icon
-          // Force via direct innerHTML assignment from BEAT_ICONS if accessible
-        }
-      }, 50);
+      $('bpSelect').value = p.beatPattern;
     }
   }
 
@@ -3293,7 +3456,7 @@ setupEvents();
     'fontSizeSelect','langSelect',
     'cfgFFTSize','cfgMaxFreq','cfgSmoothing','cfgSpecColor',
     'cfgTunerSens','cfgNotation','cfgTranspose','cfgPitchVol',
-    'cfgClickSound','cfgMetroVol','cfgAccentVol','cfgSubdiv','cfgCountIn','cfgFlashBeat',
+    'cfgClickSound','tsSelect','bpSelect','cfgMetroVol','cfgAccentVol','cfgSubdiv','cfgCountIn','cfgFlashBeat',
     'cfgSampleRate','cfgBitDepth','cfgMicGain','cfgWaveZoom',
     'toggleTheme'
   ];
