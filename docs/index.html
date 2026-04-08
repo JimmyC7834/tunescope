@@ -371,7 +371,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           </div>
         </div>
         <div class="metro-vol-row">
-          <input type="range" class="metro-vol-slider" id="cfgMetroVol" min="0" max="3" step="0.05" value="0.25">
+          <input type="range" class="metro-vol-slider" id="cfgMetroVol" min="0" max="8" step="0.05" value="1.5">
           <div class="vol-dial" id="volDial"><canvas width="96" height="96"></canvas></div>
         </div>
         </div>
@@ -671,7 +671,7 @@ async function initAudio() {
   S.outputGain.gain.value = 0;
   S.analyser.connect(S.outputGain).connect(S.ctx.destination);
   S.metroGain = S.ctx.createGain();
-  S.metroGain.gain.value = 0.25;
+  S.metroGain.gain.value = 1.5;
   S.metroGain.connect(S.ctx.destination);
   try {
     S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
@@ -1489,6 +1489,7 @@ function scheduleBeats() {
       const delay = Math.max(0, (S.nextBeatTime - S.ctx.currentTime) * 1000);
       const b = beat;
       setTimeout(() => {
+        if (!S.metroOn) return;
         const tris = elBeatRow.children;
         for (let i = 0; i < tris.length; i++) tris[i].classList.toggle('on', i === b);
       }, delay);
@@ -1501,6 +1502,7 @@ function scheduleBeats() {
       } else {
         const barDelay = Math.max(0, (S.nextBeatTime - S.ctx.currentTime) * 1000);
         setTimeout(() => {
+          if (!S.metroOn) return;
           S.barCount = (S.barCount || 0) + 1;
           const bc = $('barCounter');
           if (bc) { bc.textContent = S.barCount; bc.classList.add('counting'); }
@@ -1545,9 +1547,15 @@ function stopMetronome() {
   if (S.metroGain) {
     S.metroGain.disconnect();
     S.metroGain = S.ctx.createGain();
-    S.metroGain.gain.value = parseFloat(($('cfgMetroVol') || {}).value || 0.25);
+    S.metroGain.gain.value = parseFloat(($('cfgMetroVol') || {}).value || 1.5);
     S.metroGain.connect(S.ctx.destination);
   }
+  // Reset beat state immediately
+  S.curBeat = 0;
+  S.nextBeatTime = 0;
+  S.barCount = 0;
+  const bc = $('barCounter');
+  if (bc) { bc.textContent = '0'; bc.classList.remove('counting'); }
   const tris = elBeatRow.children;
   for (let i = 0; i < tris.length; i++) tris[i].classList.remove('on');
 }
@@ -3086,7 +3094,7 @@ function setupEvents() {
     S.outputGain.connect(S.ctx.destination);
     S.analyser.connect(S.outputGain);
     S.metroGain = S.ctx.createGain();
-    S.metroGain.gain.value = 0.25;
+    S.metroGain.gain.value = 1.5;
     S.metroGain.connect(S.ctx.destination);
     S.timeBuf = new Float32Array(FFT_SIZE);
     try {
