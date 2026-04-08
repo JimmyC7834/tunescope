@@ -112,7 +112,20 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .metro-selects-row{position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:space-between;padding:0 10px;pointer-events:none;z-index:3}
 .metro-inline-select{pointer-events:auto;font-family:'Share Tech Mono',monospace;font-size:0.8rem;background:transparent;color:var(--text-mid);border:none;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;padding:2px 4px}
 .app.light .metro-inline-select{color:#666}
-.metro-vol-row{display:flex;justify-content:center;align-items:center;padding:0;margin-top:-4px}
+.icon-picker-trigger{pointer-events:auto;display:flex;align-items:center;justify-content:center;color:var(--text-mid);cursor:pointer;padding:4px;border-radius:6px;-webkit-tap-highlight-color:transparent;transition:color .15s}
+.icon-picker-trigger:active{color:var(--accent)}
+.icon-picker-trigger svg{display:block;height:18px;width:auto}
+.ts-trigger{font-family:'Share Tech Mono',monospace;font-size:0.85rem}
+.ts-opt{font-family:'Share Tech Mono',monospace;font-size:0.85rem}
+.icon-picker-popup{position:absolute;bottom:100%;display:flex;gap:2px;background:var(--bg-panel);border:1px solid var(--border-light);border-radius:10px;padding:6px 8px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);z-index:20;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;transform:translateY(6px)}
+.icon-picker-popup.open{opacity:1;pointer-events:auto;transform:translateY(-4px)}
+.icon-picker-popup.right{left:0}
+.icon-picker-popup.left{right:0}
+.icon-picker-opt{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;color:var(--text-mid);cursor:pointer;transition:background .12s,color .12s}
+.icon-picker-opt:active,.icon-picker-opt.active{background:rgba(0,232,154,0.12);color:var(--accent)}
+.icon-picker-opt svg{display:block;height:18px;width:auto}
+.app.light .icon-picker-popup{background:#f4f4f8;box-shadow:0 -4px 16px rgba(0,0,0,0.12)}
+.metro-vol-row{display:flex;justify-content:center;align-items:center;padding:0;margin-top:4px}
 .metro-vol-slider{display:none}
 .vol-dial{width:48px;height:48px;cursor:pointer;touch-action:none;user-select:none}
 .vol-dial canvas{width:100%;height:100%}
@@ -376,24 +389,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           <div class="bar-counter-label" id="barCounter">0</div>
         </div>
         <div class="metro-selects-row">
-          <select class="metro-inline-select" id="bpSelect">
-            <option value="single" selected>♩ Quarter</option>
-            <option value="double">♫ 8ths</option>
-            <option value="split3">♩.♪ Swing</option>
-            <option value="split4">♩..♪ Dotted</option>
-            <option value="triple">♩³ Triplet</option>
-            <option value="quad">♬♬ 16ths</option>
-          </select>
-          <select class="metro-inline-select" id="tsSelect">
-            <option value="1/4">1/4</option>
-            <option value="2/4">2/4</option>
-            <option value="3/4">3/4</option>
-            <option value="4/4" selected>4/4</option>
-            <option value="3/8">3/8</option>
-            <option value="6/8">6/8</option>
-            <option value="9/8">9/8</option>
-            <option value="12/8">12/8</option>
-          </select>
+          <div class="icon-picker" id="bpPicker">
+            <div class="icon-picker-trigger" id="bpTrigger"></div>
+            <div class="icon-picker-popup right" id="bpPopup"></div>
+          </div>
+          <div class="icon-picker" id="tsPicker">
+            <div class="icon-picker-trigger ts-trigger" id="tsTrigger">4/4</div>
+            <div class="icon-picker-popup left" id="tsPopup"></div>
+          </div>
         </div>
         <button class="metro-toggle" id="metroToggle">START</button>
       </div>
@@ -616,8 +619,6 @@ const S = {
   stableFreq: 0,           // smoothed frequency
   noteHoldCount: 0,        // frames a candidate note has been consistent
   candidateNote: null,      // note waiting to become stable
-  octCorrCount: 0,         // consecutive frames octave-correction fired same direction
-  octCorrDir: 0,           // last correction direction: -1 = halved, +1 = doubled, 0 = none
   spectrumData: new Uint8Array(FFT_SIZE / 2),
   timeBuf: new Float32Array(FFT_SIZE),
   // Recording
@@ -686,7 +687,7 @@ async function initAudio() {
     const isIOS = window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios';
     const defaultGain = isIOS ? 25.0 : window.Capacitor ? 25.0 : 5.0;
     S.micGain.gain.value = defaultGain;
-    if (!localStorage.getItem('tunescope_prefs')) {
+    if (!localStorage.getItem('ts_prefs')) {
       $('cfgMicGain').value = String(defaultGain);
     }
     S.micSrc.connect(S.micGain);
@@ -915,47 +916,13 @@ function autoCorrelate(buf, sr) {
 function stabilizePitch(rawFreq) {
   if (rawFreq <= 0) return;
 
-  // Octave-jump suppression — but allow real octave changes through
-  if (S.stableFreq > 0) {
-    const ratio = rawFreq / S.stableFreq;
-    let corrDir = 0;
-    if (ratio > 1.8 && ratio < 2.2) corrDir = -1;       // would halve
-    else if (ratio > 0.45 && ratio < 0.55) corrDir = 1;  // would double
-
-    if (corrDir !== 0) {
-      if (corrDir === S.octCorrDir) {
-        S.octCorrCount++;
-      } else {
-        S.octCorrDir = corrDir;
-        S.octCorrCount = 1;
-      }
-      // If correction fires same direction 4+ frames in a row,
-      // it's a real pitch change — accept uncorrected frequency and reset
-      if (S.octCorrCount >= 4) {
-        S.stableFreq = rawFreq;
-        S.pitchHistory = [rawFreq];
-        S.octCorrCount = 0;
-        S.octCorrDir = 0;
-        S.noteHoldCount = 0;
-        S.candidateNote = null;
-      } else {
-        // Transient artifact — apply correction
-        if (corrDir === -1) rawFreq *= 0.5;
-        else rawFreq *= 2.0;
-      }
-    } else {
-      S.octCorrCount = 0;
-      S.octCorrDir = 0;
-    }
-  }
-
-  // Large-jump detection: if raw freq is far from stable for several frames,
-  // reset filters to allow fast adaptation (covers non-octave interval changes)
+  // Large-jump detection: if raw freq is far from stable for 2+ frames,
+  // reset filters to allow fast adaptation (handles octave jumps and interval changes)
   if (S.stableFreq > 0) {
     const jumpRatio = rawFreq / S.stableFreq;
     if (jumpRatio < 0.7 || jumpRatio > 1.43) { // > ~6 semitones away
       S._jumpCount = (S._jumpCount || 0) + 1;
-      if (S._jumpCount >= 3) {
+      if (S._jumpCount >= 2) {
         S.stableFreq = rawFreq;
         S.pitchHistory = [rawFreq];
         S._jumpCount = 0;
@@ -1792,14 +1759,14 @@ function animate() {
     S.analyser.getFloatTimeDomainData(S.timeBuf);
     const f = autoCorrelate(S.timeBuf, S.ctx.sampleRate);
     if (f > 0) { S.silenceFrames = 0; stabilizePitch(f); }
-    else { S.silenceFrames = (S.silenceFrames || 0) + 1; if (S.silenceFrames > 15) { S.pitchHistory.length = 0; S.stableFreq = 0; S.candidateNote = null; S.noteHoldCount = 0; } }
+    else { S.silenceFrames = (S.silenceFrames || 0) + 1; if (S.silenceFrames > 15) { S.pitchHistory.length = 0; S.stableFreq = 0; S.candidateNote = null; S.noteHoldCount = 0; S._jumpCount = 0; } }
   } else if (S.mode === 'paused' && S.liveOverride) {
     // Live mic override while paused with recording
     S.analyser.getByteFrequencyData(S.spectrumData);
     S.analyser.getFloatTimeDomainData(S.timeBuf);
     const f = autoCorrelate(S.timeBuf, S.ctx.sampleRate);
     if (f > 0) { S.silenceFrames = 0; stabilizePitch(f); }
-    else { S.silenceFrames = (S.silenceFrames || 0) + 1; if (S.silenceFrames > 15) { S.pitchHistory.length = 0; S.stableFreq = 0; S.candidateNote = null; S.noteHoldCount = 0; } }
+    else { S.silenceFrames = (S.silenceFrames || 0) + 1; if (S.silenceFrames > 15) { S.pitchHistory.length = 0; S.stableFreq = 0; S.candidateNote = null; S.noteHoldCount = 0; S._jumpCount = 0; } }
   } else if (S.mode === 'paused' && S.audioBuffer && !S.dragging) {
     // Only re-analyze if position changed
     if (Math.abs(S.playOffset - S.lastAnalyzedPos) > 0.001) {
@@ -2323,7 +2290,7 @@ function setupEvents() {
   function toggleMetronome(e) {
     const tag = e.target.tagName;
     if (tag === 'BUTTON' || tag === 'SELECT' || tag === 'INPUT' || e.target.classList.contains('subdiv-btn')
-        || e.target.closest('.bpm-wheel') || e.target.closest('.timesig-group') || e.target.closest('.bar-counter-group') || e.target.closest('.vol-dial')) return;
+        || e.target.closest('.bpm-wheel') || e.target.closest('.timesig-group') || e.target.closest('.bar-counter-group') || e.target.closest('.vol-dial') || e.target.closest('.icon-picker')) return;
     S.metroOn ? stopMetronome() : startMetronome();
   }
   document.querySelector('.metro-core').addEventListener('click', toggleMetronome);
@@ -2340,9 +2307,10 @@ function setupEvents() {
   $('cfgClickSound').addEventListener('change', function() {
     S.metroSound = this.value;
   });
-  // Inline time signature select
-  $('tsSelect').addEventListener('change', function() {
-    const combo = TS_COMBOS.find(c => c.label === this.value);
+  // Time signature icon picker (text labels)
+  const tsOptions = TS_COMBOS.map(c => ({ id: c.label, icon: c.label }));
+  buildIconPicker($('tsTrigger'), $('tsPopup'), tsOptions, '4/4', function(id) {
+    const combo = TS_COMBOS.find(c => c.label === id);
     if (combo) {
       S.beats = combo.beats;
       S.tsDenom = combo.den;
@@ -2352,14 +2320,91 @@ function setupEvents() {
       if (window._savePrefs) window._savePrefs();
     }
   });
-  // Inline beat pattern select
-  $('bpSelect').addEventListener('change', function() {
-    S.beatPattern = this.value;
-    const idx = currentPatterns.findIndex(p => p.id === this.value);
+  // ---- Icon picker: Beat Pattern ----
+  const SUBDIV_ICONS = {
+    1: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 28" height="18" fill="currentColor">
+      <ellipse cx="8" cy="23" rx="5" ry="3.2" transform="rotate(-20 8 23)"/>
+      <rect x="12.5" y="4" width="1.1" height="19"/>
+    </svg>`,
+    2: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 28" height="18" fill="currentColor">
+      <ellipse cx="7" cy="24" rx="5" ry="3.2" transform="rotate(-20 7 24)"/>
+      <ellipse cx="25" cy="22" rx="5" ry="3.2" transform="rotate(-20 25 22)"/>
+      <rect x="11.5" y="6" width="1.1" height="18"/><rect x="29.5" y="4" width="1.1" height="18"/>
+      <polygon points="11.5,6 30.6,4 30.6,6.5 11.5,8.5"/>
+    </svg>`,
+    3: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" height="18" fill="currentColor">
+      <ellipse cx="6" cy="26" rx="5" ry="3.2" transform="rotate(-20 6 26)"/>
+      <ellipse cx="22" cy="25" rx="5" ry="3.2" transform="rotate(-20 22 25)"/>
+      <ellipse cx="38" cy="24" rx="5" ry="3.2" transform="rotate(-20 38 24)"/>
+      <rect x="10.5" y="8" width="1.1" height="18"/><rect x="26.5" y="7" width="1.1" height="18"/><rect x="42.5" y="6" width="1.1" height="18"/>
+      <polygon points="10.5,8 43.6,6 43.6,8.5 10.5,10.5"/>
+      <rect x="10.5" y="1" width="1.1" height="5"/><rect x="42.5" y="1" width="1.1" height="5"/>
+      <rect x="11.6" y="1" width="9" height="1.1"/><rect x="32.5" y="1" width="10" height="1.1"/>
+      <text x="27" y="7" font-size="6.5" font-weight="700" text-anchor="middle" font-family="sans-serif">3</text>
+    </svg>`,
+    4: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 28" height="18" fill="currentColor">
+      <ellipse cx="6" cy="25" rx="5" ry="3.2" transform="rotate(-20 6 25)"/>
+      <ellipse cx="19" cy="24" rx="5" ry="3.2" transform="rotate(-20 19 24)"/>
+      <ellipse cx="33" cy="23" rx="5" ry="3.2" transform="rotate(-20 33 23)"/>
+      <ellipse cx="46" cy="22" rx="5" ry="3.2" transform="rotate(-20 46 22)"/>
+      <rect x="10.5" y="7" width="1.1" height="18"/><rect x="23.5" y="6" width="1.1" height="18"/>
+      <rect x="37.5" y="5" width="1.1" height="18"/><rect x="50.5" y="4" width="1.1" height="18"/>
+      <polygon points="10.5,7 51.6,4 51.6,6.5 10.5,9.5"/>
+      <polygon points="10.5,9.5 51.6,6.5 51.6,9 10.5,12"/>
+    </svg>`
+  };
+
+  function buildIconPicker(triggerEl, popupEl, options, currentVal, onSelect) {
+    // Set trigger to current icon
+    const cur = options.find(o => o.id === currentVal);
+    if (cur) triggerEl.innerHTML = cur.icon;
+    // Build popup options
+    popupEl.innerHTML = '';
+    options.forEach(opt => {
+      const d = document.createElement('div');
+      d.className = 'icon-picker-opt' + (opt.id === currentVal ? ' active' : '');
+      d.innerHTML = opt.icon;
+      d.addEventListener('click', e => {
+        e.stopPropagation();
+        popupEl.querySelectorAll('.icon-picker-opt').forEach(el => el.classList.remove('active'));
+        d.classList.add('active');
+        triggerEl.innerHTML = opt.icon;
+        popupEl.classList.remove('open');
+        onSelect(opt.id);
+      });
+      popupEl.appendChild(d);
+    });
+    // Toggle popup
+    triggerEl.addEventListener('click', e => {
+      e.stopPropagation();
+      const wasOpen = popupEl.classList.contains('open');
+      // Close all popups first
+      document.querySelectorAll('.icon-picker-popup.open').forEach(p => p.classList.remove('open'));
+      if (!wasOpen) popupEl.classList.toggle('open');
+    });
+  }
+  // Close popups on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.icon-picker-popup.open').forEach(p => p.classList.remove('open'));
+  });
+
+  // Beat pattern picker
+  const bpOptions = [
+    { id:'single', icon: BEAT_ICONS.single },
+    { id:'double', icon: BEAT_ICONS.double },
+    { id:'split3', icon: BEAT_ICONS.split3 },
+    { id:'split4', icon: BEAT_ICONS.split4 },
+    { id:'triple', icon: BEAT_ICONS.triple },
+    { id:'quad',   icon: BEAT_ICONS.quad }
+  ];
+  buildIconPicker($('bpTrigger'), $('bpPopup'), bpOptions, S.beatPattern, function(id) {
+    S.beatPattern = id;
+    const idx = currentPatterns.findIndex(p => p.id === id);
     if (idx >= 0) { patternIdx = idx; elSubdiv.innerHTML = currentPatterns[idx].label; }
     if (S.metroOn) { stopMetronome(); startMetronome(); }
     if (window._savePrefs) window._savePrefs();
   });
+
   $('cfgMetroVol').addEventListener('input', function() {
     const v = parseFloat(this.value);
     if (S.metroGain) S.metroGain.gain.value = v;
@@ -2409,29 +2454,23 @@ function setupEvents() {
     c.stroke();
   }
 
-  // Dial drag interaction
-  let dialDragging = false;
-  function dialAngleToValue(e) {
-    const rect = volDialCvs.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    let angle = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
-    // Normalize to 0-360 starting from top-left (135°)
-    angle = ((angle - 135) % 360 + 360) % 360;
-    const pct = Math.max(0, Math.min(1, angle / 270));
-    const slider = $('cfgMetroVol');
-    slider.value = (pct * parseFloat(slider.max)).toFixed(2);
-    slider.dispatchEvent(new Event('input'));
-  }
+  // Dial drag interaction — horizontal: left decreases, right increases
+  let dialDragging = false, dialStartX = 0, dialStartVal = 0;
   volDialEl.addEventListener('pointerdown', function(e) {
     dialDragging = true;
+    dialStartX = e.clientX;
+    dialStartVal = parseFloat($('cfgMetroVol').value);
     volDialEl.setPointerCapture(e.pointerId);
-    dialAngleToValue(e);
   });
   volDialEl.addEventListener('pointermove', function(e) {
-    if (dialDragging) dialAngleToValue(e);
+    if (!dialDragging) return;
+    const slider = $('cfgMetroVol');
+    const max = parseFloat(slider.max);
+    const dx = e.clientX - dialStartX;
+    // 200px drag = full range
+    const newVal = Math.max(0, Math.min(max, dialStartVal + (dx / 200) * max));
+    slider.value = newVal.toFixed(2);
+    slider.dispatchEvent(new Event('input'));
   });
   volDialEl.addEventListener('pointerup', function() { dialDragging = false; });
   volDialEl.addEventListener('pointercancel', function() { dialDragging = false; });
@@ -3056,7 +3095,7 @@ function setupEvents() {
       S.micGain = S.ctx.createGain();
       const defGain2 = window.Capacitor ? 25.0 : 5.0;
       S.micGain.gain.value = defGain2;
-      if (!localStorage.getItem('tunescope_prefs')) {
+      if (!localStorage.getItem('ts_prefs')) {
         $('cfgMicGain').value = String(defGain2);
       }
       S.micSrc.connect(S.micGain);
@@ -3118,7 +3157,7 @@ function setupEvents() {
       startX = t.clientX; startY = t.clientY;
       // Don't track swipe if touching an interactive element
       const el = e.target;
-      if (el.closest('button, select, input, .subdiv-btn, .timesig-group, .bar-counter-group, .scroll-picker, .vol-dial')) { tracking = false; return; }
+      if (el.closest('button, select, input, .subdiv-btn, .timesig-group, .bar-counter-group, .scroll-picker, .vol-dial, .icon-picker')) { tracking = false; return; }
       const isOpen = slider.classList.contains('open');
       // To open: must start from right edge. To close: anywhere on config panel is fine.
       tracking = isOpen || isEdgeSwipe(t.clientX);
@@ -3411,9 +3450,16 @@ setupEvents();
     }
     if (p.beats && p.tsDenom) {
       const target = p.beats + '/' + p.tsDenom;
-      // Sync inline select
-      $('tsSelect').value = target;
-      $('tsSelect').dispatchEvent(new Event('change'));
+      // Sync TS icon picker trigger + active state
+      $('tsTrigger').textContent = target;
+      $('tsPopup').querySelectorAll('.icon-picker-opt').forEach(el => {
+        el.classList.toggle('active', el.textContent.trim() === target);
+      });
+      const combo = TS_COMBOS.find(c => c.label === target);
+      if (combo) {
+        S.beats = combo.beats; S.tsDenom = combo.den;
+        buildBeats(); updatePatternOptions();
+      }
       // Sync scroll picker too
       const items = document.querySelectorAll('#tsComboItems .scroll-picker-item');
       items.forEach(item => {
@@ -3447,7 +3493,14 @@ setupEvents();
     // Restore beat pattern after TS is set
     if (p.beatPattern) {
       S.beatPattern = p.beatPattern;
-      $('bpSelect').value = p.beatPattern;
+      // Sync icon picker trigger
+      const bpOpt = bpOptions.find(o => o.id === p.beatPattern);
+      if (bpOpt) {
+        $('bpTrigger').innerHTML = bpOpt.icon;
+        $('bpPopup').querySelectorAll('.icon-picker-opt').forEach((el, i) => {
+          el.classList.toggle('active', bpOptions[i].id === p.beatPattern);
+        });
+      }
     }
   }
 
@@ -3456,7 +3509,7 @@ setupEvents();
     'fontSizeSelect','langSelect',
     'cfgFFTSize','cfgMaxFreq','cfgSmoothing','cfgSpecColor',
     'cfgTunerSens','cfgNotation','cfgTranspose','cfgPitchVol',
-    'cfgClickSound','tsSelect','bpSelect','cfgMetroVol','cfgAccentVol','cfgSubdiv','cfgCountIn','cfgFlashBeat',
+    'cfgClickSound','cfgMetroVol','cfgAccentVol','cfgSubdiv','cfgCountIn','cfgFlashBeat',
     'cfgSampleRate','cfgBitDepth','cfgMicGain','cfgWaveZoom',
     'toggleTheme'
   ];
