@@ -117,7 +117,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .icon-picker-trigger svg{display:block;height:18px;width:auto}
 .ts-trigger{font-family:'Share Tech Mono',monospace;font-size:0.85rem}
 .ts-opt{font-family:'Share Tech Mono',monospace;font-size:0.85rem}
-.icon-picker-popup{position:absolute;bottom:100%;display:flex;gap:2px;background:var(--bg-panel);border:1px solid var(--border-light);border-radius:10px;padding:6px 8px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);z-index:20;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;transform:translateY(6px)}
+.icon-picker-popup{position:absolute;bottom:100%;display:grid;grid-template-columns:repeat(5,36px);gap:2px;background:var(--bg-panel);border:1px solid var(--border-light);border-radius:10px;padding:6px 8px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);z-index:20;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;transform:translateY(6px)}
 .icon-picker-popup.open{opacity:1;pointer-events:auto;transform:translateY(-4px)}
 .icon-picker-popup.right{left:0}
 .icon-picker-popup.left{right:0}
@@ -404,7 +404,6 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
         <div class="config-item"><span>Click Sound</span><select class="config-select" id="cfgClickSound"><option value="sine" selected>Classic</option><option value="triangle">Wood</option><option value="square">Digital</option><option value="noise">Noise</option></select></div>
         <div class="config-item"><span>Accent</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgAccentVol" min="0.5" max="2.5" step="0.1" value="1.0"><span class="config-range-val" id="cfgAccentVolVal">1.0x</span></span></div>
-        <div class="config-item"><span>Subdivision</span><select class="config-select" id="cfgSubdiv"><option value="1" selected>None</option><option value="2">8th</option><option value="3">Triplet</option><option value="4">16th</option></select></div>
         <div class="config-item"><span>Count-in</span><select class="config-select" id="cfgCountIn"><option value="0" selected>Off</option><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option></select></div>
         <div class="config-item"><span>Flash Beat</span><select class="config-select" id="cfgFlashBeat"><option value="on" selected>On</option><option value="off">Off</option></select></div>
       </div>
@@ -634,7 +633,7 @@ const S = {
   // Metronome
   metroOn: false, bpm: 120, beats: 4, tsDenom: 4, curBeat: -1,
   nextBeatTime: 0, metroTimer: null, beatPattern: 'single',
-  metroSound: 'sine', metroSubdiv: 1, metroCountIn: 0, metroFlash: true, metroAccentMul: 1.0,
+  metroSound: 'sine', metroCountIn: 0, metroFlash: true, metroAccentMul: 1.0,
   // Waveform drag
   dragging: false, dragX: 0, dragOffset: 0, lastAnalyzedPos: -1,
   // Live analysis override (when paused with recording, tap to use mic)
@@ -1465,8 +1464,6 @@ function scheduleBeats() {
       metroClick(S.nextBeatTime + beatInterval / 2, 'subdiv');
     } else if (pattern === 'split3') {
       metroClick(S.nextBeatTime + beatInterval * (2 / 3), 'subdiv');
-    } else if (pattern === 'split4') {
-      metroClick(S.nextBeatTime + beatInterval * (3 / 4), 'subdiv');
     } else if (pattern === 'revdot') {
       metroClick(S.nextBeatTime + beatInterval / 4, 'subdiv');
     } else if (pattern === 'triple') {
@@ -1476,23 +1473,16 @@ function scheduleBeats() {
       metroClick(S.nextBeatTime + beatInterval / 4, 'subdiv');
       metroClick(S.nextBeatTime + beatInterval / 2, 'subdiv');
       metroClick(S.nextBeatTime + beatInterval * (3 / 4), 'subdiv');
-    } else if (pattern === 't1011') {
-      // hit-rest-hit-hit: skip 2nd sixteenth
+    } else if (pattern === 'bp81616') {
+      // 8th + two 16ths: clicks at half and 3/4
       metroClick(S.nextBeatTime + beatInterval / 2, 'subdiv');
       metroClick(S.nextBeatTime + beatInterval * (3 / 4), 'subdiv');
-    } else if (pattern === 't1101') {
-      // hit-hit-rest-hit: skip 3rd sixteenth
+    } else if (pattern === 'bp16168') {
+      // two 16ths + 8th: clicks at 1/4 and 1/2
       metroClick(S.nextBeatTime + beatInterval / 4, 'subdiv');
-      metroClick(S.nextBeatTime + beatInterval * (3 / 4), 'subdiv');
+      metroClick(S.nextBeatTime + beatInterval / 2, 'subdiv');
     }
 
-    // Subdivisions
-    if (S.metroSubdiv > 1) {
-      const subInterval = beatInterval / S.metroSubdiv;
-      for (let s = 1; s < S.metroSubdiv; s++) {
-        metroClick(S.nextBeatTime + subInterval * s, 'subdiv');
-      }
-    }
 
     // Visual update
     if (S.metroFlash) {
@@ -2192,17 +2182,6 @@ function setupEvents() {
       <polygon points="11.5,6 36.6,4 36.6,6.5 11.5,8.5"/>
       <polygon points="24,8.5 36.6,6.5 36.6,9 24,11"/>
     </svg>`,
-    // Double-dotted + sixteenth
-    split4: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 28" height="16" fill="currentColor">
-      <ellipse cx="7" cy="24" rx="5" ry="3.2" transform="rotate(-20 7 24)"/>
-      <circle cx="15.5" cy="22.5" r="1.6"/>
-      <circle cx="20.5" cy="22.5" r="1.6"/>
-      <rect x="11.5" y="6" width="1.1" height="18"/>
-      <ellipse cx="37" cy="22" rx="5" ry="3.2" transform="rotate(-20 37 22)"/>
-      <rect x="41.5" y="4" width="1.1" height="18"/>
-      <polygon points="11.5,6 42.6,4 42.6,6.5 11.5,8.5"/>
-      <polygon points="28,8.5 42.6,6.5 42.6,9 28,11"/>
-    </svg>`,
     // Triplet: three beamed eighth notes with bracket + "3"
     triple: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" height="16" fill="currentColor">
       <ellipse cx="6" cy="26" rx="5" ry="3.2" transform="rotate(-20 6 26)"/>
@@ -2241,33 +2220,27 @@ function setupEvents() {
       <polygon points="11.5,6 36.6,4 36.6,6.5 11.5,8.5"/>
       <polygon points="11.5,8.5 24,6.5 24,9 11.5,11"/>
     </svg>`,
-    // 1011: hit-rest-hit-hit — single beamed group, 2nd position is a sixteenth rest
-    t1011: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 28" height="16" fill="currentColor">
+    // 8th + two 16ths: noteheads at 1,0,1,1 positions, double beam on last two
+    bp81616: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 28" height="16" fill="currentColor">
       <ellipse cx="6" cy="25" rx="5" ry="3.2" transform="rotate(-20 6 25)"/>
       <ellipse cx="33" cy="23" rx="5" ry="3.2" transform="rotate(-20 33 23)"/>
       <ellipse cx="46" cy="22" rx="5" ry="3.2" transform="rotate(-20 46 22)"/>
       <rect x="10.5" y="7" width="1.1" height="18"/>
-      <rect x="23.5" y="6" width="1.1" height="18"/>
       <rect x="37.5" y="5" width="1.1" height="18"/>
       <rect x="50.5" y="4" width="1.1" height="18"/>
       <polygon points="10.5,7 51.6,4 51.6,6.5 10.5,9.5"/>
-      <polygon points="10.5,9.5 51.6,6.5 51.6,9 10.5,12"/>
-      <line x1="20" y1="22" x2="26" y2="18" stroke="currentColor" stroke-width="1.3"/>
-      <line x1="20" y1="25" x2="26" y2="21" stroke="currentColor" stroke-width="1.3"/>
+      <polygon points="37.5,7.5 51.6,6.5 51.6,9 37.5,10"/>
     </svg>`,
-    // 1101: hit-hit-rest-hit — single beamed group, 3rd position is a sixteenth rest
-    t1101: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 28" height="16" fill="currentColor">
+    // Two 16ths + 8th: noteheads at 1,1,0,1 positions, double beam on first two
+    bp16168: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 28" height="16" fill="currentColor">
       <ellipse cx="6" cy="25" rx="5" ry="3.2" transform="rotate(-20 6 25)"/>
       <ellipse cx="19" cy="24" rx="5" ry="3.2" transform="rotate(-20 19 24)"/>
       <ellipse cx="46" cy="22" rx="5" ry="3.2" transform="rotate(-20 46 22)"/>
       <rect x="10.5" y="7" width="1.1" height="18"/>
       <rect x="23.5" y="6" width="1.1" height="18"/>
-      <rect x="37.5" y="5" width="1.1" height="18"/>
       <rect x="50.5" y="4" width="1.1" height="18"/>
       <polygon points="10.5,7 51.6,4 51.6,6.5 10.5,9.5"/>
-      <polygon points="10.5,9.5 51.6,6.5 51.6,9 10.5,12"/>
-      <line x1="34" y1="21" x2="40" y2="17" stroke="currentColor" stroke-width="1.3"/>
-      <line x1="34" y1="24" x2="40" y2="20" stroke="currentColor" stroke-width="1.3"/>
+      <polygon points="10.5,9.5 24.6,8.5 24.6,11 10.5,12"/>
     </svg>`
   };
 
@@ -2276,12 +2249,11 @@ function setupEvents() {
       { id:'single',  label: BEAT_ICONS.single },
       { id:'double',  label: BEAT_ICONS.double },
       { id:'split3',  label: BEAT_ICONS.split3 },
-      { id:'split4',  label: BEAT_ICONS.split4 },
       { id:'revdot',  label: BEAT_ICONS.revdot },
       { id:'triple',  label: BEAT_ICONS.triple },
       { id:'quad',    label: BEAT_ICONS.quad },
-      { id:'t1011',   label: BEAT_ICONS.t1011 },
-      { id:'t1101',   label: BEAT_ICONS.t1101 }
+      { id:'bp81616', label: BEAT_ICONS.bp81616 },
+      { id:'bp16168', label: BEAT_ICONS.bp16168 }
     ];
   }
   let patternIdx = 0;
@@ -2375,40 +2347,6 @@ function setupEvents() {
       if (window._savePrefs) window._savePrefs();
     }
   });
-  // ---- Icon picker: Beat Pattern ----
-  const SUBDIV_ICONS = {
-    1: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 28" height="18" fill="currentColor">
-      <ellipse cx="8" cy="23" rx="5" ry="3.2" transform="rotate(-20 8 23)"/>
-      <rect x="12.5" y="4" width="1.1" height="19"/>
-    </svg>`,
-    2: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 28" height="18" fill="currentColor">
-      <ellipse cx="7" cy="24" rx="5" ry="3.2" transform="rotate(-20 7 24)"/>
-      <ellipse cx="25" cy="22" rx="5" ry="3.2" transform="rotate(-20 25 22)"/>
-      <rect x="11.5" y="6" width="1.1" height="18"/><rect x="29.5" y="4" width="1.1" height="18"/>
-      <polygon points="11.5,6 30.6,4 30.6,6.5 11.5,8.5"/>
-    </svg>`,
-    3: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" height="18" fill="currentColor">
-      <ellipse cx="6" cy="26" rx="5" ry="3.2" transform="rotate(-20 6 26)"/>
-      <ellipse cx="22" cy="25" rx="5" ry="3.2" transform="rotate(-20 22 25)"/>
-      <ellipse cx="38" cy="24" rx="5" ry="3.2" transform="rotate(-20 38 24)"/>
-      <rect x="10.5" y="8" width="1.1" height="18"/><rect x="26.5" y="7" width="1.1" height="18"/><rect x="42.5" y="6" width="1.1" height="18"/>
-      <polygon points="10.5,8 43.6,6 43.6,8.5 10.5,10.5"/>
-      <rect x="10.5" y="1" width="1.1" height="5"/><rect x="42.5" y="1" width="1.1" height="5"/>
-      <rect x="11.6" y="1" width="9" height="1.1"/><rect x="32.5" y="1" width="10" height="1.1"/>
-      <text x="27" y="7" font-size="6.5" font-weight="700" text-anchor="middle" font-family="sans-serif">3</text>
-    </svg>`,
-    4: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 28" height="18" fill="currentColor">
-      <ellipse cx="6" cy="25" rx="5" ry="3.2" transform="rotate(-20 6 25)"/>
-      <ellipse cx="19" cy="24" rx="5" ry="3.2" transform="rotate(-20 19 24)"/>
-      <ellipse cx="33" cy="23" rx="5" ry="3.2" transform="rotate(-20 33 23)"/>
-      <ellipse cx="46" cy="22" rx="5" ry="3.2" transform="rotate(-20 46 22)"/>
-      <rect x="10.5" y="7" width="1.1" height="18"/><rect x="23.5" y="6" width="1.1" height="18"/>
-      <rect x="37.5" y="5" width="1.1" height="18"/><rect x="50.5" y="4" width="1.1" height="18"/>
-      <polygon points="10.5,7 51.6,4 51.6,6.5 10.5,9.5"/>
-      <polygon points="10.5,9.5 51.6,6.5 51.6,9 10.5,12"/>
-    </svg>`
-  };
-
   function buildIconPicker(triggerEl, popupEl, options, currentVal, onSelect) {
     // Set trigger to current icon
     const cur = options.find(o => o.id === currentVal);
@@ -2448,12 +2386,11 @@ function setupEvents() {
     { id:'single', icon: BEAT_ICONS.single },
     { id:'double', icon: BEAT_ICONS.double },
     { id:'split3', icon: BEAT_ICONS.split3 },
-    { id:'split4', icon: BEAT_ICONS.split4 },
     { id:'revdot', icon: BEAT_ICONS.revdot },
     { id:'triple', icon: BEAT_ICONS.triple },
     { id:'quad',   icon: BEAT_ICONS.quad },
-    { id:'t1011',  icon: BEAT_ICONS.t1011 },
-    { id:'t1101',  icon: BEAT_ICONS.t1101 }
+    { id:'bp81616', icon: BEAT_ICONS.bp81616 },
+    { id:'bp16168', icon: BEAT_ICONS.bp16168 }
   ];
   buildIconPicker($('bpTrigger'), $('bpPopup'), bpOptions, S.beatPattern, function(id) {
     S.beatPattern = id;
@@ -2537,9 +2474,6 @@ function setupEvents() {
   $('cfgAccentVol').addEventListener('input', function() {
     S.metroAccentMul = parseFloat(this.value);
     $('cfgAccentVolVal').textContent = S.metroAccentMul.toFixed(1) + 'x';
-  });
-  $('cfgSubdiv').addEventListener('change', function() {
-    S.metroSubdiv = parseInt(this.value);
   });
   $('cfgCountIn').addEventListener('change', function() {
     S.metroCountIn = parseInt(this.value);
@@ -2802,8 +2736,8 @@ function setupEvents() {
       // Config panels
       fftSize:'FFT Size', maxFreq:'Max Freq', smoothing:'Smoothing', colorScheme:'Color Scheme',
       notation:'Notation', transpose:'Transpose', pitchPlayerVol:'Pitch Player Vol', sharpNotation:'Sharp (C#)', flatNotation:'Flat (D\u266D)', none:'None',
-      clickSound:'Click Sound', beatPattern:'Beat Pattern', volume:'Volume', accent:'Accent', subdivision:'Subdivision', countIn:'Count-in', flashBeat:'Flash Beat',
-      classic:'Classic', wood:'Wood', digital:'Digital', noise:'Noise', eighth:'8th', triplet:'Triplet', sixteenth:'16th', off:'Off', on:'On',
+      clickSound:'Click Sound', beatPattern:'Beat Pattern', volume:'Volume', accent:'Accent', countIn:'Count-in', flashBeat:'Flash Beat',
+      classic:'Classic', wood:'Wood', digital:'Digital', noise:'Noise', off:'Off', on:'On',
       oneBar:'1 Bar', twoBars:'2 Bars', fourBars:'4 Bars',
       sampleRate:'Sample Rate', bitDepth:'Bit Depth', waveZoom:'Waveform Zoom', micGain:'Mic Gain',
       compact:'Compact', normal:'Normal', wide:'Wide', extraWide:'Extra Wide',
@@ -2828,8 +2762,8 @@ function setupEvents() {
     zh: { spectrum:'頻譜', tuner:'調音器', tunerA440:'調音器 \u00b7 A440', metronome:'節拍器', waveform:'波形', tapToStart:'點擊開始', recordToAnalyze:'錄音以分析', tapTempo:'點擊測速', start:'開始', stop:'停止', settings:'設定', appearance:'外觀', lightMode:'淺色模式', language:'語言', selectLang:'選擇語言', tunerSec:'調音器', refPitch:'參考音高', sensitivity:'靈敏度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'音訊', metroVol:'節拍器音量', about:'關於', rename:'重新命名', share:'分享', delete:'刪除', cancel:'取消', empty:'空白', live:'即時',
       fftSize:'FFT 大小', maxFreq:'最大頻率', smoothing:'平滑度', colorScheme:'配色方案',
       notation:'記譜法', transpose:'移調', pitchPlayerVol:'音高播放器音量', sharpNotation:'升號 (C#)', flatNotation:'降號 (D\u266D)', none:'無',
-      clickSound:'點擊音效', beatPattern:'節拍型態', volume:'音量', accent:'重音', subdivision:'細分', countIn:'預備拍', flashBeat:'閃爍節拍',
-      classic:'經典', wood:'木質', digital:'數位', noise:'噪音', eighth:'八分', triplet:'三連音', sixteenth:'十六分', off:'關', on:'開',
+      clickSound:'點擊音效', beatPattern:'節拍型態', volume:'音量', accent:'重音', countIn:'預備拍', flashBeat:'閃爍節拍',
+      classic:'經典', wood:'木質', digital:'數位', noise:'噪音', off:'關', on:'開',
       oneBar:'1 小節', twoBars:'2 小節', fourBars:'4 小節',
       sampleRate:'取樣率', bitDepth:'位元深度', waveZoom:'波形縮放', micGain:'麥克風增益',
       compact:'緊湊', normal:'正常', wide:'寬', extraWide:'超寬',
@@ -2852,8 +2786,8 @@ function setupEvents() {
     ja: { spectrum:'スペクトラム', tuner:'チューナー', tunerA440:'チューナー \u00b7 A440', metronome:'メトロノーム', waveform:'波形', tapToStart:'タップして開始', recordToAnalyze:'録音して分析', tapTempo:'タップテンポ', start:'開始', stop:'停止', settings:'設定', appearance:'外観', lightMode:'ライトモード', language:'言語', selectLang:'言語を選択', tunerSec:'チューナー', refPitch:'基準ピッチ', sensitivity:'感度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'オーディオ', metroVol:'メトロノーム音量', about:'概要', rename:'名前変更', share:'共有', delete:'削除', cancel:'キャンセル', empty:'空', live:'ライブ',
       fftSize:'FFT サイズ', maxFreq:'最大周波数', smoothing:'スムージング', colorScheme:'配色',
       notation:'記譜法', transpose:'移調', pitchPlayerVol:'ピッチ音量', sharpNotation:'シャープ (C#)', flatNotation:'フラット (D\u266D)', none:'なし',
-      clickSound:'クリック音', beatPattern:'ビートパターン', volume:'音量', accent:'アクセント', subdivision:'細分化', countIn:'カウントイン', flashBeat:'フラッシュビート',
-      classic:'クラシック', wood:'ウッド', digital:'デジタル', noise:'ノイズ', eighth:'8分', triplet:'3連符', sixteenth:'16分', off:'オフ', on:'オン',
+      clickSound:'クリック音', beatPattern:'ビートパターン', volume:'音量', accent:'アクセント', countIn:'カウントイン', flashBeat:'フラッシュビート',
+      classic:'クラシック', wood:'ウッド', digital:'デジタル', noise:'ノイズ', off:'オフ', on:'オン',
       oneBar:'1小節', twoBars:'2小節', fourBars:'4小節',
       sampleRate:'サンプルレート', bitDepth:'ビット深度', waveZoom:'波形ズーム', micGain:'マイクゲイン',
       compact:'コンパクト', normal:'標準', wide:'ワイド', extraWide:'エクストラワイド',
@@ -2876,8 +2810,8 @@ function setupEvents() {
     es: { spectrum:'Espectro', tuner:'Afinador', tunerA440:'Afinador \u00b7 A440', metronome:'Metrónomo', waveform:'Forma de onda', tapToStart:'TOCA PARA INICIAR', recordToAnalyze:'GRABAR PARA ANALIZAR', tapTempo:'TEMPO POR TOQUE', start:'INICIO', stop:'PARAR', settings:'Ajustes', appearance:'Apariencia', lightMode:'Modo Claro', language:'Idioma', selectLang:'Seleccionar Idioma', tunerSec:'Afinador', refPitch:'Tono de Referencia', sensitivity:'Sensibilidad', sensLow:'Bajo', sensMed:'Medio', sensHigh:'Alto', audio:'Audio', metroVol:'Volumen del Metrónomo', about:'Acerca de', rename:'Renombrar', share:'Compartir', delete:'Eliminar', cancel:'Cancelar', empty:'Vacío', live:'EN VIVO',
       fftSize:'Tamaño FFT', maxFreq:'Frec. Máx.', smoothing:'Suavizado', colorScheme:'Esquema de Color',
       notation:'Notación', transpose:'Transposición', pitchPlayerVol:'Vol. Reproductor', sharpNotation:'Sostenido (C#)', flatNotation:'Bemol (D\u266D)', none:'Ninguno',
-      clickSound:'Sonido de Clic', beatPattern:'Patrón de Pulso', volume:'Volumen', accent:'Acento', subdivision:'Subdivisión', countIn:'Cuenta Previa', flashBeat:'Flash de Pulso',
-      classic:'Clásico', wood:'Madera', digital:'Digital', noise:'Ruido', eighth:'Corchea', triplet:'Tresillo', sixteenth:'Semicorchea', off:'Apagado', on:'Encendido',
+      clickSound:'Sonido de Clic', beatPattern:'Patrón de Pulso', volume:'Volumen', accent:'Acento', countIn:'Cuenta Previa', flashBeat:'Flash de Pulso',
+      classic:'Clásico', wood:'Madera', digital:'Digital', noise:'Ruido', off:'Apagado', on:'Encendido',
       oneBar:'1 Compás', twoBars:'2 Compases', fourBars:'4 Compases',
       sampleRate:'Frecuencia de Muestreo', bitDepth:'Profundidad de Bits', waveZoom:'Zoom de Onda', micGain:'Ganancia del Mic',
       compact:'Compacto', normal:'Normal', wide:'Amplio', extraWide:'Extra Amplio',
@@ -2964,7 +2898,7 @@ function setupEvents() {
     const cfgLabelMap = [
       ['FFT Size','fftSize'],['Max Freq','maxFreq'],['Smoothing','smoothing'],['Color Scheme','colorScheme'],
       ['Reference Pitch','refPitch'],['Sensitivity','sensitivity'],['Notation','notation'],['Transpose','transpose'],['Pitch Player Vol','pitchPlayerVol'],
-      ['Click Sound','clickSound'],['Beat Pattern','beatPattern'],['Volume','volume'],['Accent','accent'],['Subdivision','subdivision'],['Count-in','countIn'],['Flash Beat','flashBeat'],
+      ['Click Sound','clickSound'],['Beat Pattern','beatPattern'],['Volume','volume'],['Accent','accent'],['Count-in','countIn'],['Flash Beat','flashBeat'],
       ['Sample Rate','sampleRate'],['Bit Depth','bitDepth'],['Waveform Zoom','waveZoom'],['Mic Gain','micGain']
     ];
     document.querySelectorAll('.config-item > span:first-child').forEach(el => {
@@ -2983,9 +2917,6 @@ function setupEvents() {
     // Metronome: Click Sound
     const csSel = $('cfgClickSound');
     if (csSel) { tOpt(csSel, 0, 'classic'); tOpt(csSel, 1, 'wood'); tOpt(csSel, 2, 'digital'); tOpt(csSel, 3, 'noise'); }
-    // Metronome: Subdivision
-    const sdSel = $('cfgSubdiv');
-    if (sdSel) { tOpt(sdSel, 0, 'none'); tOpt(sdSel, 1, 'eighth'); tOpt(sdSel, 2, 'triplet'); tOpt(sdSel, 3, 'sixteenth'); }
     // Metronome: Count-in
     const ciSel = $('cfgCountIn');
     if (ciSel) { tOpt(ciSel, 0, 'off'); tOpt(ciSel, 1, 'oneBar'); tOpt(ciSel, 2, 'twoBars'); tOpt(ciSel, 3, 'fourBars'); }
@@ -3437,7 +3368,6 @@ setupEvents();
     p.metroSound  = $('cfgClickSound').value;
     p.metroVol    = $('cfgMetroVol').value;
     p.accentVol   = $('cfgAccentVol').value;
-    p.subdiv      = $('cfgSubdiv').value;
     p.countIn     = $('cfgCountIn').value;
     p.flashBeat   = $('cfgFlashBeat').value;
     // Waveform / Audio
@@ -3527,7 +3457,6 @@ setupEvents();
     if (p.metroSound){ $('cfgClickSound').value = p.metroSound; $('cfgClickSound').dispatchEvent(new Event('change')); }
     if (p.metroVol)  { $('cfgMetroVol').value = p.metroVol;    $('cfgMetroVol').dispatchEvent(new Event('input')); }
     if (p.accentVol) { $('cfgAccentVol').value = p.accentVol;  $('cfgAccentVol').dispatchEvent(new Event('input')); }
-    if (p.subdiv)    { $('cfgSubdiv').value = p.subdiv;         $('cfgSubdiv').dispatchEvent(new Event('change')); }
     if (p.countIn)   { $('cfgCountIn').value = p.countIn;      $('cfgCountIn').dispatchEvent(new Event('change')); }
     if (p.flashBeat) { $('cfgFlashBeat').value = p.flashBeat;  $('cfgFlashBeat').dispatchEvent(new Event('change')); }
     // Waveform
@@ -3567,7 +3496,7 @@ setupEvents();
     'fontSizeSelect','langSelect',
     'cfgFFTSize','cfgMaxFreq','cfgSmoothing','cfgSpecColor',
     'cfgTunerSens','cfgNotation','cfgTranspose','cfgPitchVol',
-    'cfgClickSound','cfgMetroVol','cfgAccentVol','cfgSubdiv','cfgCountIn','cfgFlashBeat',
+    'cfgClickSound','cfgMetroVol','cfgAccentVol','cfgCountIn','cfgFlashBeat',
     'cfgSampleRate','cfgBitDepth','cfgMicGain','cfgWaveZoom',
     'toggleTheme'
   ];
