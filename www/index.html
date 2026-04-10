@@ -79,7 +79,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-spectrum canvas{width:100%;height:100%;display:block}
 
 /* Tuner */
-.sec-tuner{height:calc(75dvh * 6 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
+.sec-tuner{height:calc(75dvh * 5.5 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
@@ -96,14 +96,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .note-arrow:active{color:var(--accent)}
 
 /* Metronome */
-.sec-metro{height:calc(75dvh * 4 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
+.sec-metro{height:calc(75dvh * 4.5 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
-.beat-row{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 12px 2px;flex-shrink:0;overflow:hidden;align-self:center}
-.beat-tri{width:40px;height:40px;transition:filter .06s;filter:none;pointer-events:none}
+.beat-row{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 8px 2px;flex-shrink:0;overflow:visible;align-self:center;max-width:100%}
+.beat-tri{width:52px;height:52px;transition:filter .06s;filter:none;pointer-events:none}
 .beat-tri svg{width:100%;height:100%;display:block}
 .beat-tri path{fill:var(--border);transition:fill .06s}
-.beat-tri.accent{width:52px;height:52px}
+.beat-tri.accent{width:64px;height:64px}
 .beat-tri.on path{fill:var(--accent)}
 .beat-tri.on{filter:drop-shadow(0 0 6px var(--accent-glow))}
 .beat-tri.accent.on path{fill:var(--warning)}
@@ -127,7 +127,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.light .icon-picker-popup{background:#f4f4f8;box-shadow:0 -4px 16px rgba(0,0,0,0.12)}
 .metro-vol-row{display:flex;justify-content:center;align-items:center;padding:0;margin-top:4px}
 .metro-vol-slider{display:none}
-.vol-dial{width:48px;height:48px;cursor:pointer;touch-action:none;user-select:none}
+.vol-dial{width:64px;height:64px;cursor:pointer;touch-action:none;user-select:none}
 .vol-dial canvas{width:100%;height:100%}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
@@ -345,6 +345,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         <div class="config-item"><span>Notation</span><select class="config-select" id="cfgNotation"><option value="sharp" selected>Sharp (C#)</option><option value="flat">Flat (D♭)</option></select></div>
         <div class="config-item"><span>Transpose</span><select class="config-select" id="cfgTranspose"><option value="0" selected>None</option><option value="1">+1</option><option value="2">+2</option><option value="3">+3</option><option value="4">+4</option><option value="5">+5</option><option value="6">+6</option><option value="-5">−5</option><option value="-4">−4</option><option value="-3">−3</option><option value="-2">−2</option><option value="-1">−1</option></select></div>
         <div class="config-item"><span>Pitch Player Vol</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgPitchVol" min="0" max="0.5" step="0.01" value="0.15"><span class="config-range-val" id="cfgPitchVolVal">0.15</span></span></div>
+        <div class="config-item"><span>Green Range</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgGreenRange" min="2" max="25" step="1" value="10"><span class="config-range-val" id="cfgGreenRangeVal">±10¢</span></span></div>
       </div>
     </div>
   </div>
@@ -633,6 +634,7 @@ const S = {
   // Metronome
   metroOn: false, bpm: 120, beats: 4, tsDenom: 4, curBeat: -1,
   nextBeatTime: 0, metroTimer: null, beatPattern: 'single',
+  greenRange: 10, // ±cents for "in tune" green zone
   metroSound: 'sine', metroCountIn: 0, metroFlash: true, metroAccentMul: 1.0,
   // Waveform drag
   dragging: false, dragX: 0, dragOffset: 0, lastAnalyzedPos: -1,
@@ -1211,12 +1213,12 @@ function drawTuner() {
   // Amber zone ±40 cents
   c.beginPath(); c.arc(cx, cy, r, centsToAngle(-40), centsToAngle(40));
   c.strokeStyle = 'rgba(255,176,32,0.55)'; c.lineWidth = arcWidth; c.lineCap = 'butt'; c.stroke();
-  // Green zone ±10 cents
-  c.beginPath(); c.arc(cx, cy, r, centsToAngle(-10), centsToAngle(10));
+  // Green zone ±greenRange cents
+  c.beginPath(); c.arc(cx, cy, r, centsToAngle(-S.greenRange), centsToAngle(S.greenRange));
   c.strokeStyle = 'rgba(0,232,154,0.75)'; c.lineWidth = arcWidth + 2; c.lineCap = 'butt'; c.stroke();
   // Green glow
   c.save(); c.shadowColor = 'rgba(0,232,154,0.3)'; c.shadowBlur = 10;
-  c.beginPath(); c.arc(cx, cy, r, centsToAngle(-10), centsToAngle(10));
+  c.beginPath(); c.arc(cx, cy, r, centsToAngle(-S.greenRange), centsToAngle(S.greenRange));
   c.strokeStyle = 'rgba(0,232,154,0.35)'; c.lineWidth = arcWidth + 6; c.stroke();
   c.restore();
 
@@ -1273,7 +1275,7 @@ function drawTuner() {
     const nx = cx + needleLen * Math.cos(nAngle);
     const ny = cy + needleLen * Math.sin(nAngle);
     const absCents = S.pitchPlaying ? 0 : Math.abs(S.displayCents);
-    const nColor = absCents < 10 ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
+    const nColor = absCents < S.greenRange ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
     // Glow
     c.save(); c.shadowColor = nColor; c.shadowBlur = 12;
     c.beginPath(); c.moveTo(cx, cy); c.lineTo(nx, ny);
@@ -1339,7 +1341,7 @@ function drawTuner() {
     c.fillText('♪ TAP TO STOP', cx, cy - 2);
   } else if (S.freq > 0 && S.note) {
     const absCents = Math.abs(S.cents);
-    const col = absCents < 10 ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
+    const col = absCents < S.greenRange ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
     drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.62);
     // Hz
     c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
@@ -1406,13 +1408,27 @@ function buildBeats() {
   elBeatRow.innerHTML = '';
   const triSvg = '<svg viewBox="0 0 24 24"><path d="M6 4.5C6 2.8 7.8 1.7 9.2 2.6l8.4 5.8c2 1.4 2 4.4 0 5.8l-8.4 5.8C7.8 21 6 20 6 18.2V4.5z"/></svg>';
   const groupOf3 = S.tsDenom === 8; // 3/8, 6/8, 9/8, 12/8 — accent every 3rd beat
+  // Scale triangles to always fit in the card
+  const maxW = 390; // approx card inner width
+  const baseSize = 52, accentSize = 64, gap = 6;
+  const accentCount = groupOf3 ? Math.ceil(S.beats / 3) : 1;
+  const normalCount = S.beats - accentCount;
+  const naturalW = accentCount * accentSize + normalCount * baseSize + (S.beats - 1) * gap;
+  const scale = naturalW > maxW ? maxW / naturalW : 1;
   for (let i = 0; i < S.beats; i++) {
     const t = document.createElement('div');
     const isAccent = groupOf3 ? (i % 3 === 0) : (i === 0);
     t.className = 'beat-tri' + (isAccent ? ' accent' : '');
+    if (scale < 1) {
+      const sz = isAccent ? accentSize * scale : baseSize * scale;
+      t.style.width = sz + 'px';
+      t.style.height = sz + 'px';
+    }
     t.innerHTML = triSvg;
     elBeatRow.appendChild(t);
   }
+  if (scale < 1) elBeatRow.style.gap = (gap * scale) + 'px';
+  else elBeatRow.style.gap = '';
 }
 
 function metroClick(time, type) {
@@ -2140,6 +2156,7 @@ function setupEvents() {
       if (newIdx !== state.idx) scrollTo(newIdx);
     }
     function pointerUp() {
+      if (!state.dragging) return;
       state.dragging = false;
       itemsEl.style.transition = 'transform 0.12s ease-out';
       scrollTo(state.idx);
@@ -2251,9 +2268,9 @@ function setupEvents() {
       { id:'split3',  label: BEAT_ICONS.split3 },
       { id:'revdot',  label: BEAT_ICONS.revdot },
       { id:'triple',  label: BEAT_ICONS.triple },
-      { id:'quad',    label: BEAT_ICONS.quad },
       { id:'bp81616', label: BEAT_ICONS.bp81616 },
-      { id:'bp16168', label: BEAT_ICONS.bp16168 }
+      { id:'bp16168', label: BEAT_ICONS.bp16168 },
+      { id:'quad',    label: BEAT_ICONS.quad }
     ];
   }
   let patternIdx = 0;
@@ -2388,9 +2405,9 @@ function setupEvents() {
     { id:'split3', icon: BEAT_ICONS.split3 },
     { id:'revdot', icon: BEAT_ICONS.revdot },
     { id:'triple', icon: BEAT_ICONS.triple },
-    { id:'quad',   icon: BEAT_ICONS.quad },
     { id:'bp81616', icon: BEAT_ICONS.bp81616 },
-    { id:'bp16168', icon: BEAT_ICONS.bp16168 }
+    { id:'bp16168', icon: BEAT_ICONS.bp16168 },
+    { id:'quad',   icon: BEAT_ICONS.quad }
   ];
   buildIconPicker($('bpTrigger'), $('bpPopup'), bpOptions, S.beatPattern, function(id) {
     S.beatPattern = id;
@@ -2421,7 +2438,7 @@ function setupEvents() {
     const startA = (135 * Math.PI) / 180;
     const endA = (405 * Math.PI) / 180;
     const valA = startA + pct * (endA - startA);
-    const knobR = 34;
+    const knobR = 36;
 
     // Flat knob body
     c.beginPath();
@@ -2970,6 +2987,12 @@ function setupEvents() {
     $('cfgPitchVolVal').textContent = v.toFixed(2);
   });
 
+  $('cfgGreenRange').addEventListener('input', function() {
+    S.greenRange = parseInt(this.value);
+    $('cfgGreenRangeVal').textContent = '±' + S.greenRange + '¢';
+    if (window._savePrefs) window._savePrefs();
+  });
+
   // ---- Reference Pitch (A4) control ----
   function updateRefPitch() {
     $('refPitchLabel').textContent = 'A' + A4;
@@ -3360,6 +3383,7 @@ setupEvents();
     p.notation   = $('cfgNotation').value;
     p.transpose  = $('cfgTranspose').value;
     p.pitchVol   = $('cfgPitchVol').value;
+    p.greenRange = S.greenRange;
     // Metronome
     p.bpm        = S.bpm;
     p.beats      = S.beats;
@@ -3429,6 +3453,7 @@ setupEvents();
     if (p.notation)  { $('cfgNotation').value = p.notation;   $('cfgNotation').dispatchEvent(new Event('change')); }
     if (p.transpose) { $('cfgTranspose').value = p.transpose; $('cfgTranspose').dispatchEvent(new Event('change')); }
     if (p.pitchVol)  { $('cfgPitchVol').value = p.pitchVol;  $('cfgPitchVol').dispatchEvent(new Event('input')); }
+    if (p.greenRange) { $('cfgGreenRange').value = p.greenRange; $('cfgGreenRange').dispatchEvent(new Event('input')); }
     // Metronome
     if (p.bpm) {
       S.bpm = parseInt(p.bpm);
