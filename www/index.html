@@ -56,7 +56,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .section-drag-source{opacity:0.2;pointer-events:none}
 .section-drag-placeholder{border:2px dashed var(--accent);background:rgba(0,232,154,0.07);flex-shrink:0;box-sizing:border-box}
 .section-drag-ghost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:0.88;border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.6);border:2px solid var(--accent)}
-.drag-handle{position:absolute;top:6px;left:6px;z-index:10;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;opacity:0.35;transition:opacity .15s,top .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
+.drag-handle{position:absolute;top:6px;left:6px;z-index:10;width:22px;height:22px;display:none;align-items:center;justify-content:center;cursor:grab;touch-action:none;opacity:0.35;transition:opacity .15s,top .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
 .drag-handle:active{cursor:grabbing;opacity:0.8}
 .drag-handle svg{display:block;width:7px;height:10px}
 .section-slider{position:relative;width:100%;height:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}
@@ -100,10 +100,10 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
 .beat-row{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 8px 2px;flex-shrink:0;overflow:visible;align-self:center;max-width:100%}
-.beat-tri{width:52px;height:52px;transition:filter .06s;filter:none;pointer-events:none}
+.beat-tri{width:72px;height:72px;transition:filter .06s;filter:none;pointer-events:none}
 .beat-tri svg{width:100%;height:100%;display:block}
 .beat-tri path{fill:var(--border);transition:fill .06s}
-.beat-tri.accent{width:64px;height:64px}
+.beat-tri.accent{width:86px;height:86px}
 .beat-tri.on path{fill:var(--accent)}
 .beat-tri.on{filter:drop-shadow(0 0 6px var(--accent-glow))}
 .beat-tri.accent.on path{fill:var(--warning)}
@@ -127,7 +127,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.light .icon-picker-popup{background:#f4f4f8;box-shadow:0 -4px 16px rgba(0,0,0,0.12)}
 .metro-vol-row{display:flex;justify-content:center;align-items:center;padding:0;margin-top:4px}
 .metro-vol-slider{display:none}
-.vol-dial{width:64px;height:64px;cursor:pointer;touch-action:none;user-select:none}
+.vol-dial{width:56px;height:56px;cursor:pointer;touch-action:none;user-select:none}
 .vol-dial canvas{width:100%;height:100%}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
@@ -236,6 +236,16 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .settings-val{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--text-bright)}
 .settings-select{background:var(--bg-panel);color:var(--text-bright);border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:.85rem;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8da8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:20px}
 .settings-select option{background:var(--bg-panel);color:var(--text-bright)}
+.feedback-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:center;justify-content:center}
+.feedback-overlay.open{display:flex}
+.feedback-box{background:var(--bg-surface,#0c0e18);border:1px solid var(--border-light);border-radius:12px;padding:20px;width:88%;max-width:380px}
+.feedback-box h3{margin:0 0 12px;font-size:.95rem;color:var(--text-bright);font-weight:600}
+.feedback-box textarea{width:100%;height:120px;background:var(--bg-panel);color:var(--text-bright);border:1px solid var(--border-light);border-radius:8px;padding:10px;font-family:inherit;font-size:.85rem;resize:none;outline:none;box-sizing:border-box}
+.feedback-box textarea:focus{border-color:var(--accent)}
+.feedback-box-btns{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+.feedback-box-btns button{border:none;border-radius:6px;padding:8px 18px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.feedback-btn-cancel{background:var(--border);color:var(--text-bright)}
+.feedback-btn-submit{background:var(--accent);color:#000;font-weight:600}
 
 /* Light theme */
 .app.light{--bg-deep:#f0f1f5;--bg-panel:#ffffff;--bg-surface:#f5f6fa;--border:#d8dae4;--border-light:#c8cad8;--text-bright:#1a1c28;--text-mid:#5a5d72;--text-dim:#8a8da0;--accent:#00b874;--accent-glow:rgba(0,184,116,.25);--warning:#e09800;--warning-glow:rgba(224,152,0,.2);--danger:#e0304a;--danger-glow:rgba(224,48,74,.25)}
@@ -551,6 +561,10 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           <div class="settings-label">Tutorial</div>
           <div class="settings-val" style="color:var(--accent)">Start &rsaquo;</div>
         </div>
+        <div class="settings-row" id="feedbackBtn" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
+          <div class="settings-label" data-i18n="feedback">Feedback</div>
+          <div class="settings-val" style="color:var(--accent)">Send &rsaquo;</div>
+        </div>
       </div>
       <div class="settings-section">
         <div class="settings-section-title" data-i18n="about">About</div>
@@ -562,6 +576,18 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     </div>
   </div>
   </div><!-- end app-inner -->
+</div>
+
+<!-- Feedback modal -->
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box">
+    <h3>Send Feedback</h3>
+    <textarea id="feedbackText" placeholder="Tell us what you think..."></textarea>
+    <div class="feedback-box-btns">
+      <button class="feedback-btn-cancel" id="feedbackCancel">Cancel</button>
+      <button class="feedback-btn-submit" id="feedbackSubmit">Submit</button>
+    </div>
+  </div>
 </div>
 
 <!-- Tutorial overlay -->
@@ -1306,7 +1332,7 @@ function drawTuner() {
   function drawNoteLabel(name, oct, col, labelY) {
     const base = name[0];
     const acc = name.length > 1 ? name.slice(1) : '';
-    c.font = '700 ' + sf(68) + 'px "Century Gothic"';
+    c.font = '700 ' + sf(80) + 'px "Century Gothic"';
     c.fillStyle = col;
     c.textAlign = 'center'; c.textBaseline = 'middle';
     const baseW = c.measureText(base).width;
@@ -1330,38 +1356,38 @@ function drawTuner() {
     const pName = NOTES[((dispMidi % 12) + 12) % 12];
     const pOct = Math.floor(dispMidi / 12) - 1;
     const pFreq = A4 * Math.pow(2, (S.pitchMidi - A4_MIDI) / 12);
-    drawNoteLabel(pName, pOct, '#00e89a', cy - maskR * 0.62);
+    drawNoteLabel(pName, pOct, '#00e89a', cy - maskR * 0.52);
     c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
-    c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 35);
+    c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 12);
     // "♪ PLAYING" indicator
     c.font = '600 ' + sf(12) + 'px "Century Gothic"';
     c.fillStyle = '#00e89a';
-    c.fillText('♪ TAP TO STOP', cx, cy - 2);
+    c.fillText('♪ TAP TO STOP', cx, cy + 18);
   } else if (S.freq > 0 && S.note) {
     const absCents = Math.abs(S.cents);
     const col = absCents < S.greenRange ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
-    drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.62);
+    drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.52);
     // Hz
     c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
-    c.fillText(S.freq.toFixed(1) + ' Hz', cx, cy - 35);
+    c.fillText(S.freq.toFixed(1) + ' Hz', cx, cy - 12);
     // Cents
     const cSign = S.cents >= 0 ? '+' : '';
     c.font = '600 ' + sf(16) + 'px "Share Tech Mono"';
     c.fillStyle = col;
-    c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy - 6);
+    c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy + 16);
   } else {
-    c.font = '700 ' + sf(58) + 'px "Century Gothic"';
+    c.font = '700 ' + sf(68) + 'px "Century Gothic"';
     c.fillStyle = lt ? '#1a1c28' : '#e4e6f0';
     c.textBaseline = 'middle';
-    c.fillText('--', cx, cy - maskR * 0.62);
+    c.fillText('--', cx, cy - maskR * 0.52);
     c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#8a8da0' : '#4a4d68';
     c.textBaseline = 'top';
-    c.fillText('--- Hz', cx, cy - 35);
+    c.fillText('--- Hz', cx, cy - 12);
   }
 
   // ---- dB indicator (top-right corner) ----
@@ -1410,7 +1436,7 @@ function buildBeats() {
   const groupOf3 = S.tsDenom === 8; // 3/8, 6/8, 9/8, 12/8 — accent every 3rd beat
   // Scale triangles to always fit in the card
   const maxW = 390; // approx card inner width
-  const baseSize = 52, accentSize = 64, gap = 6;
+  const baseSize = 72, accentSize = 86, gap = 6;
   const accentCount = groupOf3 ? Math.ceil(S.beats / 3) : 1;
   const normalCount = S.beats - accentCount;
   const naturalW = accentCount * accentSize + normalCount * baseSize + (S.beats - 1) * gap;
@@ -2760,21 +2786,21 @@ function setupEvents() {
       compact:'Compact', normal:'Normal', wide:'Wide', extraWide:'Extra Wide',
       // Settings
       fontSize:'Font Size', fontSmall:'Small', fontMedium:'Medium', fontLarge:'Large', fontXL:'Extra Large',
-      help:'Help', tutorial:'Tutorial', tutorialStart:'Start',
+      help:'Help', tutorial:'Tutorial', tutorialStart:'Start', feedback:'Feedback',
       // Tutorial
       tapToContinue:'tap to continue',
-      tut1:'This is the Spectrum \u2014 it shows a real-time frequency analysis of what your mic picks up.',
-      tut2:'Swipe left from the right edge of any section to reveal its config panel.',
-      tut3:'Swipe right to close the config panel.',
-      tut4:'The Tuner detects pitch and shows how many cents sharp or flat you are from the nearest note.',
-      tut5:'Tap the note name on the tuner to play a reference tone. Tap again to stop.',
-      tut6:'The Metronome \u2014 tap anywhere on this area to start/stop.',
-      tut7:'Tap to choose a beat pattern: quarter, 8ths, swing, reverse dotted, triplet, 16ths, 8th+16th×2, or 16th×2+8th.',
-      tut8:'This counts bars. Tap it to reset the count.',
-      tut9:'The Waveform section \u2014 shows your recording. Pinch to zoom, drag to scrub.',
-      tut10:'Tap to record. Tap again to stop. Your recording appears in the waveform.',
-      tut11:'The bottom bar manages recordings. Swipe to switch slots, long-press for actions (share, rename, delete).',
-      tut12:'Tap the gear icon to open Settings \u2014 theme, language, reference pitch, and more.'
+      tut1:'Spectrum \u2014 real-time frequency analysis.',
+      tut2:'Swipe left from the right edge to open config.',
+      tut3:'Swipe right to close.',
+      tut4:'Tuner \u2014 shows cents sharp or flat from the nearest note.',
+      tut5:'Tap the note name to play a reference tone.',
+      tut6:'Metronome \u2014 tap to start/stop.',
+      tut7:'Tap to choose a beat pattern.',
+      tut8:'Bar counter. Tap to reset.',
+      tut9:'Waveform \u2014 pinch to zoom, drag to scrub.',
+      tut10:'Tap to record. Tap again to stop.',
+      tut11:'Swipe to switch recordings. Long-press for actions.',
+      tut12:'Tap the gear icon to open Settings.'
     },
     zh: { spectrum:'頻譜', tuner:'調音器', tunerA440:'調音器 \u00b7 A440', metronome:'節拍器', waveform:'波形', tapToStart:'點擊開始', recordToAnalyze:'錄音以分析', tapTempo:'點擊測速', start:'開始', stop:'停止', settings:'設定', appearance:'外觀', lightMode:'淺色模式', language:'語言', selectLang:'選擇語言', tunerSec:'調音器', refPitch:'參考音高', sensitivity:'靈敏度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'音訊', metroVol:'節拍器音量', about:'關於', rename:'重新命名', share:'分享', delete:'刪除', cancel:'取消', empty:'空白', live:'即時',
       fftSize:'FFT 大小', maxFreq:'最大頻率', smoothing:'平滑度', colorScheme:'配色方案',
@@ -2785,20 +2811,20 @@ function setupEvents() {
       sampleRate:'取樣率', bitDepth:'位元深度', waveZoom:'波形縮放', micGain:'麥克風增益',
       compact:'緊湊', normal:'正常', wide:'寬', extraWide:'超寬',
       fontSize:'字體大小', fontSmall:'小', fontMedium:'中', fontLarge:'大', fontXL:'特大',
-      help:'幫助', tutorial:'教學導覽', tutorialStart:'開始',
+      help:'幫助', tutorial:'教學導覽', tutorialStart:'開始', feedback:'意見回饋',
       tapToContinue:'點擊繼續',
-      tut1:'這是頻譜 \u2014 即時顯示麥克風接收到的頻率分析。',
-      tut2:'從任何區段的右側邊緣向左滑動，可開啟設定面板。',
-      tut3:'向右滑動可關閉設定面板。',
-      tut4:'調音器可偵測音高，並顯示與最近音符的偏差（以音分為單位）。',
-      tut5:'點擊調音器上的音符名稱可播放參考音。再次點擊可停止。',
-      tut6:'節拍器 \u2014 點擊此區域即可啟動/停止。',
-      tut7:'點擊選擇節拍模式：四分音符、八分、搖擺、反附點、三連音、十六分、八分+十六分×2、十六分×2+八分。',
-      tut8:'這是小節計數器。點擊可重置。',
-      tut9:'波形區段 \u2014 顯示您的錄音。捏合縮放，拖動可刮擦播放。',
-      tut10:'點擊開始錄音，再次點擊停止。您的錄音會顯示在波形中。',
-      tut11:'底部欄管理錄音。滑動切換錄音槽，長按可操作（分享、重新命名、刪除）。',
-      tut12:'點擊齒輪圖示可開啟設定 \u2014 主題、語言、參考音高等。'
+      tut1:'頻譜 \u2014 即時頻率分析。',
+      tut2:'從右側邊緣向左滑動開啟設定。',
+      tut3:'向右滑動關閉。',
+      tut4:'調音器 \u2014 顯示與最近音符的音分偏差。',
+      tut5:'點擊音符名稱播放參考音。',
+      tut6:'節拍器 \u2014 點擊啟動/停止。',
+      tut7:'點擊選擇節拍模式。',
+      tut8:'小節計數器。點擊重置。',
+      tut9:'波形 \u2014 捏合縮放，拖動播放。',
+      tut10:'點擊錄音，再次點擊停止。',
+      tut11:'滑動切換錄音。長按操作。',
+      tut12:'點擊齒輪開啟設定。'
     },
     ja: { spectrum:'スペクトラム', tuner:'チューナー', tunerA440:'チューナー \u00b7 A440', metronome:'メトロノーム', waveform:'波形', tapToStart:'タップして開始', recordToAnalyze:'録音して分析', tapTempo:'タップテンポ', start:'開始', stop:'停止', settings:'設定', appearance:'外観', lightMode:'ライトモード', language:'言語', selectLang:'言語を選択', tunerSec:'チューナー', refPitch:'基準ピッチ', sensitivity:'感度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'オーディオ', metroVol:'メトロノーム音量', about:'概要', rename:'名前変更', share:'共有', delete:'削除', cancel:'キャンセル', empty:'空', live:'ライブ',
       fftSize:'FFT サイズ', maxFreq:'最大周波数', smoothing:'スムージング', colorScheme:'配色',
@@ -2809,20 +2835,20 @@ function setupEvents() {
       sampleRate:'サンプルレート', bitDepth:'ビット深度', waveZoom:'波形ズーム', micGain:'マイクゲイン',
       compact:'コンパクト', normal:'標準', wide:'ワイド', extraWide:'エクストラワイド',
       fontSize:'フォントサイズ', fontSmall:'小', fontMedium:'中', fontLarge:'大', fontXL:'特大',
-      help:'ヘルプ', tutorial:'チュートリアル', tutorialStart:'開始',
+      help:'ヘルプ', tutorial:'チュートリアル', tutorialStart:'開始', feedback:'フィードバック',
       tapToContinue:'タップして続ける',
-      tut1:'これはスペクトラムです。マイクが拾った音のリアルタイム周波数分析を表示します。',
-      tut2:'各セクションの右端から左にスワイプすると、設定パネルが開きます。',
-      tut3:'右にスワイプすると設定パネルが閉じます。',
-      tut4:'チューナーはピッチを検出し、最も近い音からのセント偏差を表示します。',
-      tut5:'チューナーの音名をタップすると基準音が鳴ります。もう一度タップで停止。',
-      tut6:'メトロノーム \u2014 このエリアをタップで開始/停止。',
-      tut7:'タップしてビートパターンを選択：4分、8分、スウィング、逆付点、3連符、16分、8分+16分×2、16分×2+8分。',
-      tut8:'小節カウンターです。タップでリセット。',
-      tut9:'波形セクション \u2014 録音を表示。ピンチでズーム、ドラッグでスクラブ。',
-      tut10:'タップで録音開始。もう一度タップで停止。録音は波形に表示されます。',
-      tut11:'下部バーで録音を管理。スワイプでスロット切り替え、長押しでアクション（共有、名前変更、削除）。',
-      tut12:'歯車アイコンをタップして設定を開く \u2014 テーマ、言語、基準ピッチなど。'
+      tut1:'スペクトラム \u2014 リアルタイム周波数分析。',
+      tut2:'右端から左にスワイプで設定を開く。',
+      tut3:'右にスワイプで閉じる。',
+      tut4:'チューナー \u2014 最も近い音からのセント偏差を表示。',
+      tut5:'音名をタップで基準音を再生。',
+      tut6:'メトロノーム \u2014 タップで開始/停止。',
+      tut7:'タップでビートパターンを選択。',
+      tut8:'小節カウンター。タップでリセット。',
+      tut9:'波形 \u2014 ピンチでズーム、ドラッグでスクラブ。',
+      tut10:'タップで録音開始。もう一度タップで停止。',
+      tut11:'スワイプで録音切替。長押しで操作。',
+      tut12:'歯車アイコンで設定を開く。'
     },
     es: { spectrum:'Espectro', tuner:'Afinador', tunerA440:'Afinador \u00b7 A440', metronome:'Metrónomo', waveform:'Forma de onda', tapToStart:'TOCA PARA INICIAR', recordToAnalyze:'GRABAR PARA ANALIZAR', tapTempo:'TEMPO POR TOQUE', start:'INICIO', stop:'PARAR', settings:'Ajustes', appearance:'Apariencia', lightMode:'Modo Claro', language:'Idioma', selectLang:'Seleccionar Idioma', tunerSec:'Afinador', refPitch:'Tono de Referencia', sensitivity:'Sensibilidad', sensLow:'Bajo', sensMed:'Medio', sensHigh:'Alto', audio:'Audio', metroVol:'Volumen del Metrónomo', about:'Acerca de', rename:'Renombrar', share:'Compartir', delete:'Eliminar', cancel:'Cancelar', empty:'Vacío', live:'EN VIVO',
       fftSize:'Tamaño FFT', maxFreq:'Frec. Máx.', smoothing:'Suavizado', colorScheme:'Esquema de Color',
@@ -2833,20 +2859,20 @@ function setupEvents() {
       sampleRate:'Frecuencia de Muestreo', bitDepth:'Profundidad de Bits', waveZoom:'Zoom de Onda', micGain:'Ganancia del Mic',
       compact:'Compacto', normal:'Normal', wide:'Amplio', extraWide:'Extra Amplio',
       fontSize:'Tamaño de Fuente', fontSmall:'Pequeño', fontMedium:'Mediano', fontLarge:'Grande', fontXL:'Extra Grande',
-      help:'Ayuda', tutorial:'Tutorial', tutorialStart:'Iniciar',
+      help:'Ayuda', tutorial:'Tutorial', tutorialStart:'Iniciar', feedback:'Comentarios',
       tapToContinue:'toca para continuar',
-      tut1:'Este es el Espectro \u2014 muestra un análisis de frecuencia en tiempo real de lo que capta tu micrófono.',
-      tut2:'Desliza hacia la izquierda desde el borde derecho de cualquier sección para abrir su panel de configuración.',
-      tut3:'Desliza hacia la derecha para cerrar el panel de configuración.',
-      tut4:'El Afinador detecta el tono y muestra cuántos centésimos estás por encima o por debajo de la nota más cercana.',
-      tut5:'Toca el nombre de la nota en el afinador para reproducir un tono de referencia. Toca de nuevo para detener.',
-      tut6:'El Metrónomo \u2014 toca en cualquier lugar de esta área para iniciar/detener.',
-      tut7:'Toca para elegir un patrón de ritmo: negra, corcheas, swing, puntillo invertido, tresillo, semicorcheas, corchea+semi×2, semi×2+corchea.',
-      tut8:'Esto cuenta compases. Tócalo para reiniciar.',
-      tut9:'La sección de Forma de Onda \u2014 muestra tu grabación. Pellizca para zoom, arrastra para recorrer.',
-      tut10:'Toca para grabar. Toca de nuevo para detener. Tu grabación aparece en la forma de onda.',
-      tut11:'La barra inferior gestiona las grabaciones. Desliza para cambiar ranuras, mantén pulsado para acciones (compartir, renombrar, eliminar).',
-      tut12:'Toca el icono del engranaje para abrir Ajustes \u2014 tema, idioma, tono de referencia y más.'
+      tut1:'Espectro \u2014 análisis de frecuencia en tiempo real.',
+      tut2:'Desliza a la izquierda desde el borde derecho para abrir config.',
+      tut3:'Desliza a la derecha para cerrar.',
+      tut4:'Afinador \u2014 muestra centésimos respecto a la nota más cercana.',
+      tut5:'Toca el nombre de la nota para un tono de referencia.',
+      tut6:'Metrónomo \u2014 toca para iniciar/detener.',
+      tut7:'Toca para elegir un patrón de ritmo.',
+      tut8:'Contador de compases. Toca para reiniciar.',
+      tut9:'Forma de onda \u2014 pellizca para zoom, arrastra para recorrer.',
+      tut10:'Toca para grabar. Toca de nuevo para detener.',
+      tut11:'Desliza para cambiar grabaciones. Mantén pulsado para acciones.',
+      tut12:'Toca el engranaje para abrir Ajustes.'
     }
   };
   let curLang = 'en';
@@ -3348,6 +3374,39 @@ function setupEvents() {
 
   // Expose for external use
   window.startTutorial = start;
+})();
+
+// ================================================================
+//  FEEDBACK
+// ================================================================
+(function(){
+  const overlay = $('feedbackOverlay');
+  const txt = $('feedbackText');
+  $('feedbackBtn').addEventListener('click', () => { overlay.classList.add('open'); txt.value = ''; txt.focus(); });
+  $('feedbackCancel').addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  const submitBtn = $('feedbackSubmit');
+  submitBtn.addEventListener('click', () => {
+    const body = txt.value.trim();
+    if (!body) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    fetch('https://formsubmit.co/ajax/jimmy20020704@gmail.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ _subject: 'TONESCOPE Feedback', message: body })
+    }).then(r => r.json()).then(data => {
+      if (data.success) {
+        txt.value = 'Thank you for your feedback!';
+        txt.disabled = true;
+        setTimeout(() => { overlay.classList.remove('open'); txt.disabled = false; submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }, 1500);
+      } else { throw new Error(); }
+    }).catch(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit';
+      alert('Could not send feedback. Please try again.');
+    });
+  });
 })();
 
 // ================================================================
