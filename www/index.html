@@ -10,6 +10,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ToneScope">
 <link rel="apple-touch-icon" href="icon-192.png">
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -41,6 +43,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .startup-title{font-size:2.4rem;font-weight:700;letter-spacing:.35em;color:var(--text-bright);text-shadow:0 0 40px var(--accent-glow),0 0 80px rgba(0,232,154,.12)}
 .startup-sub{font-family:'Share Tech Mono',monospace;font-size:.85rem;letter-spacing:.2em;color:var(--text-dim);margin-top:1.2rem;animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.startup-ad{width:320px;height:100px;margin-top:2rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-panel)}
+.startup-ad ins.adsbygoogle{display:block;width:320px;height:100px}
 
 /* ===== SECTIONS ===== */
 .scroll-area{flex:0 0 75%;overflow-y:auto;overflow-x:hidden;min-height:0;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}.scroll-area::-webkit-scrollbar{display:none}
@@ -315,6 +319,15 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <div class="startup" id="startup">
     <div class="startup-title">TONESCOPE</div>
     <div class="startup-sub">TAP TO START</div>
+    <!-- AdSense banner — replace data-ad-* values with your real ad unit -->
+    <div class="startup-ad">
+      <ins class="adsbygoogle"
+           style="display:block;width:320px;height:100px"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="fixed"
+           data-full-width-responsive="false"></ins>
+    </div>
   </div>
 
   <!-- Scrollable top area -->
@@ -2466,6 +2479,24 @@ function setupEvents() {
     const valA = startA + pct * (endA - startA);
     const knobR = 36;
 
+    // Track arc (full range, background)
+    const trackR = knobR + 7;
+    c.beginPath();
+    c.arc(cx, cy, trackR, startA, endA);
+    c.strokeStyle = lt ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.1)';
+    c.lineWidth = 3;
+    c.lineCap = 'round';
+    c.stroke();
+    // Value arc (current level)
+    if (pct > 0) {
+      c.beginPath();
+      c.arc(cx, cy, trackR, startA, valA);
+      c.strokeStyle = '#00e89a';
+      c.lineWidth = 3;
+      c.lineCap = 'round';
+      c.stroke();
+    }
+
     // Flat knob body
     c.beginPath();
     c.arc(cx, cy, knobR, 0, Math.PI * 2);
@@ -3413,6 +3444,9 @@ function setupEvents() {
 //  INIT
 // ================================================================
 setupEvents();
+
+// Push AdSense ad unit on the startup screen
+(adsbygoogle = window.adsbygoogle || []).push({});
 
 // ================================================================
 //  PERSIST / RESTORE SETTINGS  (localStorage key: 'ts_prefs')
