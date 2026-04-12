@@ -43,7 +43,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .startup-title{font-size:2.4rem;font-weight:700;letter-spacing:.35em;color:var(--text-bright);text-shadow:0 0 40px var(--accent-glow),0 0 80px rgba(0,232,154,.12)}
 .startup-sub{font-family:'Share Tech Mono',monospace;font-size:.85rem;letter-spacing:.2em;color:var(--text-dim);margin-top:1.2rem;animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-.startup-ad{width:320px;height:100px;margin-top:2rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-panel)}
+.startup-ad{width:320px;height:100px;margin-top:2rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none;align-items:center;justify-content:center;background:var(--bg-panel)}
+.app.free .startup-ad{display:flex}
 .startup-ad ins.adsbygoogle{display:block;width:320px;height:100px}
 
 /* ===== SECTIONS ===== */
@@ -228,6 +229,26 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .settings-close{background:none;border:none;color:var(--text-dim);font-size:1.3rem;cursor:pointer;padding:0 4px;-webkit-tap-highlight-color:transparent}
 .settings-close:active{color:var(--text-bright)}
 .settings-body{padding:12px 18px;flex:1;overflow-y:auto}
+.settings-ad-banner{flex-shrink:0;margin:0;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg-surface);display:none;align-items:center;justify-content:center}
+.settings-ad-inner{width:100%;height:60px;border:1px dashed var(--border-light);border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--bg-panel);color:var(--text-dim);font-size:.72rem;letter-spacing:.1em;font-family:'Share Tech Mono',monospace}
+.app.light .settings-ad-banner{background:#fff;border-color:rgba(0,0,0,0.08)}
+.app.light .settings-ad-inner{border-color:rgba(0,0,0,0.12);background:#f4f4f8}
+
+/* ── FREE VERSION OVERRIDES ──────────────────────────────────── */
+/* Applied when JS sets APP_VERSION='free' and adds .free to .app */
+.sec-ad-banner,.sec-ad-banner-2{display:none;height:calc(75svh * 1 / 13);background:var(--bg-panel);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;justify-content:center}
+.sec-ad-inner{width:calc(100% - 28px);height:100%;max-height:72px;margin:auto;border:1px dashed var(--border-light);border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface);color:var(--text-dim);font-size:.72rem;letter-spacing:.1em;font-family:'Share Tech Mono',monospace}
+.app.free .sec-ad-banner,.app.free .sec-ad-banner-2{display:flex}
+.app.free .sec-spectrum{height:calc(75svh * 2 / 13)}
+.app.free .sec-tuner{height:calc(75svh * 5.5 / 13)}
+.app.free .sec-metro{height:calc(75svh * 3.5 / 13)}
+.app.free .metro-vol-row{display:none}
+.app.free .beat-tri{width:55px;height:55px}
+.app.free .beat-tri.accent{width:65px;height:65px}
+.app.free .settings-ad-banner{display:flex}
+.app.light .sec-ad-banner,.app.light .sec-ad-banner-2{background:#f0f1f5}
+.app.light .sec-ad-inner{border-color:rgba(0,0,0,0.12);background:#f8f8fb}
+/* ───────────────────────────────────────────────────────────── */
 .settings-section{margin-bottom:18px}
 .settings-section-title{font-size:.75rem;font-weight:600;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px}
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
@@ -332,6 +353,16 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 
   <!-- Scrollable top area -->
   <div class="scroll-area" id="scrollArea">
+
+  <!-- 0a. Top banner ad — FREE VERSION ONLY (hidden in pro) -->
+  <div class="sec-ad-banner-2" id="secAdBanner2">
+    <div class="sec-ad-inner">ADVERTISEMENT</div>
+  </div>
+
+  <!-- 0b. Second banner ad — FREE VERSION ONLY (hidden in pro) -->
+  <div class="sec-ad-banner" id="secAdBanner">
+    <div class="sec-ad-inner">ADVERTISEMENT</div>
+  </div>
 
   <!-- 1. Spectrum -->
   <div class="section sec-spectrum">
@@ -538,6 +569,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       <div class="settings-title">Settings</div>
       <button class="settings-close" id="settingsClose">&times;</button>
     </div>
+    <div class="settings-ad-banner">
+      <div class="settings-ad-inner">ADVERTISEMENT</div>
+    </div>
     <div class="settings-body">
       <div class="settings-section">
         <div class="settings-section-title" data-i18n="appearance">Appearance</div>
@@ -621,6 +655,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 // ================================================================
 //  TONESCOPE — Professional Music Tuner
 // ================================================================
+
+// ════════════════════════════════════════════════════════════════
+//  VERSION FLAG — switch here to test Pro vs Free build
+//    'pro'  → no ads, volume dial shown, full metronome height
+//    'free' → banner ads, volume dial hidden, metronome shorter
+// ════════════════════════════════════════════════════════════════
+const APP_VERSION = 'free'; // ← CHANGE TO 'free' TO TEST FREE TIER
+// ════════════════════════════════════════════════════════════════
 
 const NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES_FLAT  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
@@ -1341,25 +1383,29 @@ function drawTuner() {
   c.fill();
 
   c.textAlign = 'center';
+  // Scale note-label fonts down in free mode to fit the shorter card
+  const _ts = APP_VERSION === 'free' ? 0.8 : 1;
+  const tsf = px => Math.round(sf(px) * _ts);
+
   // Draw note label: base letter centered, sharp/flat superscript, octave subscript
   function drawNoteLabel(name, oct, col, labelY) {
     const base = name[0];
     const acc = name.length > 1 ? name.slice(1) : '';
-    c.font = '700 ' + sf(80) + 'px "Century Gothic"';
+    c.font = '700 ' + tsf(80) + 'px "Century Gothic"';
     c.fillStyle = col;
     c.textAlign = 'center'; c.textBaseline = 'middle';
     const baseW = c.measureText(base).width;
     c.fillText(base, cx, labelY);
     const right = cx + baseW / 2 + 2;
     if (acc) {
-      c.font = '600 ' + sf(30) + 'px "Century Gothic"';
+      c.font = '600 ' + tsf(30) + 'px "Century Gothic"';
       c.textAlign = 'left'; c.textBaseline = 'top';
-      c.fillText(acc, right, labelY - sf(32));
+      c.fillText(acc, right, labelY - tsf(32));
     }
-    c.font = '500 ' + sf(26) + 'px "Share Tech Mono"';
+    c.font = '500 ' + tsf(26) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#5a5d72' : '#8a8da8';
     c.textAlign = 'left'; c.textBaseline = 'bottom';
-    c.fillText(oct, right, labelY + sf(26));
+    c.fillText(oct, right, labelY + tsf(26));
     c.textAlign = 'center';
   }
 
@@ -1370,12 +1416,12 @@ function drawTuner() {
     const pOct = Math.floor(dispMidi / 12) - 1;
     const pFreq = A4 * Math.pow(2, (S.pitchMidi - A4_MIDI) / 12);
     drawNoteLabel(pName, pOct, '#00e89a', cy - maskR * 0.52);
-    c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
+    c.font = '600 ' + tsf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
     c.fillText(pFreq.toFixed(1) + ' Hz', cx, cy - 12);
     // "♪ PLAYING" indicator
-    c.font = '600 ' + sf(12) + 'px "Century Gothic"';
+    c.font = '600 ' + tsf(12) + 'px "Century Gothic"';
     c.fillStyle = '#00e89a';
     c.fillText('♪ TAP TO STOP', cx, cy + 18);
   } else if (S.freq > 0 && S.note) {
@@ -1383,21 +1429,21 @@ function drawTuner() {
     const col = absCents < S.greenRange ? '#00e89a' : absCents < 40 ? '#ffb020' : '#ff3d5a';
     drawNoteLabel(S.note.name, S.note.oct, col, cy - maskR * 0.52);
     // Hz
-    c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
+    c.font = '600 ' + tsf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#4a4d62' : '#9a9dc0';
     c.textBaseline = 'top';
     c.fillText(S.freq.toFixed(1) + ' Hz', cx, cy - 12);
     // Cents
     const cSign = S.cents >= 0 ? '+' : '';
-    c.font = '600 ' + sf(16) + 'px "Share Tech Mono"';
+    c.font = '600 ' + tsf(16) + 'px "Share Tech Mono"';
     c.fillStyle = col;
     c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy + 16);
   } else {
-    c.font = '700 ' + sf(68) + 'px "Century Gothic"';
+    c.font = '700 ' + tsf(68) + 'px "Century Gothic"';
     c.fillStyle = lt ? '#1a1c28' : '#e4e6f0';
     c.textBaseline = 'middle';
     c.fillText('--', cx, cy - maskR * 0.52);
-    c.font = '600 ' + sf(24) + 'px "Share Tech Mono"';
+    c.font = '600 ' + tsf(24) + 'px "Share Tech Mono"';
     c.fillStyle = lt ? '#8a8da0' : '#4a4d68';
     c.textBaseline = 'top';
     c.fillText('--- Hz', cx, cy - 12);
@@ -3444,6 +3490,9 @@ function setupEvents() {
 //  INIT
 // ================================================================
 setupEvents();
+
+// Apply version tier — reads APP_VERSION flag declared at top of script
+if (APP_VERSION === 'free') document.querySelector('.app').classList.add('free');
 
 // Push AdSense ad unit on the startup screen
 (adsbygoogle = window.adsbygoogle || []).push({});
