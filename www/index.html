@@ -84,7 +84,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-spectrum canvas{width:100%;height:100%;display:block}
 
 /* Tuner */
-.sec-tuner{height:calc(75svh * 5.1 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
+.sec-tuner{height:calc(75svh * 5.3 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
@@ -101,7 +101,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .note-arrow:active{color:var(--accent)}
 
 /* Metronome */
-.sec-metro{height:calc(75svh * 5.4 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
+.sec-metro{height:calc(75svh * 5.2 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
 .beat-row{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 8px 2px;flex-shrink:0;overflow:visible;align-self:center;max-width:100%}
@@ -531,6 +531,15 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         </div>
       </div>
       <div class="section-config">
+        <div class="config-item">
+          <span>Format</span>
+          <select id="cfgAudioFmt" class="config-select">
+            <option value="wav" selected>WAV</option>
+            <option value="mp3">MP3</option>
+            <option value="webm">WebM</option>
+            <option value="aac">AAC</option>
+          </select>
+        </div>
         <div class="config-item">
           <span>Sample Rate</span>
           <select id="cfgSampleRate" class="config-select">
@@ -967,8 +976,8 @@ function startRecording() {
       S.audioBuffer = decoded;
       genPeaks();
       S.playOffset = 0;
-      // Save into recordings slot
-      S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice(), name: S.recordings[S.recIdx]?.name || null };
+      // Save into recordings slot (keep raw blob for non-WAV export)
+      S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice(), name: S.recordings[S.recIdx]?.name || null, rawBlob: blob, rawMime: blob.type };
       S.mode = 'paused';
       updateControlState();
       renderRecSlots();
@@ -1362,7 +1371,7 @@ function drawTuner() {
   const maxR = w / 2 - padSide;
   const r = Math.min(maxR, (h - padBot) * 0.7);
   // Vertically center: total extent = r (arc top) + padBot (labels below pivot)
-  const cy = (h + r - padBot) / 2;
+  const cy = (h + r - padBot) / 2 + 14;
   const totalCents = 100;
 
   // Smoothed display cents — hold last position when no note detected
@@ -2020,6 +2029,47 @@ function audioBufferToWav(buf) {
   return out;
 }
 
+// MP3 encoding via lamejs (loaded on demand from CDN)
+let _lamejsLoaded = false;
+function loadLamejs() {
+  if (_lamejsLoaded) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js';
+    s.onload = () => { _lamejsLoaded = true; resolve(); };
+    s.onerror = () => reject(new Error('Failed to load MP3 encoder'));
+    document.head.appendChild(s);
+  });
+}
+
+async function encodeMP3(audioBuf) {
+  await loadLamejs();
+  const nc = audioBuf.numberOfChannels;
+  const sr = audioBuf.sampleRate;
+  const len = audioBuf.length;
+  const kbps = 128;
+  const mp3enc = new lamejs.Mp3Encoder(nc, sr, kbps);
+  const blockSize = 1152;
+  const mp3Data = [];
+  const left  = new Int16Array(len);
+  const right = nc > 1 ? new Int16Array(len) : null;
+  const ld = audioBuf.getChannelData(0);
+  for (let i = 0; i < len; i++) left[i] = Math.max(-1, Math.min(1, ld[i])) * 0x7FFF | 0;
+  if (nc > 1) {
+    const rd = audioBuf.getChannelData(1);
+    for (let i = 0; i < len; i++) right[i] = Math.max(-1, Math.min(1, rd[i])) * 0x7FFF | 0;
+  }
+  for (let i = 0; i < len; i += blockSize) {
+    const lc = left.subarray(i, i + blockSize);
+    const rc = right ? right.subarray(i, i + blockSize) : lc;
+    const buf = mp3enc.encodeBuffer(lc, rc);
+    if (buf.length > 0) mp3Data.push(buf);
+  }
+  const end = mp3enc.flush();
+  if (end.length > 0) mp3Data.push(end);
+  return new Blob(mp3Data, { type: 'audio/mpeg' });
+}
+
 function recName(i) {
   const rec = S.recordings[i];
   if (rec && rec.name) return rec.name;
@@ -2614,31 +2664,41 @@ function setupEvents() {
     const slider = $('cfgMetroVol');
     const val = parseFloat(slider.value);
     const pct = val / parseFloat(slider.max);
-    const startA = (135 * Math.PI) / 180;
-    const endA = (405 * Math.PI) / 180;
-    const valA = startA + pct * (endA - startA);
-    const r = 34;
+    // ~350° sweep — tiny gap at bottom
+    const startA = (100 * Math.PI) / 180;
+    const sweep  = (340 * Math.PI) / 180;
+    const endA   = startA + sweep;
+    const valA   = startA + pct * sweep;
+    const knobR  = 28, trackR = knobR + 8;
 
-    // Circular outline only
+    // Track arc (background)
     c.beginPath();
-    c.arc(cx, cy, r, 0, Math.PI * 2);
-    c.strokeStyle = '#00e89a';
-    c.lineWidth = 1.5;
-    c.stroke();
+    c.arc(cx, cy, trackR, startA, endA);
+    c.strokeStyle = lt ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.1)';
+    c.lineWidth = 3; c.lineCap = 'round'; c.stroke();
 
-    // Indicator line from center toward edge
+    // Value arc (progress)
+    if (pct > 0) {
+      c.beginPath();
+      c.arc(cx, cy, trackR, startA, valA);
+      c.strokeStyle = '#00e89a';
+      c.lineWidth = 3; c.lineCap = 'round'; c.stroke();
+    }
+
+    // Knob body
+    c.beginPath(); c.arc(cx, cy, knobR, 0, Math.PI * 2);
+    c.fillStyle = lt ? '#d0d0d6' : '#2a2d36'; c.fill();
+    c.beginPath(); c.arc(cx, cy, knobR, 0, Math.PI * 2);
+    c.strokeStyle = lt ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.06)';
+    c.lineWidth = 1; c.stroke();
+
+    // Indicator line
     const ix1 = cx + Math.cos(valA) * 7;
     const iy1 = cy + Math.sin(valA) * 7;
-    const ix2 = cx + Math.cos(valA) * (r - 5);
-    const iy2 = cy + Math.sin(valA) * (r - 5);
-    c.beginPath();
-    c.moveTo(ix1, iy1);
-    c.lineTo(ix2, iy2);
-    c.strokeStyle = '#00e89a';
-    c.lineWidth = 2.5;
-    c.lineCap = 'round';
-    c.stroke();
-
+    const ix2 = cx + Math.cos(valA) * (knobR - 5);
+    const iy2 = cy + Math.sin(valA) * (knobR - 5);
+    c.beginPath(); c.moveTo(ix1, iy1); c.lineTo(ix2, iy2);
+    c.strokeStyle = '#00e89a'; c.lineWidth = 2.5; c.lineCap = 'round'; c.stroke();
   }
 
   // Dial drag interaction — horizontal: left decreases, right increases
@@ -2849,13 +2909,31 @@ function setupEvents() {
     if (!S.audioBuffer) return;
     const rec = S.recordings[S.recIdx];
     if (!rec || !rec.audioBuffer) return;
-    const buf = rec.audioBuffer;
-    const wav = audioBufferToWav(buf);
-    const filename = (rec.name || 'Rec ' + (S.recIdx + 1)) + '.wav';
-    const blob = new Blob([wav], { type: 'audio/wav' });
+    const fmt = ($('cfgAudioFmt') || {}).value || 'wav';
+    let blob, filename, mimeType;
+    if (fmt === 'mp3') {
+      // Encode as MP3 using lamejs
+      const buf = rec.audioBuffer;
+      const mp3Blob = await encodeMP3(buf);
+      mimeType = 'audio/mpeg';
+      filename = (rec.name || 'Rec ' + (S.recIdx + 1)) + '.mp3';
+      blob = mp3Blob;
+    } else if (fmt !== 'wav' && rec.rawBlob) {
+      // Use native captured blob (WebM/AAC)
+      const ext = fmt === 'aac' ? 'm4a' : 'webm';
+      mimeType = rec.rawMime || rec.rawBlob.type;
+      filename = (rec.name || 'Rec ' + (S.recIdx + 1)) + '.' + ext;
+      blob = rec.rawBlob;
+    } else {
+      // Re-encode as WAV
+      const wav = audioBufferToWav(rec.audioBuffer);
+      mimeType = 'audio/wav';
+      filename = (rec.name || 'Rec ' + (S.recIdx + 1)) + '.wav';
+      blob = new Blob([wav], { type: mimeType });
+    }
     // Use native share sheet on mobile if available
     if (navigator.share && navigator.canShare) {
-      const file = new File([blob], filename, { type: 'audio/wav' });
+      const file = new File([blob], filename, { type: mimeType });
       if (navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: filename });
@@ -3791,6 +3869,7 @@ applyVersionTier(APP_VERSION);
     p.countIn     = $('cfgCountIn').value;
     p.flashBeat   = $('cfgFlashBeat').value;
     // Waveform / Audio
+    p.audioFmt    = $('cfgAudioFmt').value;
     p.sampleRate  = $('cfgSampleRate').value;
     p.bitDepth    = $('cfgBitDepth').value;
     p.micGain     = $('cfgMicGain').value;
@@ -3881,6 +3960,7 @@ applyVersionTier(APP_VERSION);
     if (p.countIn)   { $('cfgCountIn').value = p.countIn;      $('cfgCountIn').dispatchEvent(new Event('change')); }
     if (p.flashBeat) { $('cfgFlashBeat').value = p.flashBeat;  $('cfgFlashBeat').dispatchEvent(new Event('change')); }
     // Waveform
+    if (p.audioFmt)  { $('cfgAudioFmt').value = p.audioFmt; }
     if (p.bitDepth)  { $('cfgBitDepth').value = p.bitDepth;    $('cfgBitDepth').dispatchEvent(new Event('change')); }
     if (p.micGain)   { $('cfgMicGain').value = p.micGain;      $('cfgMicGain').dispatchEvent(new Event('change')); }
     if (p.waveZoom)  { $('cfgWaveZoom').value = p.waveZoom;    $('cfgWaveZoom').dispatchEvent(new Event('change')); }
@@ -3918,7 +3998,7 @@ applyVersionTier(APP_VERSION);
     'cfgFFTSize','cfgMaxFreq','cfgSmoothing','cfgSpecColor',
     'cfgTunerSens','cfgNotation','cfgTranspose','cfgPitchVol',
     'cfgClickSound','cfgMetroVol','cfgAccentVol','cfgCountIn','cfgFlashBeat',
-    'cfgSampleRate','cfgBitDepth','cfgMicGain','cfgWaveZoom',
+    'cfgAudioFmt','cfgSampleRate','cfgBitDepth','cfgMicGain','cfgWaveZoom',
     'toggleTheme'
   ];
   WATCHED_IDS.forEach(id => {
