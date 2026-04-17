@@ -262,15 +262,15 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .settings-upgrade-sub{font-size:.72rem;color:var(--text-dim);line-height:1.35}
 .settings-upgrade-btn{flex-shrink:0;background:var(--accent);color:#000;border:none;border-radius:7px;padding:8px 14px;font-size:.8rem;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.03em;-webkit-tap-highlight-color:transparent}
 .settings-upgrade-btn:active{opacity:.82}
-.iap-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.78);z-index:9998;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.iap-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.78);z-index:9998;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .iap-overlay.open{display:flex}
-.iap-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:18px;padding:28px 22px 22px;width:100%;max-width:340px;position:relative;text-align:center}
+.iap-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:18px;padding:32px 24px 26px;width:100%;max-width:340px;position:relative;text-align:center;margin:auto}
 .iap-card-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;-webkit-tap-highlight-color:transparent;line-height:1;padding:0}
 .iap-card-close:active{color:var(--text-bright)}
 .iap-icon{font-size:2.2rem;margin-bottom:8px;display:block}
 .iap-card-title{font-family:'Chakra Petch',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-bright);margin-bottom:3px}
 .iap-card-sub{font-size:.78rem;color:var(--text-mid);margin-bottom:14px}
-.iap-feats{list-style:none;text-align:left;margin:0 0 16px;padding:0 4px;display:flex;flex-direction:column;gap:8px}
+.iap-feats{list-style:none;text-align:left;margin:0 0 18px;padding:8px 10px;display:flex;flex-direction:column;gap:9px;background:rgba(0,232,154,.04);border-radius:10px}
 .iap-feats li{font-size:.83rem;color:var(--text-mid);display:flex;align-items:center;gap:9px}
 .iap-feats li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
 .iap-price-tag{font-family:'Share Tech Mono',monospace;font-size:1.55rem;font-weight:700;color:var(--text-bright);margin-bottom:16px}
@@ -627,8 +627,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       <!-- Pro upgrade bar — free tier only -->
       <div class="settings-upgrade-bar" id="upgradeBar">
         <div class="settings-upgrade-text">
-          <span class="settings-upgrade-title">ToneScope Pro</span>
-          <span class="settings-upgrade-sub">Remove ads · Volume control · Full metronome</span>
+          <span class="settings-upgrade-title" id="upgradeTitle">ToneScope Pro</span>
+          <span class="settings-upgrade-sub" id="upgradeSub">Remove ads · Volume control · Full metronome</span>
         </div>
         <button class="settings-upgrade-btn" id="settingsUpgradeBtn">Unlock Pro</button>
       </div>
@@ -697,19 +697,20 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <div class="iap-card">
     <button class="iap-card-close" id="iapClose">&times;</button>
     <span class="iap-icon">♪</span>
-    <div class="iap-card-title">ToneScope Pro</div>
-    <div class="iap-card-sub">One-time purchase. Yours forever.</div>
+    <div class="iap-card-title" id="iapTitle">ToneScope Pro</div>
+    <div class="iap-card-sub" id="iapSub">One-time purchase. Yours forever.</div>
     <ul class="iap-feats">
-      <li>No banner ads</li>
-      <li>Metronome volume control</li>
-      <li>Full metronome layout</li>
-      <li>24-bit recording export</li>
+      <li id="iapFeat1">No banner ads</li>
+      <li id="iapFeat2">Metronome volume control</li>
+      <li id="iapFeat3">Full metronome layout</li>
+      <li id="iapFeat4">24-bit recording export</li>
+      <li id="iapFeat5">Unlimited recording slots</li>
     </ul>
     <div class="iap-price-tag" id="iapPriceTag">$4.99<span>one-time</span></div>
     <button class="iap-btn-primary" id="iapBuyBtn">Unlock Pro</button>
     <button class="iap-btn-secondary" id="iapRestoreBtn">Restore Purchase</button>
     <div class="iap-status" id="iapStatus"></div>
-    <div class="iap-legal">Payment charged to your App Store or Google Play account at confirmation. Non-refundable except where required by law.</div>
+    <div class="iap-legal" id="iapLegal">Payment charged to your App Store or Google Play account at confirmation. Non-refundable except where required by law.</div>
   </div>
 </div>
 
@@ -2130,6 +2131,14 @@ function switchToRecording(idx) {
 }
 
 function addNewRecording() {
+  // Free version: limit to 3 recording slots
+  const FREE_SLOT_LIMIT = 3;
+  if (APP_VERSION === 'free' && S.recordings.length >= FREE_SLOT_LIMIT) {
+    const ov = document.getElementById('iapOverlay');
+    if (window._openIapModal) window._openIapModal();
+    else if (ov) ov.classList.add('open');
+    return;
+  }
   // Save current if exists
   if (S.audioBuffer) {
     S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice() };
@@ -3014,6 +3023,11 @@ function setupEvents() {
       // Settings
       fontSize:'Font Size', fontSmall:'Small', fontMedium:'Medium', fontLarge:'Large', fontXL:'Extra Large',
       help:'Help', tutorial:'Tutorial', tutorialStart:'Start', feedback:'Feedback', restorePurchases:'Restore Purchases', privacyPolicy:'Privacy Policy',
+      // Pro / IAP
+      proTitle:'ToneScope Pro', proSub:'One-time purchase. Yours forever.', unlockPro:'Unlock Pro', restorePurchase:'Restore Purchase',
+      proFeat1:'No banner ads', proFeat2:'Metronome volume control', proFeat3:'Full metronome layout', proFeat4:'24-bit recording export', proFeat5:'Unlimited recording slots',
+      proUpgradeSub:'Remove ads \u00b7 Volume control \u00b7 Full metronome',
+      proLegal:'Payment charged to your App Store or Google Play account at confirmation. Non-refundable except where required by law.',
       // Tutorial
       tapToContinue:'tap to continue',
       tut1:'Spectrum \u2014 real-time frequency analysis.',
@@ -3039,6 +3053,10 @@ function setupEvents() {
       compact:'緊湊', normal:'正常', wide:'寬', extraWide:'超寬',
       fontSize:'字體大小', fontSmall:'小', fontMedium:'中', fontLarge:'大', fontXL:'特大',
       help:'幫助', tutorial:'教學導覽', tutorialStart:'開始', feedback:'意見回饋', restorePurchases:'恢復購買', privacyPolicy:'隱私政策',
+      proTitle:'ToneScope Pro', proSub:'一次購買，永久擁有。', unlockPro:'解鎖 Pro', restorePurchase:'恢復購買',
+      proFeat1:'無廣告', proFeat2:'節拍器音量控制', proFeat3:'完整節拍器布局', proFeat4:'24位錄音匯出', proFeat5:'無限錄音槽位',
+      proUpgradeSub:'去廣告 \u00b7 音量控制 \u00b7 完整節拍器',
+      proLegal:'確認後將從您的 App Store 或 Google Play 帳戶扣款。除法律要求外不予退款。',
       tapToContinue:'點擊繼續',
       tut1:'頻譜 \u2014 即時頻率分析。',
       tut2:'從右側邊緣向左滑動開啟設定。',
@@ -3063,6 +3081,10 @@ function setupEvents() {
       compact:'コンパクト', normal:'標準', wide:'ワイド', extraWide:'エクストラワイド',
       fontSize:'フォントサイズ', fontSmall:'小', fontMedium:'中', fontLarge:'大', fontXL:'特大',
       help:'ヘルプ', tutorial:'チュートリアル', tutorialStart:'開始', feedback:'フィードバック', restorePurchases:'購入を復元', privacyPolicy:'プライバシーポリシー',
+      proTitle:'ToneScope Pro', proSub:'一度の購入で、ずっとあなたのもの。', unlockPro:'Pro を解除', restorePurchase:'購入を復元',
+      proFeat1:'広告なし', proFeat2:'メトロノーム音量調整', proFeat3:'フルメトロノームレイアウト', proFeat4:'24ビット録音エクスポート', proFeat5:'無制限の録音スロット',
+      proUpgradeSub:'広告なし \u00b7 音量調整 \u00b7 フルメトロノーム',
+      proLegal:'確認時にApp StoreまたはGoogle Playアカウントに請求されます。法律で義務付けられている場合を除き、返金不可。',
       tapToContinue:'タップして続ける',
       tut1:'スペクトラム \u2014 リアルタイム周波数分析。',
       tut2:'右端から左にスワイプで設定を開く。',
@@ -3087,6 +3109,10 @@ function setupEvents() {
       compact:'Compacto', normal:'Normal', wide:'Amplio', extraWide:'Extra Amplio',
       fontSize:'Tamaño de Fuente', fontSmall:'Pequeño', fontMedium:'Mediano', fontLarge:'Grande', fontXL:'Extra Grande',
       help:'Ayuda', tutorial:'Tutorial', tutorialStart:'Iniciar', feedback:'Comentarios', restorePurchases:'Restaurar Compras', privacyPolicy:'Política de Privacidad',
+      proTitle:'ToneScope Pro', proSub:'Compra única. Tuyo para siempre.', unlockPro:'Desbloquear Pro', restorePurchase:'Restaurar Compra',
+      proFeat1:'Sin anuncios', proFeat2:'Control de volumen del metrónomo', proFeat3:'Metrónomo completo', proFeat4:'Exportación de grabación 24 bits', proFeat5:'Grabaciones ilimitadas',
+      proUpgradeSub:'Sin anuncios \u00b7 Control de volumen \u00b7 Metrónomo completo',
+      proLegal:'El pago se cargará a tu cuenta de App Store o Google Play al confirmar. No reembolsable excepto donde lo exija la ley.',
       tapToContinue:'toca para continuar',
       tut1:'Espectro \u2014 análisis de frecuencia en tiempo real.',
       tut2:'Desliza a la izquierda desde el borde derecho para abrir config.',
@@ -3196,6 +3222,22 @@ function setupEvents() {
     // Waveform: Zoom
     const wzSel = $('cfgWaveZoom');
     if (wzSel) { tOpt(wzSel, 0, 'compact'); tOpt(wzSel, 1, 'normal'); tOpt(wzSel, 2, 'wide'); tOpt(wzSel, 3, 'extraWide'); }
+
+    // Pro / IAP modal
+    tSpan($('iapTitle'), 'proTitle');
+    tSpan($('iapSub'), 'proSub');
+    tSpan($('iapFeat1'), 'proFeat1');
+    tSpan($('iapFeat2'), 'proFeat2');
+    tSpan($('iapFeat3'), 'proFeat3');
+    tSpan($('iapFeat4'), 'proFeat4');
+    tSpan($('iapFeat5'), 'proFeat5');
+    tSpan($('iapBuyBtn'), 'unlockPro');
+    tSpan($('iapRestoreBtn'), 'restorePurchase');
+    tSpan($('iapLegal'), 'proLegal');
+    // Upgrade bar in settings
+    tSpan($('upgradeTitle'), 'proTitle');
+    tSpan($('upgradeSub'), 'proUpgradeSub');
+    tSpan($('settingsUpgradeBtn'), 'unlockPro');
 
     // Tutorial "tap to continue"
     const tutCont = $('tutorialContinue');
@@ -3584,6 +3626,15 @@ function setupEvents() {
 
   function end() {
     overlay.classList.remove('active');
+    // Show Pro upgrade prompt after tutorial for free users (first time only)
+    if (APP_VERSION === 'free' && !localStorage.getItem('ts_tut_promo')) {
+      localStorage.setItem('ts_tut_promo', '1');
+      setTimeout(() => {
+        const ov = document.getElementById('iapOverlay');
+        if (window._openIapModal) window._openIapModal();
+        else if (ov) ov.classList.add('open');
+      }, 400);
+    }
   }
 
   function advance(e) {
@@ -3802,6 +3853,14 @@ function setupEvents() {
 
   // Expose for ad-banner tap-through if needed
   window._openIapModal = openIapModal;
+})();
+
+// ── IAP overlay close — always wired (IAP IIFE skips on web) ────
+(function() {
+  const ov = document.getElementById('iapOverlay');
+  const cl = document.getElementById('iapClose');
+  if (ov && cl) cl.addEventListener('click', () => ov.classList.remove('open'));
+  if (ov) ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
 })();
 
 // ================================================================
