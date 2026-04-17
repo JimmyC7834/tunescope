@@ -84,7 +84,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-spectrum canvas{width:100%;height:100%;display:block}
 
 /* Tuner */
-.sec-tuner{height:calc(75svh * 5.5 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
+.sec-tuner{height:calc(75svh * 5.1 / 13);background:var(--bg-panel);display:flex;padding:0;transition:background .4s;position:relative}
 .sec-tuner .section-main{align-items:center}
 .sec-tuner.live-mode{background:rgba(4,5,12,.95)}
 .sec-tuner canvas{width:100%;flex:1;min-height:0;display:block}
@@ -101,14 +101,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .note-arrow:active{color:var(--accent)}
 
 /* Metronome */
-.sec-metro{height:calc(75svh * 5 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
+.sec-metro{height:calc(75svh * 5.4 / 13);background:linear-gradient(180deg,var(--bg-panel),rgba(12,14,24,.95));display:flex;padding:0;position:relative}
 .sec-metro .section-main{padding:10px 16px}
 .metro-core{flex:1;display:flex;flex-direction:column;justify-content:center}
 .beat-row{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:6px 8px 2px;flex-shrink:0;overflow:visible;align-self:center;max-width:100%}
-.beat-tri{width:64px;height:64px;transition:filter .06s;filter:none;pointer-events:none}
+.beat-tri{width:72px;height:72px;transition:filter .06s;filter:none;pointer-events:none}
 .beat-tri svg{width:100%;height:100%;display:block}
 .beat-tri path{fill:var(--border);transition:fill .06s}
-.beat-tri.accent{width:76px;height:76px}
+.beat-tri.accent{width:90px;height:90px}
 .beat-tri.on path{fill:var(--accent)}
 .beat-tri.on{filter:drop-shadow(0 0 6px var(--accent-glow))}
 .beat-tri.accent.on path{fill:var(--warning)}
@@ -132,8 +132,11 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.light .icon-picker-popup{background:#f4f4f8;box-shadow:0 -4px 16px rgba(0,0,0,0.12)}
 .metro-vol-row{display:flex;justify-content:center;align-items:center;padding:0;margin-top:4px}
 .metro-vol-slider{display:none}
-.vol-dial{width:56px;height:56px;cursor:pointer;touch-action:none;user-select:none}
+.vol-dial{width:60px;height:60px;cursor:pointer;touch-action:none;user-select:none}
 .vol-dial canvas{width:100%;height:100%}
+.pro-badge{display:none;font-size:.6rem;font-family:'Share Tech Mono',monospace;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:1px 4px;margin-left:5px;opacity:.8;vertical-align:middle;letter-spacing:.05em}
+.app.free .cfg-pro-item .pro-badge{display:inline}
+.app.free .cfg-pro-item .config-select{opacity:.35;pointer-events:none}
 
 /* BPM horizontal scroll wheel — centered with +/- buttons */
 .bpm-wheel{display:flex;flex-direction:column;align-items:center;user-select:none;position:relative;width:100%;max-width:220px}
@@ -223,7 +226,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.settings-open .app-inner{transform:translateY(calc(-70% / 1.7))}
 .app-content{display:flex;flex-direction:column;height:100vh;height:100svh;flex-shrink:0;position:relative}
 @media(min-width:500px){.app-content{height:98vh;max-height:1100px}}
-.settings-panel{flex:1;background:var(--bg-surface);display:flex;flex-direction:column;border-top:1px solid var(--border-light)}
+.settings-panel{flex:1;background:var(--bg-surface);display:flex;flex-direction:column;border-top:1px solid var(--border-light);overflow:hidden}
 .settings-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
 .settings-title{font-size:.9rem;font-weight:600;letter-spacing:.1em;color:var(--text-bright)}
 .settings-close{background:none;border:none;color:var(--text-dim);font-size:1.3rem;cursor:pointer;padding:0 4px;-webkit-tap-highlight-color:transparent}
@@ -240,14 +243,50 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .sec-ad-inner{width:calc(100% - 28px);height:100%;max-height:72px;margin:auto;border:1px dashed var(--border-light);border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface);color:var(--text-dim);font-size:.72rem;letter-spacing:.1em;font-family:'Share Tech Mono',monospace}
 .app.free .sec-ad-banner,.app.free .sec-ad-banner-2{display:flex}
 .app.free .sec-spectrum{height:calc(75svh * 2 / 13)}
-.app.free .sec-tuner{height:calc(75svh * 5.5 / 13)}
-.app.free .sec-metro{height:calc(75svh * 3.5 / 13)}
+.app.free .sec-spectrum .section-main{padding-top:0}
+.app.free .sec-tuner{height:calc(75svh * 5 / 13)}
+.app.free .sec-metro{height:calc(75svh * 4 / 13)}
 .app.free .metro-vol-row{display:none}
-.app.free .beat-tri{width:55px;height:55px}
-.app.free .beat-tri.accent{width:65px;height:65px}
+.app.free .beat-tri{width:68px;height:68px}
+.app.free .beat-tri.accent{width:82px;height:82px}
 .app.free .settings-ad-banner{display:flex}
 .app.light .sec-ad-banner,.app.light .sec-ad-banner-2{background:#f0f1f5}
 .app.light .sec-ad-inner{border-color:rgba(0,0,0,0.12);background:#f8f8fb}
+/* ───────────────────────────────────────────────────────────── */
+
+/* ── IAP / PRO UPGRADE ───────────────────────────────────────── */
+.settings-upgrade-bar{display:none;align-items:center;gap:12px;padding:12px 18px 14px;background:linear-gradient(135deg,rgba(0,232,154,.07) 0%,rgba(0,100,80,.04) 100%);border-bottom:1px solid rgba(0,232,154,.18)}
+.app.free .settings-upgrade-bar{display:flex}
+.settings-upgrade-text{flex:1;display:flex;flex-direction:column;gap:3px}
+.settings-upgrade-title{font-family:'Chakra Petch',sans-serif;font-size:.85rem;font-weight:700;color:var(--accent);letter-spacing:.05em}
+.settings-upgrade-sub{font-size:.72rem;color:var(--text-dim);line-height:1.35}
+.settings-upgrade-btn{flex-shrink:0;background:var(--accent);color:#000;border:none;border-radius:7px;padding:8px 14px;font-size:.8rem;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.03em;-webkit-tap-highlight-color:transparent}
+.settings-upgrade-btn:active{opacity:.82}
+.iap-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.78);z-index:9998;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.iap-overlay.open{display:flex}
+.iap-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:18px;padding:28px 22px 22px;width:100%;max-width:340px;position:relative;text-align:center}
+.iap-card-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;-webkit-tap-highlight-color:transparent;line-height:1;padding:0}
+.iap-card-close:active{color:var(--text-bright)}
+.iap-icon{font-size:2.2rem;margin-bottom:8px;display:block}
+.iap-card-title{font-family:'Chakra Petch',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-bright);margin-bottom:3px}
+.iap-card-sub{font-size:.78rem;color:var(--text-mid);margin-bottom:14px}
+.iap-feats{list-style:none;text-align:left;margin:0 0 16px;padding:0 4px;display:flex;flex-direction:column;gap:8px}
+.iap-feats li{font-size:.83rem;color:var(--text-mid);display:flex;align-items:center;gap:9px}
+.iap-feats li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+.iap-price-tag{font-family:'Share Tech Mono',monospace;font-size:1.55rem;font-weight:700;color:var(--text-bright);margin-bottom:16px}
+.iap-price-tag span{font-size:.78rem;color:var(--text-dim);font-family:inherit;font-weight:400;margin-left:5px}
+.iap-btn-primary{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:10px;font-size:.92rem;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:9px;letter-spacing:.04em;-webkit-tap-highlight-color:transparent}
+.iap-btn-primary:active{opacity:.85}
+.iap-btn-primary:disabled{opacity:.48;cursor:not-allowed}
+.iap-btn-secondary{width:100%;padding:9px;background:none;color:var(--text-mid);border:1px solid var(--border-light);border-radius:8px;font-size:.81rem;font-family:inherit;cursor:pointer;margin-bottom:9px;-webkit-tap-highlight-color:transparent}
+.iap-btn-secondary:active{color:var(--text-bright);border-color:var(--border)}
+.iap-btn-secondary:disabled{opacity:.48;cursor:not-allowed}
+.iap-status{font-size:.78rem;min-height:1.15em;margin-bottom:4px}
+.iap-status.ok{color:var(--accent)}
+.iap-status.err{color:var(--danger)}
+.iap-legal{font-size:.67rem;color:var(--text-dim);line-height:1.5}
+.app.light .settings-upgrade-bar{background:linear-gradient(135deg,rgba(0,184,116,.07) 0%,rgba(0,100,80,.03) 100%);border-color:rgba(0,184,116,.22)}
+.app.light .iap-card{background:#fff}
 /* ───────────────────────────────────────────────────────────── */
 .settings-section{margin-bottom:18px}
 .settings-section-title{font-size:.75rem;font-weight:600;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px}
@@ -285,6 +324,9 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .app.light .sec-tuner.live-mode{background:rgba(220,224,235,.95)}
 .app.light .sec-metro{background:linear-gradient(180deg,var(--bg-panel),rgba(230,232,240,.95))}
 .app.light .bpm-btn{color:var(--text-bright)}
+.app.light .bpm-display{color:var(--text-bright);text-shadow:none}
+.app.light .bpm-btn:active{background:rgba(0,0,0,0.06)}
+.app.light .ref-pitch-label{color:var(--text-bright)}
 .app.light .scroll-picker-track{border-color:rgba(0,0,0,0.1)}
 .app.light .rec-action-item:active{background:rgba(0,0,0,.05)}
 .app.light .rec-settings-btn:active{background:rgba(0,0,0,.04)}
@@ -399,7 +441,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         <div class="config-item"><span>Notation</span><select class="config-select" id="cfgNotation"><option value="sharp" selected>Sharp (C#)</option><option value="flat">Flat (D♭)</option></select></div>
         <div class="config-item"><span>Transpose</span><select class="config-select" id="cfgTranspose"><option value="0" selected>None</option><option value="1">+1</option><option value="2">+2</option><option value="3">+3</option><option value="4">+4</option><option value="5">+5</option><option value="6">+6</option><option value="-5">−5</option><option value="-4">−4</option><option value="-3">−3</option><option value="-2">−2</option><option value="-1">−1</option></select></div>
         <div class="config-item"><span>Pitch Player Vol</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgPitchVol" min="0" max="0.5" step="0.01" value="0.15"><span class="config-range-val" id="cfgPitchVolVal">0.15</span></span></div>
-        <div class="config-item"><span>Green Range</span><span class="config-slider-group"><input type="range" class="config-range" id="cfgGreenRange" min="2" max="25" step="1" value="10"><span class="config-range-val" id="cfgGreenRangeVal">±10¢</span></span></div>
+        <div class="config-item"><span>Green Range</span><select class="config-select" id="cfgGreenRange"><option value="5">±5¢</option><option value="10" selected>±10¢</option><option value="15">±15¢</option><option value="20">±20¢</option></select></div>
       </div>
     </div>
   </div>
@@ -497,8 +539,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
             <option value="48000">48 kHz</option>
           </select>
         </div>
-        <div class="config-item">
-          <span>Bit Depth</span>
+        <div class="config-item cfg-pro-item">
+          <span>Bit Depth<span class="pro-badge">PRO</span></span>
           <select id="cfgBitDepth" class="config-select">
             <option value="16" selected>16-bit</option>
             <option value="24">24-bit</option>
@@ -573,6 +615,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       <div class="settings-ad-inner">ADVERTISEMENT</div>
     </div>
     <div class="settings-body">
+      <!-- Pro upgrade bar — free tier only -->
+      <div class="settings-upgrade-bar" id="upgradeBar">
+        <div class="settings-upgrade-text">
+          <span class="settings-upgrade-title">ToneScope Pro</span>
+          <span class="settings-upgrade-sub">Remove ads · Volume control · Full metronome</span>
+        </div>
+        <button class="settings-upgrade-btn" id="settingsUpgradeBtn">Unlock Pro</button>
+      </div>
       <div class="settings-section">
         <div class="settings-section-title" data-i18n="appearance">Appearance</div>
         <div class="settings-row">
@@ -612,6 +662,10 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           <div class="settings-label" data-i18n="feedback">Feedback</div>
           <div class="settings-val" style="color:var(--accent)">Send &rsaquo;</div>
         </div>
+        <div class="settings-row" id="restoreBtn" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
+          <div class="settings-label" data-i18n="restorePurchases">Restore Purchases</div>
+          <div class="settings-val" style="color:var(--accent)">↩ &rsaquo;</div>
+        </div>
       </div>
       <div class="settings-section">
         <div class="settings-section-title" data-i18n="about">About</div>
@@ -619,10 +673,35 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
           <div class="settings-label">TONESCOPE v1.0</div>
           <div class="settings-val" style="color:var(--text-dim)">Professional Music Tuner</div>
         </div>
+        <div class="settings-row" id="privacyBtn" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
+          <div class="settings-label" data-i18n="privacyPolicy">Privacy Policy</div>
+          <div class="settings-val" style="color:var(--accent)">View &rsaquo;</div>
+        </div>
       </div>
     </div>
   </div>
   </div><!-- end app-inner -->
+</div>
+
+<!-- IAP / Pro Upgrade Modal -->
+<div class="iap-overlay" id="iapOverlay">
+  <div class="iap-card">
+    <button class="iap-card-close" id="iapClose">&times;</button>
+    <span class="iap-icon">♪</span>
+    <div class="iap-card-title">ToneScope Pro</div>
+    <div class="iap-card-sub">One-time purchase. Yours forever.</div>
+    <ul class="iap-feats">
+      <li>No banner ads</li>
+      <li>Metronome volume control</li>
+      <li>Full metronome layout</li>
+      <li>24-bit recording export</li>
+    </ul>
+    <div class="iap-price-tag" id="iapPriceTag">$4.99<span>one-time</span></div>
+    <button class="iap-btn-primary" id="iapBuyBtn">Unlock Pro</button>
+    <button class="iap-btn-secondary" id="iapRestoreBtn">Restore Purchase</button>
+    <div class="iap-status" id="iapStatus"></div>
+    <div class="iap-legal">Payment charged to your App Store or Google Play account at confirmation. Non-refundable except where required by law.</div>
+  </div>
 </div>
 
 <!-- Feedback modal -->
@@ -651,17 +730,23 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   </div>
 </div>
 
+<!-- RevenueCat Capacitor bundle — loaded here (bottom of body) so it never blocks initial render.
+     On web the file is absent; onerror sets RevenueCatCap=null so IAP gracefully skips. -->
+<script src="rc-cap.js" onerror="window.RevenueCatCap=null"></script>
 <script>
 // ================================================================
 //  TONESCOPE — Professional Music Tuner
 // ================================================================
 
 // ════════════════════════════════════════════════════════════════
-//  VERSION FLAG — switch here to test Pro vs Free build
+//  VERSION TIER — driven by RevenueCat IAP on native platforms.
 //    'pro'  → no ads, volume dial shown, full metronome height
 //    'free' → banner ads, volume dial hidden, metronome shorter
+//  Web browser always gets 'pro' (no IAP available there).
+//  Native defaults to cached value, then verified against RC.
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = 'free'; // ← CHANGE TO 'free' TO TEST FREE TIER
+const _isNativeApp = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web');
+let APP_VERSION = _isNativeApp ? (localStorage.getItem('ts_tier') || 'free') : 'free';
 // ════════════════════════════════════════════════════════════════
 
 const NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
@@ -756,7 +841,7 @@ async function initAudio() {
   S.metroGain.gain.value = 1.5;
   S.metroGain.connect(S.ctx.destination);
   try {
-    S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2 } });
     S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
     // Disconnect mic cleanly if track ends (e.g. screen lock revokes mic access)
     S.micStream.getTracks().forEach(track => {
@@ -776,6 +861,7 @@ async function initAudio() {
     S.micGain.connect(S.analyser);
     // Create a destination stream for recording the amplified signal
     S.recDest = S.ctx.createMediaStreamDestination();
+    S.recDest.channelCount = 2;
     S.micGain.connect(S.recDest);
     S.mode = 'live';
   } catch (e) {
@@ -870,7 +956,15 @@ function startRecording() {
     const blob = new Blob(S.chunks, { type: S.recorder.mimeType });
     try {
       const ab = await blob.arrayBuffer();
-      S.audioBuffer = await S.ctx.decodeAudioData(ab);
+      let decoded = await S.ctx.decodeAudioData(ab);
+      // iOS often delivers mono despite stereo request — upmix to stereo
+      if (decoded.numberOfChannels === 1) {
+        const stereo = S.ctx.createBuffer(2, decoded.length, decoded.sampleRate);
+        stereo.copyToChannel(decoded.getChannelData(0), 0);
+        stereo.copyToChannel(decoded.getChannelData(0), 1);
+        decoded = stereo;
+      }
+      S.audioBuffer = decoded;
       genPeaks();
       S.playOffset = 0;
       // Save into recordings slot
@@ -2027,7 +2121,7 @@ function setupEvents() {
     updateControlState();
     animate();
   }
-  if (window.Capacitor) {
+  if (_isNativeApp) {
     // Native app — no user-gesture needed for AudioContext; init immediately
     doStart();
   } else {
@@ -2523,43 +2617,20 @@ function setupEvents() {
     const startA = (135 * Math.PI) / 180;
     const endA = (405 * Math.PI) / 180;
     const valA = startA + pct * (endA - startA);
-    const knobR = 36;
+    const r = 34;
 
-    // Track arc (full range, background)
-    const trackR = knobR + 7;
+    // Circular outline only
     c.beginPath();
-    c.arc(cx, cy, trackR, startA, endA);
-    c.strokeStyle = lt ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.1)';
-    c.lineWidth = 3;
-    c.lineCap = 'round';
-    c.stroke();
-    // Value arc (current level)
-    if (pct > 0) {
-      c.beginPath();
-      c.arc(cx, cy, trackR, startA, valA);
-      c.strokeStyle = '#00e89a';
-      c.lineWidth = 3;
-      c.lineCap = 'round';
-      c.stroke();
-    }
-
-    // Flat knob body
-    c.beginPath();
-    c.arc(cx, cy, knobR, 0, Math.PI * 2);
-    c.fillStyle = lt ? '#d0d0d6' : '#2a2d36';
-    c.fill();
-    // Subtle edge
-    c.beginPath();
-    c.arc(cx, cy, knobR, 0, Math.PI * 2);
-    c.strokeStyle = lt ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.06)';
-    c.lineWidth = 1;
+    c.arc(cx, cy, r, 0, Math.PI * 2);
+    c.strokeStyle = '#00e89a';
+    c.lineWidth = 1.5;
     c.stroke();
 
-    // Indicator line
-    const ix1 = cx + Math.cos(valA) * 8;
-    const iy1 = cy + Math.sin(valA) * 8;
-    const ix2 = cx + Math.cos(valA) * (knobR - 5);
-    const iy2 = cy + Math.sin(valA) * (knobR - 5);
+    // Indicator line from center toward edge
+    const ix1 = cx + Math.cos(valA) * 7;
+    const iy1 = cy + Math.sin(valA) * 7;
+    const ix2 = cx + Math.cos(valA) * (r - 5);
+    const iy2 = cy + Math.sin(valA) * (r - 5);
     c.beginPath();
     c.moveTo(ix1, iy1);
     c.lineTo(ix2, iy2);
@@ -2567,6 +2638,7 @@ function setupEvents() {
     c.lineWidth = 2.5;
     c.lineCap = 'round';
     c.stroke();
+
   }
 
   // Dial drag interaction — horizontal: left decreases, right increases
@@ -2863,7 +2935,7 @@ function setupEvents() {
       compact:'Compact', normal:'Normal', wide:'Wide', extraWide:'Extra Wide',
       // Settings
       fontSize:'Font Size', fontSmall:'Small', fontMedium:'Medium', fontLarge:'Large', fontXL:'Extra Large',
-      help:'Help', tutorial:'Tutorial', tutorialStart:'Start', feedback:'Feedback',
+      help:'Help', tutorial:'Tutorial', tutorialStart:'Start', feedback:'Feedback', restorePurchases:'Restore Purchases', privacyPolicy:'Privacy Policy',
       // Tutorial
       tapToContinue:'tap to continue',
       tut1:'Spectrum \u2014 real-time frequency analysis.',
@@ -2888,7 +2960,7 @@ function setupEvents() {
       sampleRate:'取樣率', bitDepth:'位元深度', waveZoom:'波形縮放', micGain:'麥克風增益',
       compact:'緊湊', normal:'正常', wide:'寬', extraWide:'超寬',
       fontSize:'字體大小', fontSmall:'小', fontMedium:'中', fontLarge:'大', fontXL:'特大',
-      help:'幫助', tutorial:'教學導覽', tutorialStart:'開始', feedback:'意見回饋',
+      help:'幫助', tutorial:'教學導覽', tutorialStart:'開始', feedback:'意見回饋', restorePurchases:'恢復購買', privacyPolicy:'隱私政策',
       tapToContinue:'點擊繼續',
       tut1:'頻譜 \u2014 即時頻率分析。',
       tut2:'從右側邊緣向左滑動開啟設定。',
@@ -2912,7 +2984,7 @@ function setupEvents() {
       sampleRate:'サンプルレート', bitDepth:'ビット深度', waveZoom:'波形ズーム', micGain:'マイクゲイン',
       compact:'コンパクト', normal:'標準', wide:'ワイド', extraWide:'エクストラワイド',
       fontSize:'フォントサイズ', fontSmall:'小', fontMedium:'中', fontLarge:'大', fontXL:'特大',
-      help:'ヘルプ', tutorial:'チュートリアル', tutorialStart:'開始', feedback:'フィードバック',
+      help:'ヘルプ', tutorial:'チュートリアル', tutorialStart:'開始', feedback:'フィードバック', restorePurchases:'購入を復元', privacyPolicy:'プライバシーポリシー',
       tapToContinue:'タップして続ける',
       tut1:'スペクトラム \u2014 リアルタイム周波数分析。',
       tut2:'右端から左にスワイプで設定を開く。',
@@ -2936,7 +3008,7 @@ function setupEvents() {
       sampleRate:'Frecuencia de Muestreo', bitDepth:'Profundidad de Bits', waveZoom:'Zoom de Onda', micGain:'Ganancia del Mic',
       compact:'Compacto', normal:'Normal', wide:'Amplio', extraWide:'Extra Amplio',
       fontSize:'Tamaño de Fuente', fontSmall:'Pequeño', fontMedium:'Mediano', fontLarge:'Grande', fontXL:'Extra Grande',
-      help:'Ayuda', tutorial:'Tutorial', tutorialStart:'Iniciar', feedback:'Comentarios',
+      help:'Ayuda', tutorial:'Tutorial', tutorialStart:'Iniciar', feedback:'Comentarios', restorePurchases:'Restaurar Compras', privacyPolicy:'Política de Privacidad',
       tapToContinue:'toca para continuar',
       tut1:'Espectro \u2014 análisis de frecuencia en tiempo real.',
       tut2:'Desliza a la izquierda desde el borde derecho para abrir config.',
@@ -3090,9 +3162,8 @@ function setupEvents() {
     $('cfgPitchVolVal').textContent = v.toFixed(2);
   });
 
-  $('cfgGreenRange').addEventListener('input', function() {
+  $('cfgGreenRange').addEventListener('change', function() {
     S.greenRange = parseInt(this.value);
-    $('cfgGreenRangeVal').textContent = '±' + S.greenRange + '¢';
     if (window._savePrefs) window._savePrefs();
   });
 
@@ -3205,7 +3276,7 @@ function setupEvents() {
     S.metroGain.connect(S.ctx.destination);
     S.timeBuf = new Float32Array(FFT_SIZE);
     try {
-      S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+      S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2 } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
       const defGain2 = window.Capacitor ? 25.0 : 5.0;
@@ -3216,6 +3287,7 @@ function setupEvents() {
       S.micSrc.connect(S.micGain);
       S.micGain.connect(S.analyser);
       S.recDest = S.ctx.createMediaStreamDestination();
+      S.recDest.channelCount = 2;
       S.micGain.connect(S.recDest);
       S.mode = 'live';
     } catch(e) { S.mode = 'idle'; }
@@ -3454,6 +3526,18 @@ function setupEvents() {
 })();
 
 // ================================================================
+//  PRIVACY POLICY
+// ================================================================
+(function(){
+  const PRIVACY_URL = 'https://tunescope.app/privacy'; // ← replace with your hosted policy URL
+  document.getElementById('privacyBtn')?.addEventListener('click', () => {
+    // '_system' opens the URL in the device's default browser on Capacitor native;
+    // falls back to a new tab on web.
+    window.open(PRIVACY_URL, '_system');
+  });
+})();
+
+// ================================================================
 //  FEEDBACK
 // ================================================================
 (function(){
@@ -3487,12 +3571,182 @@ function setupEvents() {
 })();
 
 // ================================================================
+//  IN-APP PURCHASE — RevenueCat
+// ================================================================
+(function setupIAP() {
+  // Only run on native Capacitor (iOS / Android). Web keeps 'pro' default.
+  if (!_isNativeApp || !window.RevenueCatCap) return;
+
+  const RC            = window.RevenueCatCap;
+  const ENTITLEMENT   = 'pro';
+  const PRODUCT_ID    = 'com.tunescope.app.pro';
+  // ↓ Replace these placeholders with your RevenueCat project API keys ↓
+  const IOS_KEY     = 'REVENUECAT_IOS_API_KEY';
+  const ANDROID_KEY = 'REVENUECAT_ANDROID_API_KEY';
+  // ↑ ─────────────────────────────────────────────────────────────── ↑
+
+  const platform  = window.Capacitor.getPlatform();
+  const RC_API_KEY = platform === 'ios' ? IOS_KEY : ANDROID_KEY;
+
+  let _initialized    = false;
+  let _cachedPackage  = null;
+
+  // ── DOM helpers ──────────────────────────────────────────────
+  const $id = id => document.getElementById(id);
+  function setStatus(msg, cls) {
+    const el = $id('iapStatus');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'iap-status' + (cls ? ' ' + cls : '');
+  }
+  function setBusy(busy) {
+    const buy = $id('iapBuyBtn'), res = $id('iapRestoreBtn');
+    if (buy) buy.disabled = busy;
+    if (res) res.disabled = busy;
+  }
+  function isPro(customerInfo) {
+    return ENTITLEMENT in (customerInfo?.entitlements?.active || {});
+  }
+
+  // ── Init RC (idempotent) ──────────────────────────────────────
+  async function initRC() {
+    if (_initialized) return;
+    await RC.Purchases.configure({ apiKey: RC_API_KEY });
+    _initialized = true;
+  }
+
+  // ── Check entitlement on startup (uses local cache first) ────
+  async function checkProStatus() {
+    try {
+      await initRC();
+      const { customerInfo } = await RC.Purchases.getCustomerInfo();
+      applyVersionTier(isPro(customerInfo) ? 'pro' : 'free');
+    } catch (e) {
+      console.warn('[IAP] checkProStatus:', e);
+    }
+  }
+
+  // ── Load offering to get live price ──────────────────────────
+  async function loadOffering() {
+    try {
+      await initRC();
+      const { offerings } = await RC.Purchases.getOfferings();
+      const pkgs = offerings?.current?.availablePackages || [];
+      const pkg  = pkgs.find(p => p.product?.identifier === PRODUCT_ID) || pkgs[0];
+      if (pkg) {
+        _cachedPackage = pkg;
+        const priceEl = $id('iapPriceTag');
+        if (priceEl) priceEl.innerHTML = (pkg.product?.priceString || '$4.99') + '<span>one-time</span>';
+      }
+    } catch (e) {
+      console.warn('[IAP] loadOffering:', e);
+    }
+  }
+
+  // ── Purchase ─────────────────────────────────────────────────
+  async function doPurchase() {
+    setStatus('');
+    if (!_cachedPackage) {
+      setStatus('Loading store…');
+      await loadOffering();
+      if (!_cachedPackage) { setStatus('Cannot connect to store. Try again.', 'err'); return; }
+    }
+    setBusy(true);
+    try {
+      const { customerInfo } = await RC.Purchases.purchasePackage({ aPackage: _cachedPackage });
+      if (isPro(customerInfo)) {
+        applyVersionTier('pro');
+        $id('iapOverlay')?.classList.remove('open');
+      } else {
+        setStatus('Purchase incomplete. Please try again.', 'err');
+      }
+    } catch (e) {
+      const code = String(e?.code ?? '');
+      if (e?.userCancelled || code === '1') {
+        // User cancelled — silent, no message needed
+      } else if (code === '6') {
+        // PRODUCT_ALREADY_PURCHASED_ERROR
+        setStatus('You already own Pro. Tap "Restore Purchase" below to unlock it.', 'ok');
+      } else if (code === '20') {
+        // PAYMENT_PENDING_ERROR — Ask to Buy / parental approval
+        setStatus('Purchase is pending approval. It will unlock automatically once approved.', 'ok');
+      } else {
+        setStatus('Purchase failed: ' + (e?.message || 'Unknown error'), 'err');
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // ── Restore ──────────────────────────────────────────────────
+  async function doRestore() {
+    setBusy(true);
+    setStatus('Restoring…');
+    try {
+      await initRC();
+      const { customerInfo } = await RC.Purchases.restorePurchases();
+      if (isPro(customerInfo)) {
+        applyVersionTier('pro');
+        $id('iapOverlay')?.classList.remove('open');
+        setStatus('Pro unlocked — thank you!', 'ok');
+        setTimeout(() => setStatus(''), 3000);
+      } else {
+        setStatus('No previous purchase found.', 'err');
+      }
+    } catch (e) {
+      setStatus('Restore failed: ' + (e?.message || 'Unknown error'), 'err');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // ── Open modal ───────────────────────────────────────────────
+  function openIapModal() {
+    setStatus('');
+    $id('iapOverlay')?.classList.add('open');
+    loadOffering();
+  }
+
+  // ── Wire up buttons ──────────────────────────────────────────
+  $id('iapClose')?.addEventListener('click',           () => $id('iapOverlay')?.classList.remove('open'));
+  $id('iapOverlay')?.addEventListener('click',         e => { if (e.target === $id('iapOverlay')) $id('iapOverlay').classList.remove('open'); });
+  $id('iapBuyBtn')?.addEventListener('click',          doPurchase);
+  $id('iapRestoreBtn')?.addEventListener('click',      doRestore);
+  $id('settingsUpgradeBtn')?.addEventListener('click', openIapModal);
+  // Settings row: open modal so the user sees loading state + result feedback
+  $id('restoreBtn')?.addEventListener('click', () => {
+    $id('iapOverlay')?.classList.add('open');
+    doRestore();
+  });
+
+  // ── Kick off silent status check ────────────────────────────
+  checkProStatus();
+
+  // Expose for ad-banner tap-through if needed
+  window._openIapModal = openIapModal;
+})();
+
+// ================================================================
 //  INIT
 // ================================================================
 setupEvents();
 
-// Apply version tier — reads APP_VERSION flag declared at top of script
-if (APP_VERSION === 'free') document.querySelector('.app').classList.add('free');
+// ── Version tier helper — call any time tier changes ─────────────
+function applyVersionTier(tier) {
+  APP_VERSION = tier;
+  const appEl = document.getElementById('app');
+  if (tier === 'free') {
+    appEl.classList.add('free');
+    // Lock bit depth to 16-bit in free mode
+    const bd = $('cfgBitDepth');
+    if (bd) { bd.value = '16'; wavBitDepth = 16; }
+  } else {
+    appEl.classList.remove('free');
+    localStorage.setItem('ts_tier', 'pro');
+  }
+}
+// Apply initial tier determined at startup
+applyVersionTier(APP_VERSION);
 
 // Push AdSense ad unit on the startup screen
 (adsbygoogle = window.adsbygoogle || []).push({});
@@ -3595,7 +3849,7 @@ if (APP_VERSION === 'free') document.querySelector('.app').classList.add('free')
     if (p.notation)  { $('cfgNotation').value = p.notation;   $('cfgNotation').dispatchEvent(new Event('change')); }
     if (p.transpose) { $('cfgTranspose').value = p.transpose; $('cfgTranspose').dispatchEvent(new Event('change')); }
     if (p.pitchVol)  { $('cfgPitchVol').value = p.pitchVol;  $('cfgPitchVol').dispatchEvent(new Event('input')); }
-    if (p.greenRange) { $('cfgGreenRange').value = p.greenRange; $('cfgGreenRange').dispatchEvent(new Event('input')); }
+    if (p.greenRange) { $('cfgGreenRange').value = p.greenRange; $('cfgGreenRange').dispatchEvent(new Event('change')); }
     // Metronome
     if (p.bpm) {
       S.bpm = parseInt(p.bpm);

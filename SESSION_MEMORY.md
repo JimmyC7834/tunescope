@@ -180,6 +180,27 @@ Grave(35) → Largo(50) → Larghetto(63) → Adagio(72) → Andante(84) → Mod
 
 ## File Structure
 ```
-index.html          — Complete single-file app (~2170 lines)
+index.html          — Complete single-file app (~4097 lines)
+www/rc-cap.js       — RevenueCat Capacitor bundle (24KB, built via npm run build:rc)
 SESSION_MEMORY.md   — This file
 ```
+
+## In-App Purchase (RevenueCat)
+
+Plugin: `@revenuecat/purchases-capacitor@9.2.2` (Capacitor 6 compatible)
+IAP logic: `setupIAP()` IIFE in `index.html` ~line 3564
+Tier toggle: `applyVersionTier('pro'|'free')` — updates `APP_VERSION` + toggles `.free` CSS class
+
+### ⚠ Before shipping — must complete both steps:
+
+**1. Add RevenueCat API keys** in `www/index.html` lines ~3572–3573:
+```javascript
+const IOS_KEY     = 'appl_xxxxxxxxxxxx';   // iOS key from RevenueCat dashboard
+const ANDROID_KEY = 'goog_xxxxxxxxxxxx';   // Android key from RevenueCat dashboard
+```
+
+**2. Configure in RevenueCat dashboard:**
+- Create product `com.tunescope.app.pro` as Non-Consumable (iOS) / One-time product (Android)
+- Create entitlement named `pro`
+- Create an offering containing that product as a package
+- Connect App Store Connect and Google Play Console to the RevenueCat project
