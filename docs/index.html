@@ -193,14 +193,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .wave-indicator::after{bottom:0;border-bottom:4px solid var(--warning)}
 .wave-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:var(--text-dim);letter-spacing:.1em;pointer-events:none}
 .wave-controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:2px 0 3px}
-.ctrl-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border-light);background:transparent;color:var(--text-mid);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.ctrl-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border-light);background:transparent;color:var(--text-mid);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
 .ctrl-btn:active{transform:scale(.9)}
 .ctrl-btn.rec{border-color:var(--danger);color:var(--danger)}
 .ctrl-btn.rec.active{background:var(--danger);color:#fff;animation:rec-pulse 1s ease-in-out infinite}
 @keyframes rec-pulse{0%,100%{box-shadow:0 0 0 0 var(--danger-glow)}50%{box-shadow:0 0 0 8px transparent}}
 .ctrl-btn.play{border-color:var(--accent);color:var(--accent)}
 .ctrl-btn:disabled{opacity:.25;pointer-events:none}
-.ctrl-btn svg{width:16px;height:16px;fill:currentColor}
+.ctrl-btn svg{width:18px;height:18px;fill:currentColor}
 
 /* Recording manager — bottom bar */
 .rec-bar{position:relative;height:38px;background:rgba(8,10,18,.95);border-top:1px solid var(--border);flex-shrink:0;user-select:none;display:flex;align-items:stretch;margin-bottom:6px}
@@ -312,7 +312,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .feedback-btn-submit{background:var(--accent);color:#000;font-weight:600}
 
 /* Light theme */
-.app.light{--bg-deep:#f0f1f5;--bg-panel:#ffffff;--bg-surface:#f5f6fa;--border:#d8dae4;--border-light:#c8cad8;--text-bright:#1a1c28;--text-mid:#5a5d72;--text-dim:#8a8da0;--accent:#00b874;--accent-glow:rgba(0,184,116,.25);--warning:#e09800;--warning-glow:rgba(224,152,0,.2);--danger:#e0304a;--danger-glow:rgba(224,48,74,.25)}
+.app.light{--bg-deep:#f0f1f5;--bg-panel:#ffffff;--bg-surface:#f5f6fa;--border:#c4c7d4;--border-light:#b6b9c8;--text-bright:#0f111c;--text-mid:#42445a;--text-dim:#6b6e85;--accent:#00a066;--accent-glow:rgba(0,160,102,.25);--warning:#c88000;--warning-glow:rgba(200,128,0,.2);--danger:#c82038;--danger-glow:rgba(200,32,56,.25)}
 .app.light .rec-bar{background:rgba(240,241,245,.95)}
 .app.light .rec-slot-fade-l{background:linear-gradient(90deg,rgba(240,241,245,.95) 0%,transparent 100%)}
 .app.light .rec-slot-fade-r{background:linear-gradient(270deg,rgba(240,241,245,.95) 0%,transparent 100%)}
@@ -522,7 +522,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
         <div class="wave-wrap" id="waveWrap">
           <canvas id="cvWave"></canvas>
           <div class="wave-indicator" id="waveInd" style="display:none"></div>
-          <div class="wave-empty" id="waveEmpty">RECORD TO ANALYZE</div>
+          <div class="wave-empty" id="waveEmpty"></div>
         </div>
         <div class="wave-controls">
           <button class="ctrl-btn rec" id="btnMain" title="Record">
@@ -1443,8 +1443,8 @@ function drawTuner() {
       c.save();
       c.translate(lx, ly);
       c.rotate(ang + Math.PI / 2);
-      c.font = (ct === 0 ? ('700 ' + sf(17)) : sf(11)) + 'px "Share Tech Mono"';
-      c.fillStyle = ct === 0 ? (lt ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.85)') : (lt ? 'rgba(0,0,0,0.22)' : 'rgba(255,255,255,0.2)');
+      c.font = (ct === 0 ? ('700 ' + sf(19)) : '500 ' + sf(13)) + 'px "Share Tech Mono"';
+      c.fillStyle = ct === 0 ? (lt ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.92)') : (lt ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)');
       c.textAlign = 'center'; c.textBaseline = 'middle';
       c.fillText(Math.round(hz), 0, 0);
       c.restore();
@@ -1541,7 +1541,7 @@ function drawTuner() {
     const cSign = S.cents >= 0 ? '+' : '';
     c.font = '600 ' + tsf(16) + 'px "Share Tech Mono"';
     c.fillStyle = col;
-    c.fillText(cSign + S.cents.toFixed(1) + '¢', cx, cy + 16);
+    c.fillText(cSign + S.cents.toFixed(1), cx, cy + 16);
   } else {
     c.font = '700 ' + tsf(68) + 'px "Century Gothic"';
     c.fillStyle = lt ? '#1a1c28' : '#e4e6f0';
@@ -2673,9 +2673,9 @@ function setupEvents() {
     const slider = $('cfgMetroVol');
     const val = parseFloat(slider.value);
     const pct = val / parseFloat(slider.max);
-    // ~350° sweep — tiny gap at bottom
-    const startA = (100 * Math.PI) / 180;
-    const sweep  = (340 * Math.PI) / 180;
+    // 345° sweep — small gap at bottom
+    const startA = (97.5 * Math.PI) / 180;
+    const sweep  = (345 * Math.PI) / 180;
     const endA   = startA + sweep;
     const valA   = startA + pct * sweep;
     const knobR  = 28, trackR = knobR + 8;
@@ -3035,12 +3035,12 @@ function setupEvents() {
       tut3:'Swipe right to close.',
       tut4:'Tuner \u2014 shows cents sharp or flat from the nearest note.',
       tut5:'Tap the note name to play a reference tone.',
-      tut6:'Metronome \u2014 tap to start/stop.',
+      tut6:'Metronome \u2014 tap to start/stop. Drag BPM left or right to adjust tempo.',
       tut7:'Tap to choose a beat pattern.',
       tut8:'Bar counter. Tap to reset.',
-      tut9:'Waveform \u2014 pinch to zoom, drag to scrub.',
+      tut9:'Audio waveform \u2014 pinch to zoom, drag to scrub.',
       tut10:'Tap to record. Tap again to stop.',
-      tut11:'Swipe to switch recordings. Long-press for actions.',
+      tut11:'Tap or swipe to switch recordings. Swipe up for actions.',
       tut12:'Tap the gear icon to open Settings.'
     },
     zh: { spectrum:'頻譜', tuner:'調音器', tunerA440:'調音器 \u00b7 A440', metronome:'節拍器', waveform:'波形', tapToStart:'點擊開始', recordToAnalyze:'錄音以分析', tapTempo:'點擊測速', start:'開始', stop:'停止', settings:'設定', appearance:'外觀', lightMode:'淺色模式', language:'語言', selectLang:'選擇語言', tunerSec:'調音器', refPitch:'參考音高', sensitivity:'靈敏度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'音訊', metroVol:'節拍器音量', about:'關於', rename:'重新命名', share:'分享', delete:'刪除', cancel:'取消', empty:'空白', live:'即時',
@@ -3063,12 +3063,12 @@ function setupEvents() {
       tut3:'向右滑動關閉。',
       tut4:'調音器 \u2014 顯示與最近音符的音分偏差。',
       tut5:'點擊音符名稱播放參考音。',
-      tut6:'節拍器 \u2014 點擊啟動/停止。',
+      tut6:'節拍器 \u2014 點擊啟動/停止。左右拖動 BPM 調整速度。',
       tut7:'點擊選擇節拍模式。',
       tut8:'小節計數器。點擊重置。',
-      tut9:'波形 \u2014 捏合縮放，拖動播放。',
+      tut9:'音訊波形 \u2014 捏合縮放，拖動播放。',
       tut10:'點擊錄音，再次點擊停止。',
-      tut11:'滑動切換錄音。長按操作。',
+      tut11:'點擊或滑動切換錄音。向上滑動操作。',
       tut12:'點擊齒輪開啟設定。'
     },
     ja: { spectrum:'スペクトラム', tuner:'チューナー', tunerA440:'チューナー \u00b7 A440', metronome:'メトロノーム', waveform:'波形', tapToStart:'タップして開始', recordToAnalyze:'録音して分析', tapTempo:'タップテンポ', start:'開始', stop:'停止', settings:'設定', appearance:'外観', lightMode:'ライトモード', language:'言語', selectLang:'言語を選択', tunerSec:'チューナー', refPitch:'基準ピッチ', sensitivity:'感度', sensLow:'低', sensMed:'中', sensHigh:'高', audio:'オーディオ', metroVol:'メトロノーム音量', about:'概要', rename:'名前変更', share:'共有', delete:'削除', cancel:'キャンセル', empty:'空', live:'ライブ',
@@ -3091,12 +3091,12 @@ function setupEvents() {
       tut3:'右にスワイプで閉じる。',
       tut4:'チューナー \u2014 最も近い音からのセント偏差を表示。',
       tut5:'音名をタップで基準音を再生。',
-      tut6:'メトロノーム \u2014 タップで開始/停止。',
+      tut6:'メトロノーム \u2014 タップで開始/停止。BPM を左右にドラッグしてテンポを調整。',
       tut7:'タップでビートパターンを選択。',
       tut8:'小節カウンター。タップでリセット。',
-      tut9:'波形 \u2014 ピンチでズーム、ドラッグでスクラブ。',
+      tut9:'オーディオ波形 \u2014 ピンチでズーム、ドラッグでスクラブ。',
       tut10:'タップで録音開始。もう一度タップで停止。',
-      tut11:'スワイプで録音切替。長押しで操作。',
+      tut11:'タップまたはスワイプで録音切替。上にスワイプで操作。',
       tut12:'歯車アイコンで設定を開く。'
     },
     es: { spectrum:'Espectro', tuner:'Afinador', tunerA440:'Afinador \u00b7 A440', metronome:'Metrónomo', waveform:'Forma de onda', tapToStart:'TOCA PARA INICIAR', recordToAnalyze:'GRABAR PARA ANALIZAR', tapTempo:'TEMPO POR TOQUE', start:'INICIO', stop:'PARAR', settings:'Ajustes', appearance:'Apariencia', lightMode:'Modo Claro', language:'Idioma', selectLang:'Seleccionar Idioma', tunerSec:'Afinador', refPitch:'Tono de Referencia', sensitivity:'Sensibilidad', sensLow:'Bajo', sensMed:'Medio', sensHigh:'Alto', audio:'Audio', metroVol:'Volumen del Metrónomo', about:'Acerca de', rename:'Renombrar', share:'Compartir', delete:'Eliminar', cancel:'Cancelar', empty:'Vacío', live:'EN VIVO',
@@ -3119,12 +3119,12 @@ function setupEvents() {
       tut3:'Desliza a la derecha para cerrar.',
       tut4:'Afinador \u2014 muestra centésimos respecto a la nota más cercana.',
       tut5:'Toca el nombre de la nota para un tono de referencia.',
-      tut6:'Metrónomo \u2014 toca para iniciar/detener.',
+      tut6:'Metrónomo \u2014 toca para iniciar/detener. Arrastra el BPM izquierda o derecha para ajustar el tempo.',
       tut7:'Toca para elegir un patrón de ritmo.',
       tut8:'Contador de compases. Toca para reiniciar.',
-      tut9:'Forma de onda \u2014 pellizca para zoom, arrastra para recorrer.',
+      tut9:'Forma de onda de audio \u2014 pellizca para zoom, arrastra para recorrer.',
       tut10:'Toca para grabar. Toca de nuevo para detener.',
-      tut11:'Desliza para cambiar grabaciones. Mantén pulsado para acciones.',
+      tut11:'Toca o desliza para cambiar grabaciones. Desliza arriba para acciones.',
       tut12:'Toca el engranaje para abrir Ajustes.'
     }
   };
@@ -3144,7 +3144,6 @@ function setupEvents() {
     // Startup
     tSpan(document.querySelector('.startup-sub'), 'tapToStart');
     // Waveform empty
-    tSpan(elWaveEmpty, 'recordToAnalyze');
     // BPM tap hint
     tSpan(document.querySelector('.bpm-tap-hint'), 'tapTempo');
     // Metronome toggle
@@ -3524,11 +3523,9 @@ function setupEvents() {
     { target:'.sec-tuner canvas', i18n:'tut5', hand:'tap', handPos:'center', tooltipPos:'below' },
     { target:'.sec-metro', i18n:'tut6', hand:'tap', handPos:'center', tooltipPos:'above' },
     { target:'#bpPicker', i18n:'tut7', hand:'tap', handPos:'center', tooltipPos:'above' },
-    { target:'#barCounter', i18n:'tut8', hand:'tap', handPos:'center', tooltipPos:'above' },
     { target:'.sec-wave', i18n:'tut9', hand:'none', tooltipPos:'above' },
     { target:'#btnMain', i18n:'tut10', hand:'tap', handPos:'center', tooltipPos:'above' },
-    { target:'.rec-bar', i18n:'tut11', hand:'swipe-left', handPos:'center', tooltipPos:'above' },
-    { target:'#settingsBtn', i18n:'tut12', hand:'tap', handPos:'center', tooltipPos:'above' }
+    { target:'.rec-bar', i18n:'tut11', hand:'swipe-left', handPos:'center', tooltipPos:'above' }
   ];
 
   function getRect(sel) {
@@ -3573,18 +3570,26 @@ function setupEvents() {
     continueEl.textContent = t('tapToContinue');
     buildDots();
 
-    // Position tooltip
+    // Position tooltip — measure, then clamp/flip so it stays on-screen
     const ttW = 260;
     let ttLeft = r.left + r.width / 2;
     ttLeft = Math.max(ttW / 2 + 10, Math.min(window.innerWidth - ttW / 2 - 10, ttLeft));
     tooltip.style.left = ttLeft + 'px';
+    tooltip.style.bottom = 'auto';
+    tooltip.style.top = '0px';
+    const tth = tooltip.offsetHeight;
+    const vh = window.innerHeight;
+    const gap = 12, edge = 10;
+    let ttTop;
     if (s.tooltipPos === 'above') {
-      tooltip.style.top = 'auto';
-      tooltip.style.bottom = (window.innerHeight - r.top + 12) + 'px';
+      ttTop = r.top - tth - gap;
+      if (ttTop < edge) ttTop = r.bottom + gap;
     } else {
-      tooltip.style.top = (r.bottom + 12) + 'px';
-      tooltip.style.bottom = 'auto';
+      ttTop = r.bottom + gap;
+      if (ttTop + tth > vh - edge) ttTop = r.top - tth - gap;
     }
+    ttTop = Math.max(edge, Math.min(vh - tth - edge, ttTop));
+    tooltip.style.top = ttTop + 'px';
 
     // Hand
     hand.className = 'tutorial-hand';
