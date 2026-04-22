@@ -64,7 +64,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 .drag-handle{position:absolute;top:6px;left:6px;z-index:10;width:22px;height:22px;display:none;align-items:center;justify-content:center;cursor:grab;touch-action:none;opacity:0.35;transition:opacity .15s,top .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
 .drag-handle:active{cursor:grabbing;opacity:0.8}
 /* Drag-to-reorder handles are a PRO feature */
-.app:not(.free) .drag-handle{display:flex}
+/* .app:not(.free) .drag-handle{display:flex} */ /* hidden for now */
+.sec-analysis{display:none}
 .drag-handle svg{display:block;width:7px;height:10px}
 .section-slider{position:relative;width:100%;height:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .section-slider.open{transform:translateX(-100%)}
@@ -1077,14 +1078,26 @@ function startRecording() {
         decoded = stereo;
       }
       // Auto-trim silence from head/tail (keeps up to 0.5s pad)
+      let trimmed = false;
       if (S.autoTrim) {
-        try { decoded = trimSilenceFromBuffer(decoded, 0.5); } catch(_){}
+        try {
+          const before = decoded;
+          decoded = trimSilenceFromBuffer(decoded, 0.5);
+          trimmed = decoded !== before;
+        } catch(_){}
       }
       S.audioBuffer = decoded;
       genPeaks();
       S.playOffset = 0;
-      // Save into recordings slot (keep raw blob for non-WAV export)
-      S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice(), name: S.recordings[S.recIdx]?.name || null, rawBlob: blob, rawMime: blob.type };
+      // Save into recordings slot. If trimmed, drop rawBlob so export re-encodes
+      // from the trimmed buffer (WAV/MP3) instead of shipping the untrimmed original.
+      S.recordings[S.recIdx] = {
+        audioBuffer: S.audioBuffer,
+        peaks: S.peaks.slice(),
+        name: S.recordings[S.recIdx]?.name || null,
+        rawBlob: trimmed ? null : blob,
+        rawMime: trimmed ? null : blob.type
+      };
       invalidateAnalysisCache();
       if (APP_VERSION !== 'free') computeAnalysisForBuffer(S.audioBuffer, S.recIdx);
       S.mode = 'paused';
