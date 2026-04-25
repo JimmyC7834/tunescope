@@ -8,3 +8,5 @@ ios/App/Pods/
 *.xcworkspace
 backup/
 # claude --resume 74fc89e0-0ea4-46ac-89a6-2ea5852f323f
+# Added by code-review-graph
+.code-review-graph/

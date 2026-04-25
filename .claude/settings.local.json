@@ -8,7 +8,13 @@
       "Bash(curl:*)",
       "Bash(npm install:*)",
       "Bash(npm view:*)",
-      "Bash(npx esbuild:*)"
+      "Bash(npx esbuild:*)",
+      "mcp__code-review-graph__detect_changes_tool",
+      "Bash(awk '/<script>/{flag=1;next}/<\\\\/script>/{flag=0}flag' www/index.html)",
+      "Bash(node --check /tmp/extracted.js)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "code-review-graph"
+  ]
 }

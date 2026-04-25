@@ -1851,8 +1851,24 @@ const _metroWorkerCode = `
     else if (e.data === 'stop') { clearInterval(iv); iv = null; }
   };
 `;
-const _metroWorker = new Worker(URL.createObjectURL(new Blob([_metroWorkerCode], { type: 'application/javascript' })));
-_metroWorker.onmessage = () => { if (S.metroOn && S.ctx) scheduleBeats(); };
+let _metroWorker = null;
+let _metroFallbackTimer = null;
+try {
+  _metroWorker = new Worker(URL.createObjectURL(new Blob([_metroWorkerCode], { type: 'application/javascript' })));
+  _metroWorker.onmessage = () => { if (S.metroOn && S.ctx) scheduleBeats(); };
+} catch (e) {
+  console.warn('Worker unavailable, using main-thread metronome', e);
+  _metroWorker = {
+    postMessage: msg => {
+      if (msg === 'start') {
+        if (_metroFallbackTimer) clearInterval(_metroFallbackTimer);
+        _metroFallbackTimer = setInterval(() => { if (S.metroOn && S.ctx) scheduleBeats(); }, 25);
+      } else if (msg === 'stop') {
+        if (_metroFallbackTimer) { clearInterval(_metroFallbackTimer); _metroFallbackTimer = null; }
+      }
+    }
+  };
+}
 
 function startMetronome() {
   if (!S.ctx) return;
@@ -2151,7 +2167,7 @@ function computeAnalysisForBuffer(buffer, recIdx, onDone) {
 
   function processChunk() {
     // If another recording took over, abort
-    if (S.analysisRecIdx === -2 && recIdx !== S.recIdx) { S.analysisPending = false; return; }
+    if (recIdx !== S.recIdx) { S.analysisPending = false; return; }
     const end = Math.min(frameIdx + CHUNK, frameCount);
     for (; frameIdx < end; frameIdx++) {
       const srcOff = frameIdx * hop;
@@ -2582,9 +2598,13 @@ function updateRecSlotPos(animate) {
 
 function switchToRecording(idx) {
   if (idx < 0 || idx >= S.recordings.length || idx === S.recIdx) return;
-  // Save current if exists
+  // Save current if exists — preserve all slot metadata
   if (S.audioBuffer) {
-    S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice() };
+    const prev = S.recordings[S.recIdx] || {};
+    S.recordings[S.recIdx] = Object.assign({}, prev, {
+      audioBuffer: S.audioBuffer,
+      peaks: S.peaks.slice()
+    });
   }
   // Stop any playback
   if (S.mode === 'playback') {
@@ -2618,9 +2638,13 @@ function addNewRecording() {
     else if (ov) ov.classList.add('open');
     return;
   }
-  // Save current if exists
+  // Save current if exists — preserve all slot metadata
   if (S.audioBuffer) {
-    S.recordings[S.recIdx] = { audioBuffer: S.audioBuffer, peaks: S.peaks.slice() };
+    const prev = S.recordings[S.recIdx] || {};
+    S.recordings[S.recIdx] = Object.assign({}, prev, {
+      audioBuffer: S.audioBuffer,
+      peaks: S.peaks.slice()
+    });
   }
   // Stop any playback
   if (S.mode === 'playback') {
@@ -3776,15 +3800,21 @@ function setupEvents() {
   $('refPitchDown').addEventListener('click', () => { A4 = Math.max(392, A4 - 1); updateRefPitch(); });
   $('refPitchUp').addEventListener('click', () => { A4 = Math.min(494, A4 + 1); updateRefPitch(); });
   let refRepeatTimer = null;
+  function clearRefRepeat() {
+    if (refRepeatTimer) { clearInterval(refRepeatTimer); refRepeatTimer = null; if (window._savePrefs) window._savePrefs(); }
+  }
   $('refPitchDown').addEventListener('pointerdown', e => {
     e.preventDefault();
+    clearRefRepeat();
     refRepeatTimer = setInterval(() => { A4 = Math.max(392, A4 - 1); updateRefPitch(); }, 120);
   });
   $('refPitchUp').addEventListener('pointerdown', e => {
     e.preventDefault();
-    refRepeatTimer = setInterval(() => { A4 = Math.max(392, Math.min(494, A4 + 1)); updateRefPitch(); }, 120);
+    clearRefRepeat();
+    refRepeatTimer = setInterval(() => { A4 = Math.min(494, A4 + 1); updateRefPitch(); }, 120);
   });
-  document.addEventListener('pointerup', () => { if (refRepeatTimer) { clearInterval(refRepeatTimer); refRepeatTimer = null; if (window._savePrefs) window._savePrefs(); } });
+  document.addEventListener('pointerup', clearRefRepeat);
+  document.addEventListener('pointercancel', clearRefRepeat);
 
   // ---- Pitch Player (tap note on canvas) ----
   let pitchOsc = null, pitchGainNode = null;
@@ -3860,6 +3890,8 @@ function setupEvents() {
     // Stop any active recording/playback
     if (S.mode === 'recording') stopRecording();
     if (S.mode === 'playback') stopPlayback();
+    // Stop old mic tracks before requesting new stream
+    if (S.micStream) { try { S.micStream.getTracks().forEach(t => t.stop()); } catch(_){} }
     // Close old context and create new one with desired sample rate
     S.ctx.close();
     S.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: sr });
@@ -3878,7 +3910,8 @@ function setupEvents() {
       S.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2 } });
       S.micSrc = S.ctx.createMediaStreamSource(S.micStream);
       S.micGain = S.ctx.createGain();
-      const defGain2 = window.Capacitor ? 25.0 : 5.0;
+      const isIOS2 = window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios';
+      const defGain2 = isIOS2 ? 25.0 : window.Capacitor ? 25.0 : 5.0;
       S.micGain.gain.value = defGain2;
       if (!localStorage.getItem('ts_prefs')) {
         $('cfgMicGain').value = String(defGain2);
@@ -4280,7 +4313,12 @@ function setupEvents() {
       if (pkg) {
         _cachedPackage = pkg;
         const priceEl = $id('iapPriceTag');
-        if (priceEl) priceEl.innerHTML = (pkg.product?.priceString || '$4.99') + '<span>one-time</span>';
+        if (priceEl) {
+          priceEl.textContent = pkg.product?.priceString || '$4.99';
+          const span = document.createElement('span');
+          span.textContent = 'one-time';
+          priceEl.appendChild(span);
+        }
       }
     } catch (e) {
       console.warn('[IAP] loadOffering:', e);
@@ -4372,6 +4410,7 @@ function setupEvents() {
 
 // ── IAP overlay close — always wired (IAP IIFE skips on web) ────
 (function() {
+  if (_isNativeApp && window.RevenueCatCap) return; // already wired by setupIAP
   const ov = document.getElementById('iapOverlay');
   const cl = document.getElementById('iapClose');
   if (ov && cl) cl.addEventListener('click', () => ov.classList.remove('open'));
