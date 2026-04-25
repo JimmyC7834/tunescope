@@ -3467,6 +3467,11 @@ function setupEvents() {
 
   $('recActDelete').addEventListener('click', () => {
     hideRecActions();
+    // Stop any active playback referencing the about-to-be-deleted buffer
+    if (S.mode === 'playback' && S.playSrc) {
+      try { S.playSrc.onended = null; S.playSrc.stop(); S.playSrc.disconnect(); } catch(_){}
+      S.outputGain.gain.value = 0;
+    }
     if (S.recordings.length <= 1) {
       S.recordings[0] = null;
       resetToEmpty();
@@ -3476,6 +3481,7 @@ function setupEvents() {
     }
     S.recordings.splice(S.recIdx, 1);
     S.recIdx = Math.min(S.recIdx, S.recordings.length - 1);
+    invalidateAnalysisCache();
     const rec = S.recordings[S.recIdx];
     if (rec && rec.audioBuffer) {
       S.audioBuffer = rec.audioBuffer;
@@ -3889,7 +3895,7 @@ function setupEvents() {
     if (!S.ctx || S.ctx.sampleRate === sr) return;
     // Stop any active recording/playback
     if (S.mode === 'recording') stopRecording();
-    if (S.mode === 'playback') stopPlayback();
+    if (S.mode === 'playback') pausePlayback();
     // Stop old mic tracks before requesting new stream
     if (S.micStream) { try { S.micStream.getTracks().forEach(t => t.stop()); } catch(_){} }
     // Close old context and create new one with desired sample rate
