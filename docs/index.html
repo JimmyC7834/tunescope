@@ -10,8 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ToneScope">
 <link rel="apple-touch-icon" href="icon-192.png">
-<!-- Google AdSense -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+<!-- Google AdSense — loaded dynamically below for web/free only (native uses AdMob per ToS) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -409,14 +408,14 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
   <!-- Scrollable top area -->
   <div class="scroll-area" id="scrollArea">
 
-  <!-- 0a. Top banner ad — FREE VERSION ONLY (hidden in pro) -->
+  <!-- 0a. Top banner ad — FREE VERSION ONLY (hidden in pro). Web: AdSense ins; Native: AdMob banner mounts here -->
   <div class="sec-ad-banner-2" id="secAdBanner2">
-    <div class="sec-ad-inner">ADVERTISEMENT</div>
+    <div class="sec-ad-inner" data-ad-fallback>ADVERTISEMENT</div>
   </div>
 
   <!-- 0b. Second banner ad — FREE VERSION ONLY (hidden in pro) -->
   <div class="sec-ad-banner" id="secAdBanner">
-    <div class="sec-ad-inner">ADVERTISEMENT</div>
+    <div class="sec-ad-inner" data-ad-fallback>ADVERTISEMENT</div>
   </div>
 
   <!-- 1. Spectrum -->
@@ -658,8 +657,8 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
       <div class="settings-title">Settings</div>
       <button class="settings-close" id="settingsClose">&times;</button>
     </div>
-    <div class="settings-ad-banner">
-      <div class="settings-ad-inner">ADVERTISEMENT</div>
+    <div class="settings-ad-banner" id="settingsAdBanner">
+      <div class="settings-ad-inner" data-ad-fallback>ADVERTISEMENT</div>
     </div>
     <div class="settings-body">
       <!-- Pro upgrade bar — free tier only -->
@@ -794,7 +793,45 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
 //  Native defaults to cached value, then verified against RC.
 // ════════════════════════════════════════════════════════════════
 const _isNativeApp = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web');
-let APP_VERSION = _isNativeApp ? (localStorage.getItem('ts_tier') || 'free') : 'pro';
+
+// ── Signed tier cache ────────────────────────────────────────────
+// Raises the bar against casual localStorage tampering. Not unbreakable —
+// determined attackers can reverse-engineer the hash. Acceptable for low-value
+// IAP. RC remains source of truth; this cache is only for fast cold-launch UX.
+const TIER_KEY = 'ts_tier_v2';
+const TIER_TTL_MS = 14 * 86400000; // 14 days — re-verify with RC after this
+function _tierHash(payload) {
+  // FNV-1a 32-bit, salted. Fast, no deps. Good enough as a tamper deterrent.
+  let h = 0x811c9dc5;
+  const salt = 'ts_v1_8f3a2b';
+  const s = payload + salt;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+  }
+  return h.toString(36);
+}
+function writeTierCache(tier) {
+  try {
+    const payload = tier + '|' + Date.now();
+    localStorage.setItem(TIER_KEY, payload + '|' + _tierHash(payload));
+    // Drop legacy plaintext key
+    localStorage.removeItem('ts_tier');
+  } catch(_) {}
+}
+function readTierCache() {
+  try {
+    const raw = localStorage.getItem(TIER_KEY);
+    if (!raw) return null;
+    const parts = raw.split('|');
+    if (parts.length !== 3) return null;
+    const [tier, ts, sig] = parts;
+    if (_tierHash(tier + '|' + ts) !== sig) return null;
+    if (Date.now() - parseInt(ts, 10) > TIER_TTL_MS) return null;
+    return tier === 'pro' ? 'pro' : 'free';
+  } catch(_) { return null; }
+}
+let APP_VERSION = _isNativeApp ? (readTierCache() || 'free') : 'pro';
 // ════════════════════════════════════════════════════════════════
 
 const NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
@@ -933,6 +970,7 @@ async function initAudio() {
   } catch (e) {
     console.warn('Mic denied', e);
     S.mode = 'idle';
+    showMicDeniedToast();
   }
   // Keep screen awake for practice sessions
   requestWakeLock();
@@ -953,6 +991,23 @@ async function initAudio() {
       }
     }
   });
+}
+
+function showMicDeniedToast() {
+  let el = document.getElementById('micToast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'micToast';
+    el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1c2a;color:#fff;border:1px solid var(--danger);border-radius:10px;padding:12px 18px;font-size:13px;text-align:center;z-index:9999;max-width:300px;line-height:1.4';
+    document.body.appendChild(el);
+  }
+  const isNative = _isNativeApp;
+  el.innerHTML = (isNative
+    ? 'Microphone access denied.<br><b>Open Settings → ToneScope → Microphone</b> to enable.'
+    : 'Microphone access denied.<br>Allow microphone in your browser site settings.');
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 6000);
 }
 
 function startAudioKeepalive() {
@@ -1121,6 +1176,7 @@ function stopRecording() {
 function startPlayback() {
   if (!S.audioBuffer) return;
   S.liveOverride = false;
+  if (S.playOffset >= S.audioBuffer.duration - 0.02) S.playOffset = 0;
   try { S.micGain ? S.micGain.disconnect(S.analyser) : S.micSrc && S.micSrc.disconnect(S.analyser); } catch(_){}
   S.outputGain.gain.value = 1;
   S.playSrc = S.ctx.createBufferSource();
@@ -3536,8 +3592,9 @@ function setupEvents() {
       // Pro / IAP
       proTitle:'ToneScope Pro', proSub:'One-time purchase. Yours forever.', unlockPro:'Unlock Pro', restorePurchase:'Restore Purchase',
       proFeat1:'No banner ads', proFeat2:'Metronome volume control', proFeat3:'Full metronome layout', proFeat4:'24-bit recording export', proFeat5:'Unlimited recording slots',
-      proUpgradeSub:'Remove ads \u00b7 Volume control \u00b7 Full metronome',
+      proUpgradeSub:'Remove ads \u00b7 24-bit export \u00b7 Unlimited recordings \u00b7 and more',
       proLegal:'Payment charged to your App Store or Google Play account at confirmation. Non-refundable except where required by law.',
+      iapLoading:'Loading store…', iapNoStore:'Cannot connect to store. Try again.', iapIncomplete:'Purchase incomplete. Please try again.', iapAlreadyOwn:'You already own Pro. Tap "Restore Purchase" below to unlock it.', iapPending:'Purchase is pending approval. It will unlock automatically once approved.', iapFailed:'Purchase failed:', iapUnknown:'Unknown error', iapRestoring:'Restoring…', iapUnlocked:'Pro unlocked \u2014 thank you!', iapNoPrev:'No previous purchase found.', iapRestoreFailed:'Restore failed:', iapVerifyFailed:'Could not verify Pro status. Tap Restore.', iapOneTime:'one-time',
       // Tutorial
       tapToContinue:'tap to continue',
       tut1:'Spectrum \u2014 real-time frequency analysis.',
@@ -3565,8 +3622,9 @@ function setupEvents() {
       help:'幫助', tutorial:'教學導覽', tutorialStart:'開始', feedback:'意見回饋', restorePurchases:'恢復購買', privacyPolicy:'隱私政策',
       proTitle:'ToneScope Pro', proSub:'一次購買，永久擁有。', unlockPro:'解鎖 Pro', restorePurchase:'恢復購買',
       proFeat1:'無廣告', proFeat2:'節拍器音量控制', proFeat3:'完整節拍器布局', proFeat4:'24位錄音匯出', proFeat5:'無限錄音槽位',
-      proUpgradeSub:'去廣告 \u00b7 音量控制 \u00b7 完整節拍器',
+      proUpgradeSub:'去廣告 \u00b7 24 位元匯出 \u00b7 無限錄音 \u00b7 還有更多',
       proLegal:'確認後將從您的 App Store 或 Google Play 帳戶扣款。除法律要求外不予退款。',
+      iapLoading:'載入商店…', iapNoStore:'無法連接商店，請再試一次。', iapIncomplete:'購買未完成，請再試一次。', iapAlreadyOwn:'您已擁有 Pro。請點擊下方「恢復購買」解鎖。', iapPending:'購買等待核准中。核准後將自動解鎖。', iapFailed:'購買失敗：', iapUnknown:'未知錯誤', iapRestoring:'恢復中…', iapUnlocked:'Pro 已解鎖 \u2014 感謝您！', iapNoPrev:'未找到先前的購買紀錄。', iapRestoreFailed:'恢復失敗：', iapVerifyFailed:'無法驗證 Pro 狀態，請點擊恢復購買。', iapOneTime:'一次性',
       tapToContinue:'點擊繼續',
       tut1:'頻譜 \u2014 即時頻率分析。',
       tut2:'從右側邊緣向左滑動開啟設定。',
@@ -3593,8 +3651,9 @@ function setupEvents() {
       help:'ヘルプ', tutorial:'チュートリアル', tutorialStart:'開始', feedback:'フィードバック', restorePurchases:'購入を復元', privacyPolicy:'プライバシーポリシー',
       proTitle:'ToneScope Pro', proSub:'一度の購入で、ずっとあなたのもの。', unlockPro:'Pro を解除', restorePurchase:'購入を復元',
       proFeat1:'広告なし', proFeat2:'メトロノーム音量調整', proFeat3:'フルメトロノームレイアウト', proFeat4:'24ビット録音エクスポート', proFeat5:'無制限の録音スロット',
-      proUpgradeSub:'広告なし \u00b7 音量調整 \u00b7 フルメトロノーム',
+      proUpgradeSub:'広告なし \u00b7 24ビット書き出し \u00b7 録音数無制限 \u00b7 その他',
       proLegal:'確認時にApp StoreまたはGoogle Playアカウントに請求されます。法律で義務付けられている場合を除き、返金不可。',
+      iapLoading:'ストア読込中…', iapNoStore:'ストアに接続できません。もう一度お試しください。', iapIncomplete:'購入が完了しませんでした。もう一度お試しください。', iapAlreadyOwn:'すでに Pro をお持ちです。下の「購入を復元」をタップして解除してください。', iapPending:'購入は承認待ちです。承認されると自動的に解除されます。', iapFailed:'購入に失敗しました：', iapUnknown:'不明なエラー', iapRestoring:'復元中…', iapUnlocked:'Pro が解除されました \u2014 ありがとうございます！', iapNoPrev:'過去の購入が見つかりませんでした。', iapRestoreFailed:'復元に失敗しました：', iapVerifyFailed:'Pro の確認ができませんでした。復元をタップしてください。', iapOneTime:'買い切り',
       tapToContinue:'タップして続ける',
       tut1:'スペクトラム \u2014 リアルタイム周波数分析。',
       tut2:'右端から左にスワイプで設定を開く。',
@@ -3621,8 +3680,9 @@ function setupEvents() {
       help:'Ayuda', tutorial:'Tutorial', tutorialStart:'Iniciar', feedback:'Comentarios', restorePurchases:'Restaurar Compras', privacyPolicy:'Política de Privacidad',
       proTitle:'ToneScope Pro', proSub:'Compra única. Tuyo para siempre.', unlockPro:'Desbloquear Pro', restorePurchase:'Restaurar Compra',
       proFeat1:'Sin anuncios', proFeat2:'Control de volumen del metrónomo', proFeat3:'Metrónomo completo', proFeat4:'Exportación de grabación 24 bits', proFeat5:'Grabaciones ilimitadas',
-      proUpgradeSub:'Sin anuncios \u00b7 Control de volumen \u00b7 Metrónomo completo',
+      proUpgradeSub:'Sin anuncios \u00b7 Exportación 24-bit \u00b7 Grabaciones ilimitadas \u00b7 y más',
       proLegal:'El pago se cargará a tu cuenta de App Store o Google Play al confirmar. No reembolsable excepto donde lo exija la ley.',
+      iapLoading:'Cargando tienda…', iapNoStore:'No se puede conectar a la tienda. Inténtalo de nuevo.', iapIncomplete:'Compra incompleta. Inténtalo de nuevo.', iapAlreadyOwn:'Ya tienes Pro. Toca "Restaurar Compra" abajo para desbloquearlo.', iapPending:'Compra pendiente de aprobación. Se desbloqueará automáticamente al aprobarse.', iapFailed:'Compra fallida:', iapUnknown:'Error desconocido', iapRestoring:'Restaurando…', iapUnlocked:'Pro desbloqueado \u2014 ¡gracias!', iapNoPrev:'No se encontró compra anterior.', iapRestoreFailed:'Restauración fallida:', iapVerifyFailed:'No se pudo verificar Pro. Toca Restaurar.', iapOneTime:'pago único',
       tapToContinue:'toca para continuar',
       tut1:'Espectro \u2014 análisis de frecuencia en tiempo real.',
       tut2:'Desliza a la izquierda desde el borde derecho para abrir config.',
@@ -3928,7 +3988,7 @@ function setupEvents() {
       S.recDest.channelCount = 2;
       S.micGain.connect(S.recDest);
       S.mode = 'live';
-    } catch(e) { S.mode = 'idle'; }
+    } catch(e) { S.mode = 'idle'; showMicDeniedToast(); }
   });
 
   // ---- Spectrum config options ----
@@ -4273,9 +4333,15 @@ function setupEvents() {
 
   let _initialized    = false;
   let _cachedPackage  = null;
+  let _listenerBound  = false;
+  let _retryTimer     = null;
 
   // ── DOM helpers ──────────────────────────────────────────────
   const $id = id => document.getElementById(id);
+  function _t(k, fallback) {
+    try { const v = (typeof t === 'function') ? t(k) : null; return (v && v !== k) ? v : fallback; }
+    catch(_) { return fallback; }
+  }
   function setStatus(msg, cls) {
     const el = $id('iapStatus');
     if (!el) return;
@@ -4290,22 +4356,83 @@ function setupEvents() {
   function isPro(customerInfo) {
     return ENTITLEMENT in (customerInfo?.entitlements?.active || {});
   }
+  // Match RC error code by SDK enum name with numeric/string fallback
+  function _matchCode(e, name, fallbacks) {
+    const enumMap = RC.PURCHASES_ERROR_CODE || RC.PurchasesErrorCode || {};
+    const enumVal = enumMap[name];
+    const code = e?.code;
+    if (enumVal != null && (code === enumVal || String(code) === String(enumVal))) return true;
+    if (Array.isArray(fallbacks)) {
+      const cs = String(code ?? '');
+      for (const f of fallbacks) { if (cs === String(f)) return true; }
+    }
+    return false;
+  }
+  function setPriceFallback() {
+    const priceEl = $id('iapPriceTag');
+    if (!priceEl || priceEl.dataset.priceSet === '1') return;
+    priceEl.textContent = '$4.99';
+    const span = document.createElement('span');
+    span.textContent = _t('iapOneTime', 'one-time');
+    priceEl.appendChild(span);
+  }
+  function showPrice(pkg) {
+    const priceEl = $id('iapPriceTag');
+    if (!priceEl) return;
+    priceEl.textContent = pkg?.product?.priceString || '$4.99';
+    const span = document.createElement('span');
+    span.textContent = _t('iapOneTime', 'one-time');
+    priceEl.appendChild(span);
+    priceEl.dataset.priceSet = '1';
+  }
 
   // ── Init RC (idempotent) ──────────────────────────────────────
   async function initRC() {
     if (_initialized) return;
     await RC.Purchases.configure({ apiKey: RC_API_KEY });
     _initialized = true;
+    // Fix #7 — listen for deferred / Ask-to-Buy approvals so app unlocks live
+    try {
+      const handler = (info) => {
+        const ci = info?.customerInfo || info;
+        if (ci && isPro(ci)) applyVersionTier('pro');
+      };
+      if (typeof RC.Purchases.addCustomerInfoUpdateListener === 'function' && !_listenerBound) {
+        RC.Purchases.addCustomerInfoUpdateListener(handler);
+        _listenerBound = true;
+      } else if (typeof RC.Purchases.addListener === 'function' && !_listenerBound) {
+        RC.Purchases.addListener('customerInfoUpdate', handler);
+        _listenerBound = true;
+      }
+    } catch (e) { console.warn('[IAP] listener bind:', e); }
   }
 
-  // ── Check entitlement on startup (uses local cache first) ────
-  async function checkProStatus() {
+  // ── Check entitlement on startup ─────────────────────────────
+  // Fix #5 + #6: Never downgrade on transient failure or malformed response.
+  // Only authoritative customerInfo with absent entitlement triggers free tier.
+  async function checkProStatus(attempt) {
+    attempt = attempt || 0;
     try {
       await initRC();
-      const { customerInfo } = await RC.Purchases.getCustomerInfo();
-      applyVersionTier(isPro(customerInfo) ? 'pro' : 'free');
+      const res = await RC.Purchases.getCustomerInfo();
+      const ci = res?.customerInfo;
+      if (!ci || !ci.entitlements) {
+        // Malformed response — keep current tier, retry later
+        if (attempt < 1) _retryTimer = setTimeout(() => checkProStatus(attempt + 1), 4000);
+        return;
+      }
+      applyVersionTier(isPro(ci) ? 'pro' : 'free');
     } catch (e) {
       console.warn('[IAP] checkProStatus:', e);
+      // Keep cached tier; retry once after backoff
+      if (attempt < 1) {
+        _retryTimer = setTimeout(() => checkProStatus(attempt + 1), 5000);
+        return;
+      }
+      // Final failure — surface toast only if user previously had Pro (cache says pro)
+      if (APP_VERSION === 'pro') {
+        setStatus(_t('iapVerifyFailed', 'Could not verify Pro status. Tap Restore.'), 'err');
+      }
     }
   }
 
@@ -4318,16 +4445,13 @@ function setupEvents() {
       const pkg  = pkgs.find(p => p.product?.identifier === PRODUCT_ID) || pkgs[0];
       if (pkg) {
         _cachedPackage = pkg;
-        const priceEl = $id('iapPriceTag');
-        if (priceEl) {
-          priceEl.textContent = pkg.product?.priceString || '$4.99';
-          const span = document.createElement('span');
-          span.textContent = 'one-time';
-          priceEl.appendChild(span);
-        }
+        showPrice(pkg);
+      } else {
+        setPriceFallback();
       }
     } catch (e) {
       console.warn('[IAP] loadOffering:', e);
+      setPriceFallback();
     }
   }
 
@@ -4335,9 +4459,9 @@ function setupEvents() {
   async function doPurchase() {
     setStatus('');
     if (!_cachedPackage) {
-      setStatus('Loading store…');
+      setStatus(_t('iapLoading', 'Loading store…'));
       await loadOffering();
-      if (!_cachedPackage) { setStatus('Cannot connect to store. Try again.', 'err'); return; }
+      if (!_cachedPackage) { setStatus(_t('iapNoStore', 'Cannot connect to store. Try again.'), 'err'); return; }
     }
     setBusy(true);
     try {
@@ -4346,20 +4470,17 @@ function setupEvents() {
         applyVersionTier('pro');
         $id('iapOverlay')?.classList.remove('open');
       } else {
-        setStatus('Purchase incomplete. Please try again.', 'err');
+        setStatus(_t('iapIncomplete', 'Purchase incomplete. Please try again.'), 'err');
       }
     } catch (e) {
-      const code = String(e?.code ?? '');
-      if (e?.userCancelled || code === '1') {
-        // User cancelled — silent, no message needed
-      } else if (code === '6') {
-        // PRODUCT_ALREADY_PURCHASED_ERROR
-        setStatus('You already own Pro. Tap "Restore Purchase" below to unlock it.', 'ok');
-      } else if (code === '20') {
-        // PAYMENT_PENDING_ERROR — Ask to Buy / parental approval
-        setStatus('Purchase is pending approval. It will unlock automatically once approved.', 'ok');
+      if (e?.userCancelled || _matchCode(e, 'PURCHASE_CANCELLED_ERROR', ['1'])) {
+        // User cancelled — silent
+      } else if (_matchCode(e, 'PRODUCT_ALREADY_PURCHASED_ERROR', ['6'])) {
+        setStatus(_t('iapAlreadyOwn', 'You already own Pro. Tap "Restore Purchase" below to unlock it.'), 'ok');
+      } else if (_matchCode(e, 'PAYMENT_PENDING_ERROR', ['20'])) {
+        setStatus(_t('iapPending', 'Purchase is pending approval. It will unlock automatically once approved.'), 'ok');
       } else {
-        setStatus('Purchase failed: ' + (e?.message || 'Unknown error'), 'err');
+        setStatus(_t('iapFailed', 'Purchase failed:') + ' ' + (e?.message || _t('iapUnknown', 'Unknown error')), 'err');
       }
     } finally {
       setBusy(false);
@@ -4369,20 +4490,20 @@ function setupEvents() {
   // ── Restore ──────────────────────────────────────────────────
   async function doRestore() {
     setBusy(true);
-    setStatus('Restoring…');
+    setStatus(_t('iapRestoring', 'Restoring…'));
     try {
       await initRC();
       const { customerInfo } = await RC.Purchases.restorePurchases();
       if (isPro(customerInfo)) {
         applyVersionTier('pro');
         $id('iapOverlay')?.classList.remove('open');
-        setStatus('Pro unlocked — thank you!', 'ok');
+        setStatus(_t('iapUnlocked', 'Pro unlocked — thank you!'), 'ok');
         setTimeout(() => setStatus(''), 3000);
       } else {
-        setStatus('No previous purchase found.', 'err');
+        setStatus(_t('iapNoPrev', 'No previous purchase found.'), 'err');
       }
     } catch (e) {
-      setStatus('Restore failed: ' + (e?.message || 'Unknown error'), 'err');
+      setStatus(_t('iapRestoreFailed', 'Restore failed:') + ' ' + (e?.message || _t('iapUnknown', 'Unknown error')), 'err');
     } finally {
       setBusy(false);
     }
@@ -4414,13 +4535,19 @@ function setupEvents() {
   window._openIapModal = openIapModal;
 })();
 
-// ── IAP overlay close — always wired (IAP IIFE skips on web) ────
+// ── IAP overlay close + web fallback — wired when setupIAP skipped ───
 (function() {
   if (_isNativeApp && window.RevenueCatCap) return; // already wired by setupIAP
   const ov = document.getElementById('iapOverlay');
   const cl = document.getElementById('iapClose');
   if (ov && cl) cl.addEventListener('click', () => ov.classList.remove('open'));
   if (ov) ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+  // Hide settings restore row when no IAP available (web / native without RC bundle)
+  const restoreRow = document.getElementById('restoreBtn');
+  if (restoreRow) restoreRow.style.display = 'none';
+  // Hide settings upgrade bar — pro is default in this context
+  const upgradeBar = document.getElementById('upgradeBar');
+  if (upgradeBar) upgradeBar.style.display = 'none';
 })();
 
 // ================================================================
@@ -4436,10 +4563,19 @@ function applyVersionTier(tier) {
     appEl.classList.add('free');
     // Lock bit depth to 16-bit in free mode
     const bd = $('cfgBitDepth');
-    if (bd) { bd.value = '16'; wavBitDepth = 16; }
+    if (bd && bd.value !== '16') {
+      bd.value = '16';
+      wavBitDepth = 16;
+      bd.dispatchEvent(new Event('change'));
+      if (window._savePrefs) window._savePrefs();
+    }
+    // Persist downgrade so it survives cold launch (RC entitlement expired/refunded)
+    if (_isNativeApp) writeTierCache('free');
   } else {
     appEl.classList.remove('free');
-    localStorage.setItem('ts_tier', 'pro');
+    if (_isNativeApp) writeTierCache('pro');
+    // Tear down any banner ads if user upgraded mid-session
+    if (typeof window._adsTeardown === 'function') window._adsTeardown();
   }
   // Re-measure canvases — analysis card visibility toggled with tier
   if (typeof setupCanvases === 'function' && window.S && S.ctx) {
@@ -4449,8 +4585,112 @@ function applyVersionTier(tier) {
 // Apply initial tier determined at startup
 applyVersionTier(APP_VERSION);
 
-// Push AdSense ad unit on the startup screen
-(adsbygoogle = window.adsbygoogle || []).push({});
+// ================================================================
+//  ADS — AdSense (web) + AdMob (native). Slots populate when keys set.
+// ================================================================
+(function setupAds() {
+  if (APP_VERSION !== 'free') return;
+
+  // ↓ Replace before release. Slots placeholder-detected by 'XXXX' substring. ↓
+  const ADSENSE_CLIENT      = 'ca-pub-XXXXXXXXXXXXXXXX';
+  const ADSENSE_SLOT_STARTUP = 'XXXXXXXXXX';
+  const ADSENSE_SLOT_TOP     = 'XXXXXXXXXX';
+  const ADSENSE_SLOT_BOTTOM  = 'XXXXXXXXXX';
+  const ADSENSE_SLOT_SETTINGS = 'XXXXXXXXXX';
+  const ADMOB_BANNER_IOS     = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  const ADMOB_BANNER_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  // ↑ ───────────────────────────────────────────────────────────── ↑
+
+  const isPlaceholder = v => !v || v.indexOf('XXXX') !== -1;
+
+  function mountAdSenseSlot(container, slotId, opts = {}) {
+    if (!container || isPlaceholder(slotId) || isPlaceholder(ADSENSE_CLIENT)) return;
+    // Drop fallback text, mount <ins>
+    container.querySelectorAll('[data-ad-fallback]').forEach(el => el.remove());
+    const ins = document.createElement('ins');
+    ins.className = 'adsbygoogle';
+    ins.style.display = 'block';
+    if (opts.width)  ins.style.width  = opts.width;
+    if (opts.height) ins.style.height = opts.height;
+    ins.setAttribute('data-ad-client', ADSENSE_CLIENT);
+    ins.setAttribute('data-ad-slot', slotId);
+    if (opts.format) ins.setAttribute('data-ad-format', opts.format);
+    if (opts.responsive != null) ins.setAttribute('data-full-width-responsive', String(opts.responsive));
+    container.appendChild(ins);
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(_) {}
+  }
+
+  function loadAdSenseAndMount() {
+    if (isPlaceholder(ADSENSE_CLIENT)) return; // keep fallback placeholders visible
+    const onReady = () => {
+      // Startup splash slot
+      const startupAd = document.querySelector('.startup-ad');
+      if (startupAd && !startupAd.querySelector('ins.adsbygoogle')) {
+        mountAdSenseSlot(startupAd, ADSENSE_SLOT_STARTUP, { width: '320px', height: '100px', format: 'fixed', responsive: false });
+      }
+      mountAdSenseSlot(document.getElementById('secAdBanner2'), ADSENSE_SLOT_TOP, { format: 'auto', responsive: true });
+      mountAdSenseSlot(document.getElementById('secAdBanner'),  ADSENSE_SLOT_BOTTOM, { format: 'auto', responsive: true });
+      mountAdSenseSlot(document.getElementById('settingsAdBanner'), ADSENSE_SLOT_SETTINGS, { format: 'auto', responsive: true });
+    };
+    if (window.adsbygoogle) { onReady(); return; }
+    const adScript = document.createElement('script');
+    adScript.async = true;
+    adScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_CLIENT;
+    adScript.crossOrigin = 'anonymous';
+    adScript.onload = onReady;
+    document.head.appendChild(adScript);
+  }
+
+  async function loadAdMobBanner() {
+    if (!_isNativeApp || !window.Capacitor?.Plugins?.AdMob) return;
+    const platform = window.Capacitor.getPlatform();
+    const adId = platform === 'ios' ? ADMOB_BANNER_IOS : ADMOB_BANNER_ANDROID;
+    if (isPlaceholder(adId)) return;
+    try {
+      const AdMob = window.Capacitor.Plugins.AdMob;
+      await AdMob.initialize({ requestTrackingAuthorization: true });
+      await AdMob.showBanner({
+        adId,
+        adSize: 'BANNER',
+        position: 'BOTTOM_CENTER',
+        margin: 0,
+        isTesting: false
+      });
+      // AdMob renders an OS-level overlay, not into a DOM container, so ad-banner divs
+      // act as spacing reservations. Hide our DOM placeholders to avoid double height.
+      ['secAdBanner','secAdBanner2','settingsAdBanner'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    } catch (e) {
+      console.warn('[AdMob] showBanner failed', e);
+    }
+  }
+
+  function teardownAds() {
+    // Native: drop AdMob banner overlay
+    if (_isNativeApp && window.Capacitor?.Plugins?.AdMob) {
+      try { window.Capacitor.Plugins.AdMob.removeBanner(); } catch(_) {}
+      try { window.Capacitor.Plugins.AdMob.hideBanner?.(); } catch(_) {}
+    }
+    // Web: remove AdSense <ins> from every container, hide reservations
+    ['secAdBanner','secAdBanner2','settingsAdBanner'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.querySelectorAll('ins.adsbygoogle').forEach(n => n.remove());
+      el.style.display = 'none';
+    });
+    document.querySelectorAll('.startup-ad ins.adsbygoogle').forEach(n => n.remove());
+    const startup = document.querySelector('.startup-ad');
+    if (startup) startup.style.display = 'none';
+  }
+
+  if (_isNativeApp) loadAdMobBanner();
+  else loadAdSenseAndMount();
+
+  // Expose teardown for tier upgrade flow
+  window._adsTeardown = teardownAds;
+})();
 
 // ================================================================
 //  PERSIST / RESTORE SETTINGS  (localStorage key: 'ts_prefs')
