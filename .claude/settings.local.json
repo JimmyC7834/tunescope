@@ -15,7 +15,10 @@
       "Bash(npm list *)",
       "Bash(npm run *)",
       "Bash(node --check _check.js)",
-      "Bash(rm -f _check.js)"
+      "Bash(rm -f _check.js)",
+      "Bash(node -e ' *)",
+      "Bash(grep -n \"capacitor\\\\.config\\\\.json\\\\|iosScheme\\\\|androidScheme\" ios/App/App/capacitor.config.json)",
+      "Bash(cat ios/App/App/capacitor.config.json)"
     ]
   },
   "enabledMcpjsonServers": [

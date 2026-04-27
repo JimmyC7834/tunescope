@@ -5,6 +5,7 @@
   "scripts": {
     "build": "mkdir -p www && cp index.html www/ && cp manifest.json www/ && cp icon-*.png www/",
     "build:rc": "npx esbuild node_modules/@revenuecat/purchases-capacitor/dist/esm/index.js --bundle --format=iife --global-name=RevenueCatCap --outfile=www/rc-cap.js --minify",
+    "prepare": "npm run build:rc",
     "cap:sync": "npm run build:rc && npx cap sync",
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios"
