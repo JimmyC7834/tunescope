@@ -395,14 +395,7 @@ body.light-body{background:radial-gradient(ellipse at 50% 0%,#e8eaf2 0%,#f0f1f5 
     <div class="startup-title">TONESCOPE</div>
     <div class="startup-sub">TAP TO START</div>
     <!-- AdSense banner — replace data-ad-* values with your real ad unit -->
-    <div class="startup-ad">
-      <ins class="adsbygoogle"
-           style="display:block;width:320px;height:100px"
-           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-           data-ad-slot="XXXXXXXXXX"
-           data-ad-format="fixed"
-           data-full-width-responsive="false"></ins>
-    </div>
+    <div class="startup-ad"></div>
   </div>
 
   <!-- Scrollable top area -->
@@ -3500,19 +3493,46 @@ function setupEvents() {
       filename = (rec.name || 'Rec ' + (S.recIdx + 1)) + '.wav';
       blob = new Blob([wav], { type: mimeType });
     }
-    // Use native share sheet on mobile if available
-    if (navigator.share && navigator.canShare) {
+    // Native: use Capacitor Share plugin (reliable across all Capacitor WebView versions)
+    if (_isNativeApp && window.Capacitor?.Plugins?.Share) {
+      const CapShare = window.Capacitor.Plugins.Share;
+      // Write blob to a data URL, then share via navigator.share if WebView supports it,
+      // otherwise fall back to Capacitor Share text-only dialog.
+      const file = new File([blob], filename, { type: mimeType });
+      let shared = false;
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: filename });
+          shared = true;
+        } catch (e) {
+          if (e.name === 'AbortError') return; // user cancelled — stop here
+        }
+      }
+      if (!shared) {
+        // Older WebView: share title + download URL as text fallback
+        try {
+          const canRes = await CapShare.canShare();
+          if (canRes?.value) {
+            await CapShare.share({ title: filename, text: filename, dialogTitle: 'Share Recording' });
+            shared = true;
+          }
+        } catch (_) {}
+      }
+      if (shared) return;
+    }
+    // Web: navigator.share with files if supported
+    if (!_isNativeApp && navigator.share && navigator.canShare) {
       const file = new File([blob], filename, { type: mimeType });
       if (navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: filename });
           return;
         } catch (e) {
-          if (e.name === 'AbortError') return; // user cancelled
+          if (e.name === 'AbortError') return;
         }
       }
     }
-    // Fallback: download
+    // Final fallback: trigger browser download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -3814,6 +3834,7 @@ function setupEvents() {
   }
   $('langSelect').addEventListener('change', function() {
     curLang = this.value;
+    document.documentElement.lang = curLang;
     applyLang();
     // Update sensitivity dropdown labels
     const sel = $('sensitivitySelect');
@@ -4272,7 +4293,7 @@ function setupEvents() {
 //  PRIVACY POLICY
 // ================================================================
 (function(){
-  const PRIVACY_URL = 'https://jimmyc7834.github.io/tunescope/';
+  const PRIVACY_URL = 'https://jimmyc7834.github.io/tunescope/privacy.html';
   document.getElementById('privacyBtn')?.addEventListener('click', () => {
     // '_system' opens the URL in the device's default browser on Capacitor native;
     // falls back to a new tab on web.
